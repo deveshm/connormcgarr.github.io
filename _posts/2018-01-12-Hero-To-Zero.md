@@ -90,14 +90,14 @@ Here are a list of resources I used to take me from a zero to a hero!:
 1. [Learning the Terminal](https://www.codecademy.com/learn/learn-the-command-line)- this is vital. You have to understand these basics before you can pursue anything more advanced.
 2. [Vuln Hub](https://www.vulnhub.com/)- I am not a proponent of blogs saying which boxes you should attempt. It is about the methodologies. Any of them will do! Try them all. BUT DO ATTEMPT BRAINPAIN 1!!!!! Hint, it utilizes exploit development.
 3. [Hack The Box](https://www.hackthebox.eu/)- start with the easier machines. Get your methodologies down, and document!!  I left some screenshots above on how to document. Get OneNote, make a HTB notebook, and go at it! All of those boxes will help prepare you. Again, not a fan of people giving specific boxes.
-4. [Spawning TTY lines]-(https://netsec.ws/?p=337)
-5. [Reverse Shell Cheat Sheet]-(http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet)
-6. [Penetration Testing Cheat Sheet]-(https://ired.team/offensive-security-experiments/offensive-security-cheetsheets)
-7. [Understanding Reverse and Bind Shells]-(https://www.hackingtutorials.org/networking/hacking-netcat-part-2-bind-reverse-shells/)
-8. [Signing Up for OSCP]-(https://www.offensive-security.com/preregistration.php?cid=21)
-9. [PWK Syllabus]-(https://www.offensive-security.com/documentation/penetration-testing-with-kali.pdf)
-10. [OSCP/PWK Example Documentation]-(https://www.offensive-security.com/pwk-online/PWK-Example-Report-v1.pdf)
-11. [OSCP Exam Guide]-(https://support.offensive-security.com/oscp-exam-guide/#oscp-certification-exam-guide)
+4. [Spawning TTY lines](https://netsec.ws/?p=337)
+5. [Reverse Shell Cheat Sheet](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet)
+6. [Penetration Testing Cheat Sheet](https://ired.team/offensive-security-experiments/offensive-security-cheetsheets)
+7. [Understanding Reverse and Bind Shells](https://www.hackingtutorials.org/networking/hacking-netcat-part-2-bind-reverse-shells/)
+8. [Signing Up for OSCP](https://www.offensive-security.com/preregistration.php?cid=21)
+9. [PWK Syllabus](https://www.offensive-security.com/documentation/penetration-testing-with-kali.pdf)
+10. [OSCP/PWK Example Documentation](https://www.offensive-security.com/pwk-online/PWK-Example-Report-v1.pdf)
+11. [OSCP Exam Guide](https://support.offensive-security.com/oscp-exam-guide/#oscp-certification-exam-guide)
 
 Ending
 --

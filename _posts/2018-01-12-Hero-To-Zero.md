@@ -20,38 +20,33 @@ When March arrived, my confidence was really flourishing and evolving. I was ref
 Times up, let's do this
 --
 April 26th, 2018. "Thank you for your interest in Penetration Testing with Kali Linux, Please read this entire email carefullly as it contains very important information." I had just sumbitted my application to PWK! I was ready to ride the NOP sled to OSCP (Exploit Developement joke)! 
-Let me fill you in on how busy I was at this time:
+Let me fill you in on how overloaded I was at this time:
   1. I was working 40 hours a week as an intern
   2. I was driving 4 hours round trip, 3 days a week for a face to face course. This forced me to get in at 6 a.m. to work to 
      compensate the hours.
   3. I was also taking 3 other online courses.
   
-I was now about to add another course to the total! Crazy, I know. I also do not share this message to come off as a martyr. I want it to be known- there is no excuse for not taking the plunge if you truly want it. If you talk about it, be about it! Many people ask me, "Connor how much time did you spend on PWK?" There are 3 paces you can select with PWK. 30, 60, or 90 days. I opted for 60 days. I spent 3 hours Monday through Friday doing coursework and labs. I then spent every waking moment on Saturday and Sunday doing the same. Having said that, I am human. There were some days I spent time watching movies, playing sports, or playing video games. This is the amount of dedication I found myself putting in. I would say I averaged around 30-40 hours a week on this beast. Remember though- this is a blog on someone who had no experience getting OSCP. A more seasoned verteran may be able to get away with less- but I wouldn't recommend it.
+I consider mysefl very assiduous. Even this was daunting for me. I was now about to add embarking on a long and winding road to that list! Crazy, I know. I also do not share this message to come off as a martyr. I want it to be known- there is no excuse for not taking the plunge if you truly want it. If you talk about it, be about it! Copious amounts of people ask me, "Connor how much time did you spend on PWK?" There are 3 paces you can select with PWK. 30, 60, or 90 days. I opted for 60 days. I spent 3 hours Monday through Friday jammming in coursework and labs. I then spent every waking moment on Saturday and Sunday doing the same. Having said that, I am human. There were some days I spent time watching movies, doing homework, playing sports, or playing video games. This is the amount of dedication I found myself putting in. You must recall this though- this is a blog on someone who had no experience obtaining OSCP. A more seasoned verteran may be able to get away with less- but I would advise dedicating whatever time and resources you have towards it.
 
 
 May 26th, 2018. PWK D-DAY.
 --
-A date that forever changed the course of my life- for the better. This was my start date for PWK. There are a plether of blogs out there for the technical content of PWK. I want to try to create an OSCP blog that is unique to my situation. This blog is going to talk about the following: what to expect and how to document. Documentation is the single more important thing with this course. To pass the OSCP exam, you have to submit a report. The OSCP exam consists of an undisclosed number of vulnerable machines in a network you have no prior knowledge of. Your grade will be determined by a committee of individuals from OffSec. They will read your report AND ONLY your report. Later in this blog, you will get more specifics about the exam and report- I just am stressing the importance of documentation. 
+A date that forever altered the course of my life- for the better. This was my start date for PWK. There are a plether of blogs out there for the technical content of PWK. I want to try to establish an OSCP blog that is unique to my situation. This blog is going to talk about the following: what to expect, how to document, and some resources. This is not a "how to pass OSCP" blog, and I refuse to become a part of that machine. Documentation is the single most important commodity for red teamers. To pass the OSCP exam, you have to submit a report. The OSCP exam consists of an undisclosed number of vulnerable machines in a network you have no prior knowledge of. Your grade will be determined by a committee of individuals from OffSec. They will read your report AND ONLY your report. Later in this blog, you will get more specifics about the exam and report- here I am stressing the importance of documentation. 
 Here is what you can expect from PWK:
-  1. **Exploit Development**- You will learn the basics of exploit development. You will reverse engineer an 
+  1. **Exploit Development**- You will grasp the basics of exploit development. You will reverse engineer an 
      application and probe it for Buffer Overflow vulnerabilities. This include attaching an application to a debugger and 
-     understanding what you are looking at. (If this seems daunting do not worry, it was to me too.) But remember that this is 
-     a ***LEARNING COURSE TAUGHT BY PROFESSIONALS***. You are here to learn and they will teach you.
+     understanding what you are looking at. (If this seems daunting do not worry, it was to me at first.) But remember that this      is a ***LEARNING COURSE TAUGHT BY PROFESSIONALS***. You are here to learn and they will teach you.
   2. **Enumeration**- This is a term that is used all. of. the. time. Enumeration is the process of probing, 
      discovering, and using what you know to come up with an attack vector. Enumeration includes things like scanning    
-     machines with Nmap and other tools. Enumerating could also mean you play around with the functionality of a web application
-     and seeing what you can do to abuse its native functionality. When someone tells you to "enumerate" more it may seem like 
-     a sarcastic answer that does not help. It is actually the best answer! It means that you are close, you just need to look 
-     with a stronger magnifying glass and try harder! Someone encouraging you to enumerate means that they only want you to 
-     learn for yourself. If you get told to enumerate, do not fret. Take a break and come back to it! You eventually will 
-     find the attack vector with enough effort. PWK gives you the tools to find the vulnerabilities!
+     machines with Nmap and various tools. Enumerating could also mean you play around with the functionality of a web
+     application and seeing what you can do to abuse its functionality. When someone tells you to "enumerate" more it may            seem like a sarcastic answer that does not help. It is actually the best answer! It means that you are close, you just need      to look with a stronger magnifying glass and try harder! Someone encouraging you to enumerate means that they only want          you to learn for yourself. If you get told to enumerate, do not fret. Take a break and come back to it! You eventually          will find the attack vector with enough effort. PWK gives you the tools to find the vulnerabilities!
    3. **Web Application Exploitation**- This topic encompasses a vast portion of the PWK course. EVERYTHING uses a web app these 
       days from banks, schools, and governmental services. Many companies only pay for web application assessments. You will 
       learn fundementals of Cross-Site Scripting, Cross-Site Reverse Forgery, PHP exploitation, reviewing source code for flaws,
       SQL injections, File Inclusion Vulnerabilities, and my favorite- default credentials! Always check those firstly :).
    4. **Privilege Escalation**- This will encompass only 2 attack vectors primarily. These include misconfigurations and kernel
       exploitation. You will learn what services are weak and where you should look when you have a low privileged shell. 
-      From a kernel exploit perspective, you will need to understand why a kernel exploit is working and how to successfully
+      From a kernel exploit perspective, you will need to understand why a kernel exploit works and how to successfully
       compile one.
    5. **Using Exploit-DB and Metasploit**- This is where the fun comes in. These attack vectors take advantage of publically
       known exploits. These generally will be exploits that take advantage of vulnerabilties in memory. These will inject 
@@ -62,7 +57,7 @@ Here is what you can expect from PWK:
       
 Exam Day
 --
-I am not going to get in specifics here, I will just briefly talk on my experience. If you were comfortable with the PWK course and labs, you will be fine! Just enumerate properly and leave no stone unturned. I passed my exam on the first try. I do not mean to sound pretentious with that last statement, I just want to provide what transparency I can. I also opted in for the proctored exam, so the integrity of my exam is in tact. If you enumerate, use google, and put forth maximum effort- there is no reason you should not pass! The OSCP exam was a great amount of fun to me! Let's talk specifics It is a 24 hour exam. You are presented with a number of hosts to compromise. The goal is ALWAYS to obtain a shell as a privileged user. As you are taking the exam, you need to be capturing screenshots (you will know what to screenshot when the time comes- trust me) and documenting the exploitation process. You will need to provide a writted document with all of your findings and submit it for a grade. I will provide links to helpful websites at the end with all of this information. Make sure you follow ALL of Offensive Securty's instructions. Passing OSCP has been one of the greates pleasures on my young life- and I am proud to be apart of the community that have all "Tried Harder."
+I am not going to get in specifics here, I will just briefly touch on my experience. If you were comfortable with the PWK course and labs, you will be fine! Just enumerate properly and leave no stone unturned. I passed my exam on the first try. I do not mean to sound pretentious with that last sentiment, I just want to provide what transparency I can. I also opted in for the proctored exam, so the integrity of my exam is in tact. If you enumerate, use google, and put forth maximum effort- there is no reason you should not pass! The OSCP exam was an ample amount of fun for me! Let's talk specifics. It is a 24 hour exam and you are presented with a number of hosts to compromise. The goal is ALWAYS to obtain a shell as a privileged user. As you are taking the exam, you need to be capturing screenshots (you will know what to screenshot when the time comes- trust me) and documenting the exploitation process. You will need to provide an enthralling written document with all of your findings and submit it for a grade. I will provide links to helpful websites at the end with all of this information. Make sure you follow ALL of Offensive Securty's instructions. Passing OSCP has been one of the greatest pleasures on my young life- and I am proud to be apart of the community that have all "Tried Harder."
 
 
 How Did I Document My PWK/OSCP machines?

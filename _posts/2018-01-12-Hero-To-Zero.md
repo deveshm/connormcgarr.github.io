@@ -1,5 +1,5 @@
 ---
-title:  "From Hero to Zero: My Path to OSCP"
+title:  "From Zero to Hero: My Path to OSCP"
 date:   2019-01-12
 categories: posts
 tags: [posts]

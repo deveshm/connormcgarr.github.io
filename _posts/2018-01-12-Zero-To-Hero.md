@@ -68,7 +68,7 @@ Most blogs talk about the technical skills required- but I believe documentation
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot.png" alt="">
 
-I realize this picture is small, so I will divide it into more readable portions, so you can view it more easily.
+I realize this picture is small so I will divide it into more readable portions, so you can view it more easily.
 
 First thing I do is create a new tab with the IP address of the machine I am going after with the hostname (here it is 10.10.10.10 TEST and 10.10.10.20 TEST_DEV along with 10.10.10.30 PROD_1):
 

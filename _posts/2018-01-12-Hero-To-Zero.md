@@ -101,5 +101,5 @@ Here are a list of resources I used to take me from a zero to a hero!:
 
 Ending
 --
-There is not one tride and true method for obtaining OSCP. The goal of this blog was to show anyone can obtain OSCP. If you dedicate yourself enough, you will find yourself jumping up and down doing the root.txt dance when you receive your passing email from Offensive Security. Please feel free to reach out with any questions! If you just stay dedicated, go through the coursework before you hit the labs. Have an awesome rest of your day! :)
+There is not one tride and true method for obtaining OSCP. The goal of this blog was to show anyone can obtain OSCP. If you dedicate yourself enough, you will find yourself jumping up and down doing the root.txt dance when you receive your passing email from Offensive Security. Please feel free to reach out with any questions! If you just stay dedicated, go through the coursework before you hit the labs, and use google- you will get there! No doubt. I have faith in you! Have an awesome rest of your day! :)
 

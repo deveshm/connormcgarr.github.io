@@ -73,7 +73,7 @@ Most blogs talk about the technical skills required- but I believe documentation
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot2.png" alt="">
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot3.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot 3.png" alt="">
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot4.png" alt="">
 

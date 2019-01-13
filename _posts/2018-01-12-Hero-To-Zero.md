@@ -1,7 +1,6 @@
 ---
-title: "From Zero to Hero! My Path to OSCP"
-date: 2018-01-12
-tags: {OSCP, penetration testing, computing, computers, security
-header:
-  excerpt: "How I went from a kid in college, who thought there was only one distribution of Linux, to OSCP in under a year."
-----
+title:  "From Hero to Zero: My Path to OSCP"
+date:   2018-12-20 
+categories: Detection
+tags: 
+---

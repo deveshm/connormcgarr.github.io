@@ -128,7 +128,7 @@ footer:
       icon: "fab fa-fw fa-github"
       url: "https://github.com/connormcgarr"
     - label: "Linkedin"
-      icon: "fab fa-fw fa-link"
+      icon: "fab fa-fw fa-linkedin"
       url: "https://www.linkedin.com/in/connor-mcgarr-oscp-7522a6152/"
 
 

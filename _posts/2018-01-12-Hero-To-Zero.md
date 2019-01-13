@@ -33,7 +33,35 @@ May 26th, 2018. PWK D-DAY.
 --
 A date that forever changed the course of my life- for the better. This was my start date for PWK. There are a plether of blogs out there for the technical content of PWK. I want to try to create an OSCP blog that is unique to my situation. This blog is going to talk about the following: what to expect and how to document. Documentation is the single more important thing with this course. To pass the OSCP exam, you have to submit a report. The OSCP exam consists of an undisclosed number of vulnerable machines in a network you have no prior knowledge of. Your grade will be determined by a committee of individuals from OffSec. They will read your report AND ONLY your report. Later in this blog, you will get more specifics about the exam and report- I just am stressing the importance of documentation. 
 Here is what you can expect from PWK:
-  1. Exploit Development
-    a. 
+  1. **Exploit Development**- You will learn the basics of exploit development. You will reverse engineer an 
+     application and probe it for Buffer Overflow vulnerabilities. This include attaching an application to a debugger and 
+     understanding what you are looking at. (If this seems daunting do not worry, it was to me too.) But remember that this is 
+     a ***LEARNING COURSE TAUGHT BY PROFESSIONALS***. You are here to learn and they will teach you.
+  2. **Enumeration**- This is a term that is used all. of. the. time. Enumeration is the process of probing, 
+     discovering, and using what you know to come up with an attack vector. Enumeration includes things like scanning    
+     machines with Nmap and other tools. Enumerating could also mean you play around with the functionality of a web application
+     and seeing what you can do to abuse its native functionality. When someone tells you to "enumerate" more it may seem like 
+     a sarcastic answer that does not help. It is actually the best answer! It means that you are close, you just need to look 
+     with a stronger magnifying glass and try harder! Someone encouraging you to enumerate means that they only want you to 
+     learn for yourself. If you get told to enumerate, do not fret. Take a break and come back to it! You eventually will 
+     find the attack vector with enough effort. PWK gives you the tools to find the vulnerabilities!
+   3. **Web Application Exploitation**- This topic encompasses a vast portion of the PWK course. EVERYTHING uses a web app these 
+      days from banks, schools, and governmental services. Many companies only pay for web application assessments. You will 
+      learn fundementals of Cross-Site Scripting, Cross-Site Reverse Forgery, PHP exploitation, reviewing source code for flaws,
+      SQL injections, File Inclusion Vulnerabilities, and my favorite- default credentials! Always check those firstly :).
+   4. **Privilege Escalation**- This will encompass only 2 attack vectors primarily. These include misconfigurations and kernel
+      exploitation. You will learn what services are weak and where you should look when you have a low privileged shell. 
+      From a kernel exploit perspective, you will need to understand why a kernel exploit is working and how to successfully
+      compile one.
+   5. **Using Exploit-DB and Metasploit**- This is where the fun comes in. These attack vectors take advantage of publically
+      known exploits. These generally will be exploits that take advantage of vulnerabilties in memory. These will inject 
+      shellcode most likely into memory. You will also, at times, be tasked with modifying publically available exploits to fit 
+      your needs. Do not worry- it is not as daunting as one may think! Again, Offensive Security are world class instructors. 
+      You will get the information you need!
+      
+      
+Exam Day
+--
+I am not going to get in specifics here, I will just briefly talk on my experience. If you were comfortable with the PWK course and labs, you will be fine! Just enumerate properly and leave no stone unturned. I passed my exam on the first try. I do not mean to sound pretentious with that last statement, I just want to provide what transparency I can. I also opted in for the proctored exam, so the integrity of my exam is in tact. If you enumerate, use google, and put forth maximum effort- there is no reason you should not pass! The OSCP exam was a great amount of fun to me! Let's talk specifics It is a 24 hour exam. You are presented with a number of hosts to compromise. The goal is ALWAYS to obtain a shell as a privileged user. As you are taking the exam, you need to be capturing screenshots (you will know what to screenshot when the time comes- trust me) and documenting the exploitation process. You will need to provide a writted document with all of your findings and submit it for a grade. I will provide links to helpful websites at the end with all of this information. Make sure you follow ALL of Offensive Securty's instructions. Passing OSCP has been one of the greates pleasures on my young life- and I am proud to be apart of the community that have all "Tried Harder."
 
 

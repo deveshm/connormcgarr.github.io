@@ -114,9 +114,6 @@ author:
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"
       url: connormcgarr7@email.com
-    - label: "LinkedIn"
-      icon: "fas fa-fw fa-link"
-      url: "https://www.linkedin.com/in/connor-mcgarr-oscp-7522a6152/"
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/connormcgarr"

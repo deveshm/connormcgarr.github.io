@@ -64,7 +64,7 @@ I am not going to get in specifics here, I will just briefly touch on my experie
 
 How Did I Document My PWK/OSCP machines?
 --
-Most blogs talk about the technical skills required- but I believe documentation is far superior in notoriety. OneNote is going to be your best friend. I recommend OneNote 2016! I also recommend 3 computer monitors for this whole journey! 1 for your Kali machine, 1 for OneNote, and 1 for the videos/PDF. I created an example template on how I documented my findings below. I found this method to be the most effective (these are fake IP addresses, so don't even try it) Remember though- you will need to document your findings in a formal report with your PWK machines and coursework for 5 bonus points on the exam. OSCP will also need to be put into a formal document. OneNote is great for fast taking notes and easy reference.
+Most blogs talk about the technical skills required- but I believe documentation is far superior in notoriety. OneNote is going to be your best friend. I recommend OneNote 2016! I also recommend 3 computer monitors for this whole journey! 1 for your Kali machine, 1 for OneNote, and 1 for the videos/PDF. I created an example template on how I documented my findings below. I found this method to be the most effective (these are fake IP addresses, so don't even try it) Remember though- you will need to document your findings in a formal report with your PWK machines and coursework for 5 bonus points on the exam. OSCP will also need to be put into a formal document. OneNote is great for expediting the note taking process and provides an easy reference.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot.png" alt="">
 

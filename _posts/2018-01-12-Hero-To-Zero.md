@@ -34,5 +34,6 @@ May 26th, 2018. PWK D-DAY.
 A date that forever changed the course of my life- for the better. This was my start date for PWK. There are a plether of blogs out there for the technical content of PWK. I want to try to create an OSCP blog that is unique to my situation. This blog is going to talk about the following: what to expect and how to document. Documentation is the single more important thing with this course. To pass the OSCP exam, you have to submit a report. The OSCP exam consists of an undisclosed number of vulnerable machines in a network you have no prior knowledge of. Your grade will be determined by a committee of individuals from OffSec. They will read your report AND ONLY your report. Later in this blog, you will get more specifics about the exam and report- I just am stressing the importance of documentation. 
 Here is what you can expect from PWK:
   1. Exploit Development
+    a. 
 
 

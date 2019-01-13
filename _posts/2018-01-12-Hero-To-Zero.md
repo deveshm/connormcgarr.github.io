@@ -71,10 +71,26 @@ Most blogs talk about the technical skills required- but I believe documentation
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot.png" alt="">
 
+I realize this picture is small, but I will break it down so you can see it more easily.
+
+First thing I do is create a new tab with the IP address of the machine I am going after with the hostname (here it is 10.10.10.10 TEST and 10.10.10.20 TEST_DEV along with 10.10.10.30 PROD_1):
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/Screentshot4.png" alt="">
+
+Secondly, I run a port scan and I list all of the open ports with their services in numerical order:
+
 <img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot2.png" alt="">
+
+Third, I enumerate the port and I document my steps with screenshots:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot 3.png" alt="">
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot4.png" alt="">
+This is the best approach I could come up with. I believe documentation plays the most pivotal and intregal role in this whole process. A client does not buy a penetration test! They buy your documentation, so you can begin the remediation process. 
+
+
+Resources
+---
+Here are a list of resources I used to take me from a zero to a hero!:
+
 
 

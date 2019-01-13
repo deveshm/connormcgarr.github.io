@@ -70,3 +70,11 @@ How Did I Document my PWK/OSCP machines?
 Most blogs talk about the technical skills required- but I believe documentation is far superior in notoriety. OneNote is going to be your best friend. I recommend OneNote 2016.I also recommend 3 computer monitors for this whole journey! 1 for your Kali machine, 1 for OneNote, and 1 for the videos/PDF. I created an example template on how I documented my findings below. I found this method to be the most effective (these are fake IP addresses, so don't even try it):
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot.png" alt="">
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot2.png" alt="">
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot3.png" alt="">
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot4.png" alt="">
+
+

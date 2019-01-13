@@ -89,9 +89,9 @@ Resources
 ---
 Here are a list of resources I used to take me from a zero to a hero!:
 
-1. [Learning the Terminal](https://www.codecademy.com/learn/learn-the-command-line)- this is vital. You have to understand these basics before you can pursue anything more advanced.
+1. [Learning the Terminal](https://www.codecademy.com/learn/learn-the-command-line)- This is vital. If you have no idea where to start, START HERE! You have to understand these basics before you can pursue anything more advanced.
 2. [Vuln Hub](https://www.vulnhub.com/)- I am not a proponent of blogs saying which boxes you should attempt. It is about the methodologies. Any of them will do! Try them all. BUT DO ATTEMPT BRAINPAIN 1!!!!! Hint, it utilizes exploit development.
-3. [Hack The Box](https://www.hackthebox.eu/)- start with the easier machines. Get your methodologies down, and document!!  I left some screenshots above on how to document. Get OneNote, make a HTB notebook, and go at it! All of those boxes will help prepare you. Again, not a fan of people giving specific boxes.
+3. [Hack The Box](https://www.hackthebox.eu/)- Start with the easier machines. Get your methodologies down, and document!!  I left some screenshots above on how to document. Get OneNote, make a HTB notebook, and go at it! All of those boxes will help prepare you. Again, not a fan of people giving specific boxes.
 4. [Spawning TTY lines](https://netsec.ws/?p=337)
 5. [Reverse Shell Cheat Sheet](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet)
 6. [Penetration Testing Cheat Sheet](https://ired.team/offensive-security-experiments/offensive-security-cheetsheets)

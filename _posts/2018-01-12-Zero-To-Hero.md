@@ -54,6 +54,8 @@ To satisfy any questions, here is a brief, high-level overview of what you can e
       your needs. Do not worry- it is not as daunting as one may think! Again, Offensive Security are world class instructors. 
       You will get the information you need!
       
+One thing to note also. Many people also ask- "Connor do I need to know a programming language?" The answer I give is, "No." Here is my logic behind this. You are going to have to review a minute amount of code- but code is self explanatory. Especially with the high level languages like Python and PHP. They are very much in a human readable notation. Any programming you may need to engage in, will be offset by Offensive Security. While it is beneficial to know a programming language, it is not vital. You may use a Bash script or a Python script to automate a process. This would mean, for example, if you KNOW FOR A FACT that you are going to have to Nmap (which you will) a group of targets to view open ports so you know where to begin- you could use Bash to automate that process. You could create a Bash script that either is hard coded or accepts a user argument for a range of IPs and that script automatically runs a scan for a given list. I personally did not automate anything. I love the terminal and it is more fulfilling to me to remember all of the syntax for a given tool and all of that tool's switches when executing an attack- but that is just me! Old habits die hard.
+      
       
 Exam Day
 --
@@ -62,7 +64,7 @@ I am not going to get in specifics here, I will just briefly touch on my experie
 
 How Did I Document My PWK/OSCP machines?
 --
-Most blogs talk about the technical skills required- but I believe documentation is far superior in notoriety. OneNote is going to be your best friend. I recommend OneNote 2016.I also recommend 3 computer monitors for this whole journey! 1 for your Kali machine, 1 for OneNote, and 1 for the videos/PDF. I created an example template on how I documented my findings below. I found this method to be the most effective (these are fake IP addresses, so don't even try it):
+Most blogs talk about the technical skills required- but I believe documentation is far superior in notoriety. OneNote is going to be your best friend. I recommend OneNote 2016! I also recommend 3 computer monitors for this whole journey! 1 for your Kali machine, 1 for OneNote, and 1 for the videos/PDF. I created an example template on how I documented my findings below. I found this method to be the most effective (these are fake IP addresses, so don't even try it) Remember though- you will need to document your findings in a formal report with your PWK machines and coursework for 5 bonus points on the exam. OSCP will also need to be put into a formal document. OneNote is great for fast taking notes and easy reference.:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot.png" alt="">
 

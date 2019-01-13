@@ -1,7 +1,7 @@
 ---
 layout: archive
 permalink: /posts/
-title: "Information Security Posts"
+title: "Posts"
 author_profile: true
 ---
 

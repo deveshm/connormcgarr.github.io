@@ -7,7 +7,7 @@ excerpt: "How I went from a naive college kid who did not know there was more th
 ---
 Introduction:
 ---
-"Wait, Kali Linux is the same thing as Linux?" I remember the sheer embarrassment hitting my face. This was me, a 20 year old novice in August of 2017, at one of my school's Cyber Defense Club meetings. In the world of information security, where there are ground breaking developments everyday- I had just came to the realization there in fact is more than one distribution of Linux. In this moment I realized I was being left in the dust by my peers, and a change was needed. This is the first of many events that propelled me to the elation I felt when I read the words "...allow us to be the first to congratulate you on your OSCP certification" in an email from Offensive Security. How did that befuddled young man obtain one of the industry's most elite certifications? In this blog post, I am going to elaborate a little on my background at the time I passed my OSCP in September. Provided also: My pathway to the cert, various resources I found useful, and I want to debunk a few myths I encountered on my journey that almost deterred me from the challenge.
+"Wait, Kali Linux is the same thing as Linux?" I can still recall the sheer embarrassment hitting my face. This was me, a 20 year old novice in August of 2017, at one of my school's Cyber Defense Club meetings. In the world of information security, where there are ground breaking developments everyday- I had just came to the realization there in fact is more than one distribution of Linux. In this moment I realized I was being left in the dust by my peers, and a change was needed. This is the first of many events that propelled me to the elation I felt when I read the words "...allow us to be the first to congratulate you on your OSCP certification" in an email from Offensive Security. How did that befuddled young man obtain one of the industry's most elite certifications? In this blog post, I am going to elaborate a little on my background at the time I passed my OSCP in September. Provided also: My pathway to the cert, various resources I found useful, and I want to debunk a few myths I encountered on my journey that almost deterred me from the challenge.
 
 Pre-PWK/OSCP Background
 --
@@ -87,5 +87,19 @@ Resources
 ---
 Here are a list of resources I used to take me from a zero to a hero!:
 
+1. [Learning the Terminal](https://www.codecademy.com/learn/learn-the-command-line)- this is vital. You have to understand these basics before you can pursue anything more advanced.
+2. [Vuln Hub](https://www.vulnhub.com/)- I am not a proponent of blogs saying which boxes you should attempt. It is about the methodologies. Any of them will do! Try them all. BUT DO ATTEMPT BRAINPAIN 1!!!!! Hint, it utilizes exploit development.
+3. [Hack The Box](https://www.hackthebox.eu/)- start with the easier machines. Get your methodologies down, and document!!  I left some screenshots above on how to document. Get OneNote, make a HTB notebook, and go at it! All of those boxes will help prepare you. Again, not a fan of people giving specific boxes.
+4. [Spawning TTY lines]-(https://netsec.ws/?p=337)
+5. [Reverse Shell Cheat Sheet]-(http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet)
+6. [Penetration Testing Cheat Sheet]-(https://ired.team/offensive-security-experiments/offensive-security-cheetsheets)
+7. [Understanding Reverse and Bind Shells]-(https://www.hackingtutorials.org/networking/hacking-netcat-part-2-bind-reverse-shells/)
+8. [Signing Up for OSCP]-(https://www.offensive-security.com/preregistration.php?cid=21)
+9. [PWK Syllabus]-(https://www.offensive-security.com/documentation/penetration-testing-with-kali.pdf)
+10. [OSCP/PWK Example Documentation]-(https://www.offensive-security.com/pwk-online/PWK-Example-Report-v1.pdf)
+11. [OSCP Exam Guide]-(https://support.offensive-security.com/oscp-exam-guide/#oscp-certification-exam-guide)
 
+Ending
+--
+There is not one tride and true method for obtaining OSCP. The goal of this blog was to show anyone can obtain OSCP. If you dedicate yourself enough, you will find yourself jumping up and down doing the root.txt dance when you receive your passing email from Offensive Security. Please feel free to reach out with any questions! If you just stay dedicated, go through the coursework before you hit the labs. Have an awesome rest of your day! :)
 

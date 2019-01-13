@@ -64,11 +64,11 @@ I am not going to get in specifics here, I will just briefly touch on my experie
 
 How Did I Document My PWK/OSCP machines?
 --
-Most blogs talk about the technical skills required- but I believe documentation is far superior in notoriety. OneNote is going to be your best friend. I recommend OneNote 2016! I also recommend 3 computer monitors for this whole journey! 1 for your Kali machine, 1 for OneNote, and 1 for the videos/PDF. I created an example template on how I documented my findings below. I found this method to be the most effective (these are fake IP addresses, so don't even try it) Remember though- you will need to document your findings in a formal report with your PWK machines and coursework for 5 bonus points on the exam. OSCP will also need to be put into a formal document. OneNote is great for fast taking notes and easy reference.:
+Most blogs talk about the technical skills required- but I believe documentation is far superior in notoriety. OneNote is going to be your best friend. I recommend OneNote 2016! I also recommend 3 computer monitors for this whole journey! 1 for your Kali machine, 1 for OneNote, and 1 for the videos/PDF. I created an example template on how I documented my findings below. I found this method to be the most effective (these are fake IP addresses, so don't even try it) Remember though- you will need to document your findings in a formal report with your PWK machines and coursework for 5 bonus points on the exam. OSCP will also need to be put into a formal document. OneNote is great for fast taking notes and easy reference.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot.png" alt="">
 
-I realize this picture is small, but I will break it down so you can see it more easily.
+I realize this picture is small, so I will divide it into more readable portions, so you can view it more easily.
 
 First thing I do is create a new tab with the IP address of the machine I am going after with the hostname (here it is 10.10.10.10 TEST and 10.10.10.20 TEST_DEV along with 10.10.10.30 PROD_1):
 
@@ -82,7 +82,7 @@ Third, I enumerate the port and I document my steps with screenshots:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot 3.png" alt="">
 
-This is the best approach I could come up with. I believe documentation plays the most pivotal and integral role in this whole process. A client does not buy a penetration test! They buy your documentation, so you can begin the remediation process. 
+This is the best approach I could come up with. I believe documentation plays the most pivotal and integral role in this whole process. A client does not buy a penetration test! They buy your documentation, so you can begin they remediation process. 
 
 
 Resources

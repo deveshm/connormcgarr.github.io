@@ -4,7 +4,7 @@ permalink: /posts/
 title: "Information Security Posts"
 author_profile: true
 header:
-  image: "/images/elliot.jpg"
+  image: "/images/Elliot.jpg"
 ---
 
 {% include group-by-array collection=site.posts field="tags" %}

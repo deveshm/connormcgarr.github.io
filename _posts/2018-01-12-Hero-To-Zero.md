@@ -19,4 +19,20 @@ When March came around, I started becoming more confident. I REALLY layed off th
 
 Times up, let's do this
 --
-April 
+April 26th, 2018. "Thank you for your interest in Penetration Testing with Kali Linux, Please read this entire email carefullly as it containes very important information." I had just sumbitted my application to PWK! I was ready to ride the NOP sled to OSCP (Exploit Developement joke)! 
+Let me fill you in on how busy I was at this time:
+  1. I was working 40 hours a week as an intern
+  2. I was driving 4 hours round trip, 3 days a week for a face to face course. This forced me to get in at 6 a.m. to work to 
+     compensate the hours.
+  3. I was also taking 3 other online courses.
+  
+I was now about to add another course to the total! Crazy, I know. I also do not share this message to come off as a martyr. I want it to be known- there is no excuse for not taking the plunge if you truly want it. If you talk about it, be about it! Many people ask me, "Connor how much time did you spend on PWK?" There are 3 paces you can select with PWK. 30, 60, or 90 days. I opted for 60 days. I spent 3 hours Monday through Friday doing coursework and labs. I then spent every waking moment on Saturday and Sunday doing the same. Having said that, I am human. There were some days I spent time watching movies, playing sports, or playing video games. This is the amount of dedication I found myself putting in. I would say I averaged around 30-40 hours a week on this beast. Remember though- this is a blog on someone who had no experience getting OSCP. A more seasoned verteran may be able to get away with less- but I wouldn't recommend it.
+
+
+May 26th, 2018. PWK D-DAY.
+--
+A date that forever changed the course of my life- for the better. This was my start date for PWK. There are a plether of blogs out there for the technical content of PWK. I want to try to create an OSCP blog that is unique to my situation. This blog is going to talk about the following: what to expect and how to document. Documentation is the single more important thing with this course. To pass the OSCP exam, you have to submit a report. The OSCP exam consists of an undisclosed number of vulnerable machines in a network you have no prior knowledge of. Your grade will be determined by a committee of individuals from OffSec. They will read your report AND ONLY your report. Later in this blog, you will get more specifics about the exam and report- I just am stressing the importance of documentation. 
+Here is what you can expect from PWK:
+  1. Exploit Development
+
+

@@ -99,7 +99,7 @@ Here are a list of resources I used to take me from a zero to a hero!:
 10. [OSCP/PWK Example Documentation](https://www.offensive-security.com/pwk-online/PWK-Example-Report-v1.pdf)
 11. [OSCP Exam Guide](https://support.offensive-security.com/oscp-exam-guide/#oscp-certification-exam-guide)
 
-Ending
+Debunking Myths/Ending
 --
-There is not one tride and true method for obtaining OSCP. The goal of this blog was to show anyone can obtain OSCP. If you dedicate yourself enough, you will find yourself jumping up and down doing the root.txt dance when you receive your passing email from Offensive Security. Please feel free to reach out with any questions! If you just stay dedicated, go through the coursework before you hit the labs, and use google- you will get there! No doubt. I have faith in you! Have an awesome rest of your day! :)
+There is not one tride and true method for obtaining OSCP. The goal of this blog was to show anyone can obtain OSCP. Many people have told me I was in over my head, and that it was too advanced for me. This is a myth. If you dedicate yourself enough, you will find yourself jumping up and down doing the root.txt dance when you receive your passing email from Offensive Security. Please feel free to reach out with any questions! I can say first hand, you can do it with enough dedication. I spent my own money on 60 days of access- I did not ask for a hand out. OSCP only has 2 prereqs- dedication and commitment. If you just stay dedicated, go through the coursework before you hit the labs, and use google- you will get there! No doubt. I have faith in you! Have an awesome rest of your day! :)
 

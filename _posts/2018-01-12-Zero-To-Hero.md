@@ -82,7 +82,7 @@ Third, I enumerate the port and I document my steps with screenshots:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Screenshot 3.png" alt="">
 
-This is the best approach I could come up with. I believe documentation plays the most pivotal and integral role in this whole process. A client does not buy a penetration test! They buy your documentation, so you can begin they remediation process. 
+This is the best approach I could come up with. I believe documentation plays the most pivotal and integral role in this whole process. A client does not buy a penetration test! They buy your documentation, so they can begin the remediation process. 
 
 
 Resources

@@ -87,7 +87,7 @@ This is the best approach I could come up with. I believe documentation plays th
 
 Resources
 ---
-Here are a list of resources I used to take me from a zero to a hero!:
+Here are a list of resources I used to take me from a zero to a hero:
 
 1. [Learning the Terminal](https://www.codecademy.com/learn/learn-the-command-line)- This is vital. If you have no idea where to start, START HERE! You have to understand these basics before you can pursue anything more advanced.
 2. [Vuln Hub](https://www.vulnhub.com/)- I am not a proponent of blogs saying which boxes you should attempt. It is about the methodologies. Any of them will do! Try them all. BUT DO ATTEMPT BRAINPAIN 1!!!!! Hint, it utilizes exploit development.

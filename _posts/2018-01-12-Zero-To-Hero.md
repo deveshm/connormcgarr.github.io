@@ -19,7 +19,7 @@ When March arrived, my confidence was really flourishing and evolving. I was ref
 
 Times up, let's do this
 --
-April 26th, 2018. "Thank you for your interest in Penetration Testing with Kali Linux, Please read this entire email carefully as it contains very important information." I had just submitted my application to PWK! I was ready to ride the NOP sled to OSCP (Exploit Development joke)! 
+April 26th, 2018. "Thank you for your interest in Penetration Testing with Kali Linux, Please read this entire email carefully as it contains very important information." I had just submitted my application to PWK! I was ready to ride the NOP sled to OSCP (Exploit development joke)! 
 Let me fill you in on how overloaded I was at this time:
   1. I was working 40 hours a week as an intern
   2. I was driving 4 hours round trip, 3 days a week for a face to face course. This forced me to get in at 6 a.m. to work to 

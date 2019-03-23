@@ -80,3 +80,5 @@ s.send(command+pwn)
 s.recv(1024)
 s.close()
 ```
+We then restart the application in Immunity Debugger, and throw our exploit at Vulnserver. Again, the application crashes. This time, however, we know that the SEH chain can be overwritten by our supplied data. There is a really neat python framework known as [Mona](https://github.com/corelan/mona) that can be ported into Immunity. We will run a script that will find any instances of cyclic patterns (like the one we supplied above). The command to issue that in Immunity is: `!mona findmsp`. You will need to issue this command in the white text bar at the bottom of the debugger, near the Windows start button. Here is what mona finds:
+<img src="{{ site.url }}{{ site.baseurl }}/images/cyclic.png" alt="">

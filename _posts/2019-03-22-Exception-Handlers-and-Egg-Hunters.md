@@ -294,7 +294,7 @@ s.send(command+pwn)
 s.recv(1024)
 s.close()
 ```
-Remember when we spoke about egg hunters earlier? A few things were mentioned. 1- The egg hunter looks for two occurrences of its tag in order to validate that the opcode directly after the tag should be executed. 2 - We have `w00tw00t` appended to the beginning our second stage shellcode. Everything else stays the same- and we are ready to fire off our exploit! 
+Remember when we spoke about egg hunters earlier? A few things were mentioned. 1- The egg hunter looks for two occurrences of its tag in order to validate that the opcode directly after the tags should be executed. 2 - We have `w00tw00t` appended to the beginning our second stage shellcode. Everything else stays the same- and we are ready to fire off our exploit! 
 
 Before we do anything this time, on our attacking machine, we need to start a `nc` listener to catch our shell when it is sent. Here is how we start our listener:
 ```console

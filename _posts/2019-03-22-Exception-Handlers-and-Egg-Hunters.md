@@ -112,9 +112,9 @@ s.send(command+pwn)
 s.recv(1024)
 s.close()
 ```
-The above script sends 3495 bytes of data, to reach the location of nSEH. We are going to fill nSEH with 4 B's (42 hex) and SEH with 4 C's (43 hex). Remember, 5000 bytes is how much we concluded our application needs to crash. We fill the rest of our data with D's, and take 5000 minus the A's, B's, and C's.
+The above script sends 3495 bytes of data, to reach the location of nSEH. We are going to fill nSEH with 4 B's (42 hex) and SEH with 4 C's (43 hex). Remember, we concluded 5000 bytes was the appropriate amount of data to crash the server. We fill the rest of our data with D's, and take 5000 minus the A's, B's, and C's to meet this stipulation.
 
-Again, we execute the script after restarting the application in Immunity. The crash occurs, we view the SEH chain- and we validate that nSEH is overwritten by B's (42 hex) and SEH is overwritten by C's (43 hex).
+Again, we execute our PoC after restarting the application in Immunity. The crash occurs, we view the SEH chain- and we validate that nSEH is overwritten by B's (42 hex) and SEH is overwritten by C's (43 hex).
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/SEH1.png" alt="">
 

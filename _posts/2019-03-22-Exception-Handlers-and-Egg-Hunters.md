@@ -52,3 +52,6 @@ The application, which is attached to [Immunity Debugger](https://www.immunityin
 <img src="{{ site.url }}{{ site.baseurl }}/images/crash.png" alt="">
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/crash1.png" alt="">
+
+Knowing that EIP is not overwritten, this throws us for a loop. Remember, that these registers are all apart of the stack. What else do we recall is on the stack? That is right, exception handlers. Immunity (and OllyDBG) allow you to view the SEH chain to see what is occuring. To access this chain, click `View > SEH Chain`. Well what do you know?! Our user supplied data hit nSEH and SEH and they were corrupted with 41's, or A's.
+<img src="{{ site.url }}{{ site.baseurl }}/images/SEH.png" alt="">

@@ -294,7 +294,7 @@ s.send(command+pwn)
 s.recv(1024)
 s.close()
 ```
-Remember when we spoke about egg hunters earlier? Two things were mentioned. 1- The egg hunter looks for two occurrences of it's tag in order to execute. This is why we have `w00tw00t` in our second stage shellcode, even though our tag generated on the egg hunter was just `w00t`. We also said that we append our tag onto the front of our shellcode, which is what is going on here. Everything else stays the same- and we are ready to fire off our exploit! We will still use Immunity until we can guarentee 100 percent that our exploit works.
+Remember when we spoke about egg hunters earlier? Two things were mentioned. 1- The egg hunter looks for two occurrences of its tag in order to validate that the opcode directly after the tage should be executed. This is why we have `w00tw00t` appended to the beginning our second stage shellcode, even though our tag generated on the egg hunter was just `w00t`. We also said that we append our tag onto the front of our shellcode, which is what is going on here. Everything else stays the same- and we are ready to fire off our exploit! We will still use Immunity until we can guarentee 100 percent that our exploit works.
 
 Before we do anything this time, on our attacking machine- we need to start a `nc` listener to catch our shell when it comes in. We start the listener:
 ```console

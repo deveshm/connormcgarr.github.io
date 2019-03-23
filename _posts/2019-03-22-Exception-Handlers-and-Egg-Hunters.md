@@ -61,7 +61,7 @@ We can see clearly EIP is not overwritten. Will this throw us for a loop? Rememb
 
 Calculating The Offset
 ---
-Just like a vanilla EIP overwrite stack based buffer overflow- we need to find the offset to a particular place in memory where we can control the flow of execution. But without EIP- what can we do? We actually are going to leverage the SEH chain to write to EIP. Bear with me here. Firstly, before we do anything, we need to find the offset to nSEH. Since the SEH chain is a linked list, SEH will reside right next to nSEH. To find the offset of nSEH, we are going to create a 5000 byte string cyclic pattern, that will help us determine where nSEH is. Here is the command to generate this in Metasploit:
+Just like a vanilla EIP overwrite stack based buffer overflow- we need to find the offset to a particular place in memory where we can control the flow of execution. But without EIP- what can we do? We actually are going to leverage the SEH chain to write to EIP. Bear with me here. Firstly, before we do anything, we need to find the offset to the exception handlers. Since the SEH chain is a linked list, SEH will reside right next to nSEH. To find the offset, we are going to create a 5000 byte string cyclic pattern, that will help us determine where our handlers are. Here is the command to generate this in Metasploit:
 ```console 
 root@kali:~# /usr/share/metasploit-framework/tools/exploit/pattern_create.rb -l 5000
 ```
@@ -89,7 +89,7 @@ We then restart the application in Immunity Debugger, and throw our PoC (proof o
 <img src="{{ site.url }}{{ site.baseurl }}/images/cyclic.png" alt="">
 <img src="{{ site.url }}{{ site.baseurl }}/images/cyclic2.png" alt="">
 
-We can conclude that is takes 3495 bytes of data to reach nSEH. We can also use deductive reasoning to determine SEH is 4 bytes in front of nSEH. Let's update our Python script to validate with a sanity check:
+We can conclude that is takes 3495 bytes of data to reach our exception handlers. Let's update our Python script to validate with a sanity check, by filling nSEH with B's (42 hex) and SEH with C's (43 hex). Recall- the exception handlers are in a linked-list. This tells you, that SEH naturally would be right next to (4 bytes) nSEH. :
 ```console
 root@kali:~/Desktop# cat VALIDATE.py 
 #!/usr/bin/python

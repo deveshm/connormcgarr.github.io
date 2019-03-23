@@ -141,5 +141,8 @@ s.send(command+pwn)
 s.recv(1024)
 s.close()
 ```
-We restart our application in Immunity once again and then we execute the script. The application crashes, and we view the SEH chain. This time, we see a memory address has been loaded into SEH. We are going to set a breakpoint on this address. The breakpoint will pause execution of the program, when the program reaches that instruction. To do this, we do one left-click on `essfunc.625011b3` and press `F2`:
+We restart our application in Immunity once again and then we execute the script. The application crashes, and we view the SEH chain. This time, we see a memory address has been loaded into SEH. We are going to set a breakpoint on this address. The breakpoint will pause execution of the program, when the program reaches that instruction. To do this, we do one left-click on `essfunc.625011b3` and press `F2`. After pressing `F2` for the breakpoint, we then need to pass the exception to the applicatino, to get our `pop pop ret` instruction on the stack for execution. To do this press `Shift + F9`:
 <img src="{{ site.url }}{{ site.baseurl }}/images/breakpoint.png" alt="">
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/step.png" alt="">
+

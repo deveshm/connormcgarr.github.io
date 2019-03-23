@@ -23,7 +23,7 @@ Let me preface this paragraph by saying egg hunters are not making an inference 
 
 Down to the Nitty-Gritty
 ---
-We will be taking crack at the [Vulnserver](https://github.com/stephenbradshaw/vulnserver). For reference and continuity, fuzzing will be out of the scope of this post. Let's begin.
+We will be taking crack at the [Vulnserver](https://github.com/stephenbradshaw/vulnserver). For reference and continuity, fuzzing will be within the scope of this post. Let's begin.
 
 Initial Crash
 ---

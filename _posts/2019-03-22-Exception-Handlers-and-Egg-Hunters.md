@@ -115,4 +115,29 @@ Again, we execute the script after restarting the application in Immunity. The c
 
 Awesome! We can control what gets stored in the SEH chain. You may be asking yourself "How are we going to leverage this information?" Remember when I talked about the location of SEH after an exception occurs? The value is `esp+8`. This is where that comes in handy. Let's take a step back and remember how assembler commands work for a second. A `pop` instruction will generally remove a register off of the stack. The stack (for our purposes here) grows downwards in memory addresses. When a `pop` instruction is executed, the value of the current stack pointer (ESP) INCREASES by 4 bytes. A `ret`, or return, instruction will load the current value of the stack pointer into the instruction pointer (EIP). If we fill SEH with a `pop <register> pop <register> ret` instruction we can move our current stack pointer (ESP) 8 bytes upward in memory (4 bytes for each `pop` instruction). If SEH is located at the current ESP value plus 8 bytes, a `pop pop` sequence will take our current stack pointer and fill it with SEH's value (which is `esp+8`) into the stack pointer (ESP). The last `ret` instruction, as explained above, will take our ESP value, which now contains our SEH value, and place it into EIP- allowing for redirection of execution! We do not care which registers are getting popped off of the stack- just as long as they get popped off of the stack. We don't mind the registers getting popped off- we only care that ESP increases when a `pop` insruction is executed. Mona has a nice feature to search for `pop pop ret` sequences. Here is the command used in Immunity: `!mona seh`(Again, I know it is hard to see, so i zoomed in on the addresses in the second image):
 <img src="{{ site.url }}{{ site.baseurl }}/images/poppopret.png" alt="">
+
 <img src="{{ site.url }}{{ site.baseurl }}/images/again.png" alt="">
+
+We need to obtain a memory address where a `pop <register> pop <register> ret` instruction chain commences. We also need to make sure the .DLL or .exe where the this instruction resides was not compiled with ASLR or SafeSEH. It looks like we can use the last address mentioned at: `0x625011b3`. Remember that Intel uses little endian, which stores the least significant byte first. This will flip our address from `62 50 11 b3` to `b3 11 50 62`. Let's update our PoC once again:
+```console
+root@kali:~/Desktop# cat POPPOPRET.py 
+#!/usr/bin/python
+import socket
+import sys
+import os
+
+#Vulnerable command
+command = "GMON /.:/"
+
+pwn = "A" * 3495
+pwn+= "B" * 4
+pwn+= "\xb3\x11\x50\62"
+pwn+= "D" * (5000-len(pwn))
+
+s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("172.16.55.134", 9999))
+
+s.send(command+pwn)
+s.recv(1024)
+s.close()
+```

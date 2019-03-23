@@ -26,5 +26,5 @@ We will be taking crack at the [Vulnserver](https://github.com/stephenbradshaw/v
 Initial Crash
 ---
 When starting the application, we notice it starts listening on TCP port `9999`. We will take note of this for the future. After starting the server, we connect to it via `nc` on port 9999 and execute the command `HELP` to view a list of commands we can issue.
-<img src="{{ site.url }}{{ site.baseurl }}/images/nc9999.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/net9999.png" alt="">
 

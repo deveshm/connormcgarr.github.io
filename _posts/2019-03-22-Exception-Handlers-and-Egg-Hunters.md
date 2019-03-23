@@ -127,7 +127,7 @@ If we fill SEH with a `pop <register> pop <register> ret` instruction we can mov
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/again.png" alt="">
 
-We need to obtain a memory address where a `pop <register> pop <register> ret` instruction chain commences. We also need to make sure the .DLL or .exe where the this instruction resides was not compiled with ASLR or SafeSEH. It looks like we can use the last address mentioned at: `0x625011b3`. Remember that Intel uses little endian, which stores the least significant byte first. This will flip our address from `62 50 11 b3` to `b3 11 50 62`. Let's update our PoC once again:
+We need to obtain a memory address where a `pop <register> pop <register> ret` instruction chain commences. We also need to make sure the .DLL or .exe where the this instruction resides was not compiled with ASLR or SafeSEH. It looks like we can use the last address in the above image, mentioned at: `0x625011b3`. Remember that Intel uses little endian, which stores the least significant byte first. This will flip our address from `62 50 11 b3` to `b3 11 50 62`. Let's update our PoC once again:
 ```console
 root@kali:~/Desktop# cat POPPOPRET.py 
 #!/usr/bin/python

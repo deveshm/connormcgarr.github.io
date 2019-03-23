@@ -141,3 +141,5 @@ s.send(command+pwn)
 s.recv(1024)
 s.close()
 ```
+We restart our application in Immunity once again and then we execute the script. The application crashes, and we view the SEH chain. This time, we see a memory address has been loaded into SEH. We are going to set a breakpoint on this address. The breakpoint will pause execution of the program, when the program reaches that instruction. To do this, we do one left-click on `essfunc.625011b3` and press `F2`:
+<img src="{{ site.url }}{{ site.baseurl }}/images/breakpoint.png" alt="">

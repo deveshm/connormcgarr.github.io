@@ -7,7 +7,7 @@ excerpt: "Introduction to SEH exploits and utilizing egg hunters to achieve code
 ---
 Introduction:
 ---
-Error handling has become a vitale element within the embodiment of software development. Far are the days of just scraping by with only getting applications to function. Developers need to be implement graceful exiting of a program in case of any type of error. As old adage states, "No good deed goes
+Error handling has become a vital element within the embodiment of software development. Far are the days of just scraping by with only getting applications to function. Developers need to be implement graceful exiting of a program in case of any type of error. As old adage states, "No good deed goes
 unpunished." - the same applies to exception handlers. This blog post will give a brief introduction to exception handler exploits
 along with how we can leverage a technique known as an egg hunter to smuggle shellcode when there is not enough room on our stack pointer.
 

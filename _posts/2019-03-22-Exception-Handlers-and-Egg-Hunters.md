@@ -89,7 +89,7 @@ We then restart the application in Immunity Debugger, and throw our PoC (proof o
 <img src="{{ site.url }}{{ site.baseurl }}/images/cyclic.png" alt="">
 <img src="{{ site.url }}{{ site.baseurl }}/images/cyclic2.png" alt="">
 
-We can conclude that is takes 3495 bytes of data to reach our exception handlers. Let's update our Python script to validate with a sanity check, by filling nSEH with B's (42 hex) and SEH with C's (43 hex). Recall- the exception handlers are in a linked-list. This tells you, that SEH naturally would be right next to (4 bytes) nSEH. :
+We can conclude that is takes 3495 bytes of data to reach our exception handlers. Let's update our Python script to validate with a sanity check, by filling nSEH with B's (42 hex) and SEH with C's (43 hex). Recall- the exception handlers are in a linked-list. This tells you that SEH naturally would be right next to (4 bytes) nSEH. :
 ```console
 root@kali:~/Desktop# cat VALIDATE.py 
 #!/usr/bin/python

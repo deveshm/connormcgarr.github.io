@@ -153,10 +153,10 @@ s.close()
 We restart our application in Immunity once again, and then we send our updated PoC. The application crashes, and we view the SEH chain. This time, we see a memory address has been loaded into SEH. We are going to set a breakpoint on this address. The breakpoint will pause execution of the program when the program reaches the instruction to which the breakpoint is set. To do this, we do one left-click on `essfunc.625011b3` and press `F2`:
 <img src="{{ site.url }}{{ site.baseurl }}/images/breakpoint.png" alt="">
 
-After pressing `F2` for the breakpoint, we then need to pass the exception to the application, to get our `pop pop ret` instruction on the stack for execution. To do this press `Shift + F9`:
+After pressing `F2` for the breakpoint, we then need to pass the exception to the application, to get our `pop pop ret` instruction on the stack for execution. To do this press, `Shift + F9`:
 <img src="{{ site.url }}{{ site.baseurl }}/images/step.png" alt="">
 
-Excellent. Now, we will execute the `pop eax, pop eax, ret` instructions one at a time by stepping through them. Press `F7` to step through once to the second `pop` instruction, and the again to get to the `ret` instruction. Press `F7` one more time to execute `ret`, and you will notice that the program redirects us to the following place:
+Excellent. Now, we will execute the `pop eax, pop eax, ret` instructions one at a time by stepping through them. Press `F7` to step through once to the second `pop` instruction, and then again to get to the `ret` instruction. Press `F7` one more time to execute `ret`, and you will notice that the program redirects us to the following place:
 <img src="{{ site.url }}{{ site.baseurl }}/images/notice.png" alt="">
 
 Notice where we are!!!! Look at the 3 values below our current instruction! You will see 3 B's (42 hex), along with the current B (42 hex). We have landed in nSEH! More importantly, both of these values are on the stack if you look at the stack dump, shown below:

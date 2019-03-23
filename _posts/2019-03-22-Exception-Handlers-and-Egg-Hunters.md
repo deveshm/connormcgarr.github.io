@@ -181,3 +181,6 @@ s.close()
 Before we execute, take note of the `\x90` instructions in the jump instruction. These are no operators that literally do nothing. They are just there as place holders, because the register needs four bytes- and we only had two. Carrying on...
 We restart the application in Immunity, we throw our script at it. Application crashes and we view the SEH chain. We set a breakpoint on SEH, as shown previously, and use `Shift + F9` to pass the exception to the application. We then step through our `pop pop ret` instructions, and we land on our jump!!:
 <img src="{{ site.url }}{{ site.baseurl }}/images/NOP.png" alt="">
+
+We step though the jump withh `F7` and we land back in our A's:
+<img src="{{ site.url }}{{ site.baseurl }}/images/validate.png" alt="">

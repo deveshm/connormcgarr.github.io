@@ -197,7 +197,7 @@ We step though the jump withh `F7` and we land back in our A's:
 <img src="{{ site.url }}{{ site.baseurl }}/images/validate.png" alt="">
 
 Let's Go Huntin', Boys!
- ---
+---
 Now it is time to generate our egg hunter. We will do this with mona. This is the command I issued:
 `!mona egg -t w00t`:
 <img src="{{ site.url }}{{ site.baseurl }}/images/eggsy.png" alt="">

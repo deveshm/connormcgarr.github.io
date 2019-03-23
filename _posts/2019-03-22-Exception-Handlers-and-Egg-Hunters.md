@@ -147,3 +147,13 @@ We restart our application in Immunity once again and then we execute the script
 After pressing `F2` for the breakpoint, we then need to pass the exception to the application, to get our `pop pop ret` instruction on the stack for execution. To do this press `Shift + F9`:
 <img src="{{ site.url }}{{ site.baseurl }}/images/step.png" alt="">
 
+Excellent. Now, we will execute the `pop eax, pop eax, ret` instructions one at a time by stepping through them. Press `F7` to step through once to the second `pop` instruction, and the again to get to the `ret` instruction. Press `F7` one more time to execute `ret`, and you will notice that the program redirects us to the following place:
+<img src="{{ site.url }}{{ site.baseurl }}/images/notice.png" alt="">
+
+Notice where we are!!!! Look at the 3 values below our current instruction! You will see 3 B's (42 hex), along with the current B (42 hex). We have landed in nSEH! More importantly, both of these values are on the stack if you look at the stack dump, shown below:
+<img src="{{ site.url }}{{ site.baseurl }}/images/stack.png" alt="">
+
+The address `00C0FFDC` is the "Pointer to next SEH record", which is nSEH. That address, as shown in image after we stepped thorugh the `pop pop ret` instructions, is the address of where our B's (42 hex) start. Awesome! Now what could we do from here? We could do a typical jump to ESP to execute shellcode! But we have a slight issue. ESP only has the capability to hold less than 30 bytes:
+<img src="{{ site.url }}{{ site.baseurl }}/images/ugh.png" alt="">
+
+This is not even enough for our egg hunter to go! What can we do? Well one thing we are going to have to do is some math! But we can make a jump backwards into our "A" (41 hex) buffer and store our egg hunter there.

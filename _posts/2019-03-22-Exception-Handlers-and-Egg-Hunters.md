@@ -178,7 +178,7 @@ s.send(command+pwn)
 s.recv(1024)
 s.close()
 ```
-Before we execute, take note of the `\x90` instructions in the jump instruction. These are no operators that literally do nothing. They are just there as place holders, because the register needs four bytes- and we only had two. Carrying on...
+Before we execute, take note of the `\x90` instructions in the jump instruction. These are no operations that literally do nothing. They are just there as place holders, because the register needs four bytes- and we only had two. Carrying on...
 We restart the application in Immunity, we throw our script at it. Application crashes and we view the SEH chain. We set a breakpoint on SEH, as shown previously, and use `Shift + F9` to pass the exception to the application. We then step through our `pop pop ret` instructions, and we land on our jump!!:
 <img src="{{ site.url }}{{ site.baseurl }}/images/NOP.png" alt="">
 
@@ -218,3 +218,4 @@ s.send(command+pwn)
 s.recv(1024)
 s.close()
 ```
+Some questions you may have are probably: "Why did your initial A value go from 3495 to 3457?" and "Why do you have 6 no operation instructions?" I will explain. So remember when we implemented the short jump backwards 40 bytes? We had to integrate 2 no operation instructions, because we only had two bytes. Those no opearations can be omitted from our memory for the following calculation. We take our original offset of `3495` and we add 2 bytes (for our `EB D8` instruction). We now have a value of `3497`. Then, we went backwards 40 bytes. We now need to subtract that value. `3497 - 40` gives us 3457. That is the offset to our egg hunter. After we put in our 32 bytes of egg hunter, we still do not get back to our original 3495 value for the offset of the exception handlers. If we add 32 to our current `3457`, we get `3489`. This is six bytes short of our offset. So we must add these 6 bytes in before we can use our exception handlers to execute instructions on the stack. To compensate for this, we add those six bytes back in the form of a [NOP Sled](https://en.wikipedia.org/wiki/NOP_slide). This will give us a bit more reliability in our exploit, instead of just using A's. 

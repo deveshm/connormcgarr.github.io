@@ -20,7 +20,7 @@ Now, refer to the names of our acronyms above. Notice anything? It looks like yo
 
 An exception handler need to be able to point to the nSEH (next handler) and the current handler (SEH). When an exception is raised- the handler "zeroes out" a majority of the registers (ESI, EAX, ECX, etc. etc.). This, theoretically, should remove any user supplied data that is malicious. While this sounds like a tried and true way to prevent things like a stack based buffer overflow- this nomenclature is not without its flaws. 
 
-We will get to how we use this newfound knowledge to obtain a shell later on. Before we move on, take one note of a crucial attribute of SEH at the time an exception is raised. SEH will be located at `esp+8`. This means the location of ESP, plus 8 bytes, will be where SEH resides.
+Using this newfound knowledge, by the end of this article, we will cultivate a method to achieve code execution. Before we move on, take one note of a crucial attribute of SEH at the time an exception is raised. SEH will be located at `esp+8`. This means the location of ESP, plus 8 bytes, will be where SEH resides.
 
 Egg Hunters: Woah, Wait- Easter Is Here?
 ---

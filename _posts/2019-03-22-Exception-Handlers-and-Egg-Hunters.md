@@ -171,7 +171,7 @@ We restart our application in Immunity once again, and then we send our updated 
 After pressing `F2` for the breakpoint, we then need to pass the exception to the application, to get our `pop pop ret` chain on the stack for execution. To do this press, `Shift + F9`:
 <img src="{{ site.url }}{{ site.baseurl }}/images/step.png" alt="">
 
-Excellent. Now, we will execute the `pop eax, pop eax, ret` chain one at a time by stepping through them. Press `F7` to step through once to the second `pop` instruction, and then again to get to the `ret` instruction. Press `F7` one more time to execute `ret`, and you will notice that the program redirects us to the following place:
+Excellent. Now, we will execute the `pop eax, pop eax, ret` chain, one instruction at a time, by stepping through them. Press `F7` to step through once to the second `pop` instruction, and then again to get to the `ret` instruction. Press `F7` one more time to execute `ret`, and you will notice that the program redirects us to the following place:
 <img src="{{ site.url }}{{ site.baseurl }}/images/notice.png" alt="">
 
 Notice where we are!!!! Look at the 3 values below our current instruction, in the above image! You will see 3 B's (42 hex), along with the current B (42 hex). We have landed in nSEH! More importantly, both of these values are on the stack if you look at the stack dump, shown below:

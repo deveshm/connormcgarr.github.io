@@ -161,7 +161,7 @@ Excellent. Now, we will execute the `pop eax, pop eax, ret` instructions one at 
 Notice where we are!!!! Look at the 3 values below our current instruction! You will see 3 B's (42 hex), along with the current B (42 hex). We have landed in nSEH! More importantly, both of these values are on the stack if you look at the stack dump, shown below:
 <img src="{{ site.url }}{{ site.baseurl }}/images/stack.png" alt="">
 
-The address `00C0FFDC` is the "Pointer to next SEH record", which is nSEH. That address, as shown in image after we stepped through the `pop pop ret` instruction, is the address of where our B's (42 hex) start. Awesome! Now what could we do from here? We could do a typical jump to ESP to execute shellcode! But we have a slight issue. ESP only has the capability to hold less than 30 bytes:
+The address `00C0FFDC` is the "Pointer to next SEH record", which is nSEH. That address, as shown in image after we stepped through the `pop pop ret` instruction, is the address of where our B's (42 hex) start. Awesome! Now what could we do from here? We could do a typical jump to ESP to execute shellcode! But we have a slight issue. ESP now only has the capability to hold less than 30 bytes:
 <img src="{{ site.url }}{{ site.baseurl }}/images/ugh.png" alt="">
 
 Take the Jump!

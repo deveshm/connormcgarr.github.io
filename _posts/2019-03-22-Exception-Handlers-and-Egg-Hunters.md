@@ -12,11 +12,15 @@ unpunished." - the same applies to exception handlers. This blog post will give 
 
 Exception Handlers: How Do They Work?
 ---
-Briefly I will hit on how these work (in Windows at least). Let's get acquainted some acronyms firstly. nSEH stands for next structured exception handler (we will get to why here in a second). SEH  (structured exception handler) is the current exception handler. Exception handlers are grouped into two types- operating system and developer implemented handlers. As we know, an application executed on a machine that utilizes a stack based data structure will give each function/piece of the application its own stack frame to be put onto the stack for execution. The stack frame of each function/piece will eventually be popped of when execution has ceased. The same is true for an exception handler. If there is a function that has an exception handler embedded in itself- that exception handler will also get its own stack frame. Can you forsee a slight issue? Our exception handlers, eventually, will be pushed onto the stack.
+Briefly I will hit on how these work (in Windows at least). Let's get acquainted some acronyms firstly. nSEH stands for next structured exception handler (we will get to why here in a second). SEH  (structured exception handler) is the current exception handler. Exception handlers are grouped into two types- operating system and developer implemented handlers. 
+
+As we know, an application executed on a machine that utilizes a stack based data structure will give each function/piece of the application its own stack frame to be put onto the stack for execution. The stack frame of each function/piece will eventually be popped of when execution has ceased. The same is true for an exception handler. If there is a function that has an exception handler embedded in itself- that exception handler will also get its own stack frame. Can you forsee a slight issue? Our exception handlers, eventually, will be pushed onto the stack.
 
 Now, refer to the names of our acronyms above. Notice anything? It looks like you could have a list of exception handlers. If you thought this, then you are correct! The handlers form a data structure known as linked-list. You can conceptualize a linked-list as a set of data that all point to different things (at a high level) Here just know that the linked-list of elements (exception handlers) point to nSEH, nSEH,..., SEH. 
 
-An exception handler need to be able to point to the nSEH (next handler) and the current handler (SEH). When an exception is raised- the handler "zeroes out" a majority of the registers (ESI, EAX, ECX, etc. etc.). This, theoretically, should remove any user supplied data that is malicious. While this sounds like a tried and true way to prevent things like a stack based buffer overflow- this nomenclature is not without its flaws. We will get to how we use this newfound knowledge to obtain a shell later on. Before we move on, take one note of a crucial attribute of SEH at the time an exception is raised. SEH will be located at `esp+8`. This means the location of ESP, plus 8 bytes, will be where SEH resides.
+An exception handler need to be able to point to the nSEH (next handler) and the current handler (SEH). When an exception is raised- the handler "zeroes out" a majority of the registers (ESI, EAX, ECX, etc. etc.). This, theoretically, should remove any user supplied data that is malicious. While this sounds like a tried and true way to prevent things like a stack based buffer overflow- this nomenclature is not without its flaws. 
+
+We will get to how we use this newfound knowledge to obtain a shell later on. Before we move on, take one note of a crucial attribute of SEH at the time an exception is raised. SEH will be located at `esp+8`. This means the location of ESP, plus 8 bytes, will be where SEH resides.
 
 Egg Hunters: Woah, Wait- Easter Is Here?
 ---
@@ -64,7 +68,9 @@ We can see clearly EIP is not overwritten. Will this throw us for a loop? Rememb
 
 Calculating The Offset
 ---
-Just like a vanilla EIP overwrite stack based buffer overflow- we need to find the offset to a particular place in memory where we can control the flow of execution. But without EIP- what can we do? We actually are going to leverage the SEH chain to write to EIP. Bear with me here. Firstly, before we do anything, we need to find the offset to the exception handlers. Since the SEH chain is a linked list, SEH will reside right next to nSEH. To find the offset, we are going to create a 5000 byte string cyclic pattern, that will help us determine where our handlers are. Here is the command to generate this in Metasploit:
+Just like a vanilla EIP overwrite stack based buffer overflow- we need to find the offset to a particular place in memory where we can control the flow of execution. But without EIP- what can we do? We actually are going to leverage the SEH chain to write to EIP. Bear with me here. Firstly, before we do anything, we need to find the offset to the exception handlers. 
+
+Since the SEH chain is a linked list, SEH will reside right next to nSEH. To find the offset, we are going to create a 5000 byte string cyclic pattern, that will help us determine where our handlers are. Here is the command to generate this in Metasploit:
 ```console 
 root@kali:~# /usr/share/metasploit-framework/tools/exploit/pattern_create.rb -l 5000
 ```
@@ -88,7 +94,9 @@ s.send(command+pwn)
 s.recv(1024)
 s.close()
 ```
-We then restart the application in Immunity Debugger, and throw our PoC (proof of concept) at Vulnserver. Again, the application crashes. This time, however, we know that the SEH chain can be overwritten by our supplied data. There is a really neat Python framework known as [mona](https://github.com/corelan/mona) that can be ported into Immunity. We will run a mona script that will find any instances of cyclic patterns (like the one we supplied above). The command to issue that in Immunity is: `!mona findmsp`. You will need to issue this command in the white text bar at the bottom of the debugger, near the Windows start button. Here is what mona finds (You can right click on the first image below and open it in a new tab if it is too hard to read. I added a second picture to zoom in on the actual offset value:
+We then restart the application in Immunity Debugger, and throw our PoC (proof of concept) at Vulnserver. Again, the application crashes. This time, however, we know that the SEH chain can be overwritten by our supplied data. There is a really neat Python framework known as [mona](https://github.com/corelan/mona) that can be ported into Immunity. We will run a mona script that will find any instances of cyclic patterns (like the one we supplied above). The command to issue that in Immunity is: `!mona findmsp`. 
+
+You will need to issue this command in the white text bar at the bottom of the debugger, near the Windows start button. Here is what mona finds (You can right click on the first image below and open it in a new tab if it is too hard to read. I added a second picture to zoom in on the actual offset value:
 <img src="{{ site.url }}{{ site.baseurl }}/images/cyclic.png" alt="">
 <img src="{{ site.url }}{{ site.baseurl }}/images/cyclic2.png" alt="">
 

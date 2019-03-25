@@ -135,14 +135,14 @@ Awesome! We can control what gets stored in the SEH chain. You may be asking you
 
 A `pop` instruction will generally remove a register off of the stack. The stack (for our purposes here) grows downward to lower memory addresses. When a `pop` instruction is executed, the value of the current stack pointer (ESP) **INCREASES** by 4 bytes. A `ret`, or return, instruction will load the current value of the stack pointer into the instruction pointer (EIP). 
 
-If we fill SEH with a `pop <register> pop <register> ret` instruction we can move our current stack pointer (ESP) 8 bytes upward in memory (4 bytes for each `pop` instruction). If SEH is located at the current ESP value plus 8 bytes, a `pop pop` sequence will take our current stack pointer and fill it with SEH's value (which is `esp+8`). The last `ret` instruction, as explained above, will take our ESP (which now contains our SEH value) and place it into EIP. Henceforth, we can control what gets loaded into the instruction pointer (EIP)! 
+If we fill SEH with a `pop <register> pop <register> ret` chain we can move our current stack pointer (ESP) 8 bytes upward in memory (4 bytes for each `pop` instruction). If SEH is located at the current ESP value plus 8 bytes, a `pop pop` sequence will take our current stack pointer and fill it with SEH's value (which is `esp+8`). The last `ret` instruction, as explained above, will take our ESP (which now contains our SEH value) and place it into EIP. Henceforth, we can control what gets loaded into the instruction pointer (EIP)! 
 
-We don't actually mind that registers will be popped off of the stack from our `pop pop ret` chain- we only care that ESP increases when a `pop` instruction is executed. Mona has a nice feature to search for `pop pop ret` sequences. Here is the command used in Immunity: `!mona seh`(Again, I know it is hard to see, so i zoomed in on the addresses in the second image):
+We don't actually mind that registers will be popped off of the stack from our `pop pop ret` chain- we only care that ESP increases when a `pop` instruction is executed. Mona has a nice feature to search for `pop pop ret` chain. Here is the command used in Immunity: `!mona seh`(Again, I know it is hard to see, so i zoomed in on the addresses in the second image):
 <img src="{{ site.url }}{{ site.baseurl }}/images/poppopret.png" alt="">
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/again.png" alt="">
 
-We need to obtain a memory address where a `pop <register> pop <register> ret` instruction chain commences. We also need to make sure the .DLL or .exe where this instruction chain resides, was not compiled with ASLR or SafeSEH. It looks like we can use the last address in the above image, mentioned at: `0x625011b3`. Remember that Intel uses little endian format, which stores data with the least significant byte first. This will flip our address from `62 50 11 b3` to `b3 11 50 62`. Let's update our PoC once again:
+We need to obtain a memory address where a `pop <register> pop <register> ret` chain occurs. We also need to make sure the .DLL or .exe where this chain resides, was not compiled with ASLR or SafeSEH. It looks like we can use the last address in the above image, mentioned at: `0x625011b3`. Remember that Intel uses little endian format, which stores data with the least significant byte first. This will flip our address from `62 50 11 b3` to `b3 11 50 62`. Let's update our PoC once again:
 ```console
 root@kali:~/Desktop# cat POPPOPRET.py 
 #!/usr/bin/python
@@ -168,16 +168,16 @@ s.close()
 We restart our application in Immunity once again, and then we send our updated PoC. The application crashes, and we view the SEH chain. This time, we see a memory address has been loaded into SEH. We are going to set a breakpoint on this address. The breakpoint will pause execution of the program when the program reaches the instruction to which the breakpoint is set. To do this, we do one left-click on `essfunc.625011b3` and press `F2`:
 <img src="{{ site.url }}{{ site.baseurl }}/images/breakpoint.png" alt="">
 
-After pressing `F2` for the breakpoint, we then need to pass the exception to the application, to get our `pop pop ret` instruction on the stack for execution. To do this press, `Shift + F9`:
+After pressing `F2` for the breakpoint, we then need to pass the exception to the application, to get our `pop pop ret` chain on the stack for execution. To do this press, `Shift + F9`:
 <img src="{{ site.url }}{{ site.baseurl }}/images/step.png" alt="">
 
-Excellent. Now, we will execute the `pop eax, pop eax, ret` instructions one at a time by stepping through them. Press `F7` to step through once to the second `pop` instruction, and then again to get to the `ret` instruction. Press `F7` one more time to execute `ret`, and you will notice that the program redirects us to the following place:
+Excellent. Now, we will execute the `pop eax, pop eax, ret` chain one at a time by stepping through them. Press `F7` to step through once to the second `pop` instruction, and then again to get to the `ret` instruction. Press `F7` one more time to execute `ret`, and you will notice that the program redirects us to the following place:
 <img src="{{ site.url }}{{ site.baseurl }}/images/notice.png" alt="">
 
 Notice where we are!!!! Look at the 3 values below our current instruction, in the above image! You will see 3 B's (42 hex), along with the current B (42 hex). We have landed in nSEH! More importantly, both of these values are on the stack if you look at the stack dump, shown below:
 <img src="{{ site.url }}{{ site.baseurl }}/images/stack.png" alt="">
 
-The address `00C0FFDC` is the "Pointer to next SEH record", which is nSEH. That address, as shown in image after we stepped through the `pop pop ret` instruction, is the address of where our B's (42 hex) start. Awesome! Now what could we do from here? We could do a typical jump to ESP to execute shellcode! But we have a slight issue. ESP now only has the capability to hold less than 30 bytes:
+The address `00C0FFDC` is the "Pointer to next SEH record", which is nSEH. That address, as shown in image after we stepped through the `pop pop ret` chain, is the address of where our B's (42 hex) start. Awesome! Now what could we do from here? We could do a typical jump to ESP to execute shellcode! But we have a slight issue. ESP now only has the capability to hold less than 30 bytes:
 <img src="{{ site.url }}{{ site.baseurl }}/images/ugh.png" alt="">
 
 Take the Jump!
@@ -208,9 +208,9 @@ s.send(command+pwn)
 s.recv(1024)
 s.close()
 ```
-Before we execute, take note of the `\x90` instructions in the jump instruction. These two added instructions are called no operations. "NOPS", as they are commonly characterised as are instructions that literally do not do anything (hence the name). The opcode is first recognized by the CPU. The CPU then disregards the NOP and reads the next sequential instruction to be executed. We are using two "NOPs" here as place holders, because registers needs four bytes loaded in them- and we only had two. Carrying on...
+Before we execute, take note of the `\x90` instructions, next to the jump opcode. These two added instructions are called no operations. "NOPS", as they are commonly characterised as are instructions that literally do not do anything (hence the name). The opcode is first recognized by the CPU. The CPU then disregards the NOP and reads the next sequential instruction to be executed. We are using two "NOPs" here as place holders, because registers needs four bytes loaded in them- and we only had two. Carrying on...
 
-We restart the application in Immunity and we throw our PoC at it. Our Vulnserver application crashes, and we view the SEH chain. We set a breakpoint on SEH, as shown previously, and use `Shift + F9` to pass the exception to the application. We then step through our `pop pop ret` instructions, and we land on our jump!!:
+We restart the application in Immunity and we throw our PoC at it. Our Vulnserver application crashes, and we view the SEH chain. We set a breakpoint on SEH, as shown previously, and use `Shift + F9` to pass the exception to the application. We then step through our `pop pop ret` chain, and we land on our jump!!:
 <img src="{{ site.url }}{{ site.baseurl }}/images/NOP.png" alt="">
 
 We step though the jump withh `F7` and we land back in our A's:
@@ -339,4 +339,4 @@ Mouth Of The River
 ---
 There is an ocean of resources out there about exploit development. The above post was just to shed some light on buiding on the fundementals of a simple vanilla stack based buffer overflow. There are copious amounts of blogs on simple overflows, but the more low level you go- the less there is (and the move convoluted the writeups get). I will probably be documenting more exploit development topics as I go forward. 
 
-I just wanted to share information with others today in a way that I think is easy to understand. I remember the exact chronological order I had to endure to in order to understand things like why `pop pop ret` is needed with exception handler exploitation. I hope by sharing what I have learned in my own words, I can relay those phrases or analogies that led me to have my "AHA!" moments, with all of you! Peace, love, and positivity! Have a great day :-) 
+I just wanted to share information with others today in a way that I think is easy to understand. I remember the exact chronological order I had to endure to in order to understand things like why a `pop pop ret` chain is needed with exception handler exploitation. I hope by sharing what I have learned in my own words, I can relay those phrases or analogies that led me to have my "AHA!" moments, with all of you! Peace, love, and positivity! Have a great day :-) 

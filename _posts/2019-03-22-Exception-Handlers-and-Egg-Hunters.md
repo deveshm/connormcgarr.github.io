@@ -208,7 +208,7 @@ s.send(command+pwn)
 s.recv(1024)
 s.close()
 ```
-Before we execute, take note of the `\x90` instructions, next to the jump opcode. These two added instructions are called no operations. "NOPS", as they are commonly characterised, are instructions that literally do not do anything (hence the name). The opcode is first recognized by the CPU. The CPU then disregards the NOP, and reads the next sequential instruction to be executed. We are using two "NOPs" here as place holders, because registers needs four bytes loaded in them- and we only had two. Carrying on...
+Before we execute, take note of the `\x90` instructions, next to the jump opcode. These two added instructions are called no operations. "NOPS", as they are commonly characterised, are instructions that literally do not do anything (hence the name). The opcode is first recognized by the CPU. The CPU then disregards the NOP, and reads the next sequential instruction to be executed. We are using two "NOPs" here as place holders, because registers need four bytes loaded in them- and our jump opcode only provided two. Carrying on...
 
 We restart the application in Immunity and we throw our PoC at it. Our Vulnserver application crashes, and we view the SEH chain. We set a breakpoint on SEH, as shown previously, and use `Shift + F9` to pass the exception to the application. We then step through our `pop pop ret` chain, and we land on our jump!!:
 <img src="{{ site.url }}{{ site.baseurl }}/images/NOP.png" alt="">

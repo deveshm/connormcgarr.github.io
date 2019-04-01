@@ -70,7 +70,7 @@ Calculating The Offset
 ---
 Just like a vanilla EIP overwrite stack based buffer overflow- we need to find the offset to a particular place in memory where we can control the flow of execution. But without EIP- what can we do? We actually are going to leverage the SEH chain to write to EIP. Bear with me here. Firstly, before we do anything, we need to find the offset to the exception handlers. 
 
-Since the SEH chain is a linked list, SEH will reside right next to nSEH. To find the offset, we are going to create a 5000 byte string cyclic pattern, that will help us determine where our handlers are. Here is the command to generate this in Metasploit:
+Since the SEH chain is a linked list, SEH will reside right next to nSEH. To find the offset, we are going to create a 5000 byte cyclic pattern string, that will help us determine where our handlers are. Here is the command to generate this in Metasploit:
 ```console 
 root@kali:~# /usr/share/metasploit-framework/tools/exploit/pattern_create.rb -l 5000
 ```

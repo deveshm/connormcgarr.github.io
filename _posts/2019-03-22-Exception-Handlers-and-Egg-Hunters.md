@@ -131,7 +131,7 @@ Again, we execute our PoC after restarting the application in Immunity. The cras
 
 The Importance of Pop Pop Ret
 ---
-Awesome! We can control what gets stored in the SEH chain. You may be asking yourself "How are we going to leverage this information?" Remember when I talked about the location of SEH when an exception occurs? The value is `esp+8`. This is where that tidbit of information comes in handy. Let's take a step back and remember how assembler commands work for a second. 
+Awesome! We can control what gets stored in the SEH chain. You may be asking yourself, "How are we going to leverage this information?" Remember when I talked about the location of SEH when an exception occurs? The value is `esp+8`. This is where that tidbit of information comes in handy. Let's take a step back and remember how assembler commands work for a second. 
 
 A `pop` instruction will generally remove a register off of the stack. The stack (for our purposes here) grows downward to lower memory addresses. When a `pop` instruction is executed, the value of the current stack pointer (ESP) **INCREASES** by 4 bytes. A `ret`, or return, instruction will load the current value of the stack pointer into the instruction pointer (EIP). 
 

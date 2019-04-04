@@ -37,7 +37,7 @@ Initial Crash
 When starting the application, we notice it starts listening on TCP port `9999`. We will take note of this for the future. After starting the server, we connect to it via `nc` on port 9999, and execute the command `HELP` to view a list of commands we can issue:
 <img src="{{ site.url }}{{ site.baseurl }}/images/net9999.png" alt="">
 
-After we view the list of commands we choose to reverse engineer the command `GMON`. Here is the python script we are going to execute to see if we can crash the application:
+After we view the list of commands we choose to reverse engineer the command `GMON`. Here is the PoC Python script we are going to execute to see if we can crash the application:
 ```console
 root@kali:~/Desktop# cat CRASH.py 
 #!/usr/bin/python
@@ -74,7 +74,7 @@ Since the SEH chain is a linked list, SEH will reside right next to nSEH. To fin
 ```console 
 root@kali:~# /usr/share/metasploit-framework/tools/exploit/pattern_create.rb -l 5000
 ```
-Here is our updated Python script:
+Here is our updated PoC script:
 ```console
 root@kali:~/Desktop# cat OFFSET.py 
 #!/usr/bin/python
@@ -96,7 +96,7 @@ s.close()
 ```
 We then restart the application in Immunity Debugger, and throw our PoC (proof of concept) at Vulnserver. Again, the application crashes. This time, however, we know that the SEH chain can be overwritten by our supplied data. There is a really neat Python framework known as [mona](https://github.com/corelan/mona) that can be ported into Immunity. We will run a mona script that will find any instances of cyclic patterns (like the one we supplied above). The command to issue that in Immunity is: `!mona findmsp`. 
 
-You will need to issue this command in the white text bar at the bottom of the debugger, near the Windows start button. Here is what mona finds (You can right click on the first image below and open it in a new tab if it is too hard to read. I added a second picture to zoom in on the actual offset value:
+You will need to issue this command in the white text bar at the bottom of the debugger, near the Windows start button. Here is what mona finds (You can right click on the first image below and open it in a new tab if it is too hard to read.) I added a second picture to zoom in on the actual offset value:
 <img src="{{ site.url }}{{ site.baseurl }}/images/cyclic.png" alt="">
 <img src="{{ site.url }}{{ site.baseurl }}/images/cyclic2.png" alt="">
 

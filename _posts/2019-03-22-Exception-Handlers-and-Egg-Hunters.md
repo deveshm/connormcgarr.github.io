@@ -18,7 +18,7 @@ As we know, an application executed on a machine that utilizes a stack based dat
 
 Now, refer to the names of our acronyms above. Notice anything? It looks like you could have a list of exception handlers. If you thought this, then you are correct! The handlers form a data structure known as linked-list. You can conceptualize a linked-list as a set of data that all point to different things (at a high level). Here just know that the linked-list of elements (exception handlers) point to nSEH, nSEH,..., SEH. 
 
-An exception handler need to be able to point to the nSEH (next handler) and the current handler (SEH). When an exception is raised- the handler "zeroes out" a majority of the registers (ESI, EAX, ECX, etc. etc.). This, theoretically, should remove any user supplied data that is malicious. While this sounds like a tried and true way to prevent things like a stack based buffer overflow- this nomenclature is not without its flaws. 
+An exception handler need to be able to point to the nSEH (next handler) and SEH (current handler). When an exception is raised- the handler "zeroes out" a majority of the registers (ESI, EAX, ECX, etc. etc.). This, theoretically, should remove any user supplied data that is malicious. While this sounds like a tried and true way to prevent things like a stack based buffer overflow- this nomenclature is not without its flaws. 
 
 Using this newfound knowledge, by the end of this article, we will cultivate a method to achieve code execution. Before we move on, take one note of a crucial attribute of SEH at the time an exception is raised. SEH will be located at `esp+8`. This means the location of ESP, plus 8 bytes, will be where SEH resides.
 

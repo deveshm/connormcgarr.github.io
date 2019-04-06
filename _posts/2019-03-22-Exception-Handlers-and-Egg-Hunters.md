@@ -20,7 +20,7 @@ Now, refer to the names of our acronyms above. Notice anything? It looks like yo
 
 An exception handler need to be able to point to the nSEH (next handler) and SEH (current handler). When an exception is raised- the handler "zeroes out" a majority of the registers (ESI, EAX, ECX, etc. etc.). This, theoretically, should remove any user supplied data that is malicious. While this sounds like a tried and true way to prevent things like a stack based buffer overflow- this nomenclature is not without its flaws. 
 
-Using this newfound knowledge, by the end of this article, we will cultivate a method to achieve code execution. Before we move on, take one note of a crucial attribute of SEH at the time an exception is raised. SEH will be located at `esp+8`. This means the location of ESP, plus 8 bytes, will be where SEH resides.
+Using this newfound knowledge, by the end of this article, we will cultivate a method to achieve code execution. Before we move on, take one note of a crucial attribute of nSEH at the time an exception is raised. nSEH will be located at `esp+8`. This means the location of ESP, plus 8 bytes, will be where nSEH resides.
 
 Egg Hunters: Woah, Wait- Easter Is Here?
 ---
@@ -131,11 +131,11 @@ Again, we execute our PoC after restarting the application in Immunity. The cras
 
 The Importance of Pop Pop Ret
 ---
-Awesome! We can control what gets stored in the SEH chain. You may be asking yourself, "How are we going to leverage this information?" Remember when I talked about the location of SEH when an exception occurs? The value is `esp+8`. This is where that tidbit of information comes in handy. Let's take a step back and remember how assembler commands work for a second. 
+Awesome! We can control what gets stored in the SEH chain. You may be asking yourself, "How are we going to leverage this information?" Remember when I talked about the location of nSEH when an exception occurs? The value is `esp+8`. This is where that tidbit of information comes in handy. Let's take a step back and remember how assembler commands work for a second. 
 
 A `pop` instruction will generally remove a register off of the stack. The stack (for our purposes here) grows downward to lower memory addresses. When a `pop` instruction is executed, the value of the current stack pointer (ESP) **INCREASES** by 4 bytes. A `ret`, or return, instruction will load the current value of the stack pointer into the instruction pointer (EIP). 
 
-If we fill SEH with a `pop <register> pop <register> ret` chain we can move our current stack pointer (ESP) 8 bytes upward in memory (4 bytes for each `pop` instruction). If SEH is located at the current ESP value plus 8 bytes, a `pop pop` sequence will take our current stack pointer and fill it with SEH's value (which is `esp+8`). The last `ret` instruction, as explained above, will take our ESP (which now contains our SEH value) and place it into EIP. Henceforth, we can control what gets loaded into the instruction pointer (EIP)! 
+If we fill SEH with a `pop <register> pop <register> ret` chain we can move our current stack pointer (ESP) 8 bytes upward in memory (4 bytes for each `pop` instruction). If nSEH is located at the current ESP value plus 8 bytes, a `pop pop` sequence will take our current stack pointer and fill it with nSEH's value (which is `esp+8`). The last `ret` instruction, as explained above, will take our ESP (which now contains our nSEH value) and place it into EIP. Henceforth, we can control what gets loaded into the instruction pointer (EIP)! 
 
 We don't actually mind that registers will be popped off of the stack from our `pop pop ret` chain- we only care that ESP increases when a `pop` instruction is executed. Mona has a nice feature to search for `pop pop ret` chain. Here is the command used in Immunity: `!mona seh`(Again, I know it is hard to see, so i zoomed in on the addresses in the second image):
 <img src="{{ site.url }}{{ site.baseurl }}/images/poppopret.png" alt="">

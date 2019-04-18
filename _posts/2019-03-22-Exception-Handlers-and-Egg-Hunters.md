@@ -37,7 +37,7 @@ Initial Crash
 When starting the application, we notice it starts listening on TCP port `9999`. We will take note of this for the future. After starting the server, we connect to it via `nc` on port 9999, and execute the command `HELP` to view a list of commands we can issue:
 <img src="{{ site.url }}{{ site.baseurl }}/images/net9999.png" alt="">
 
-After we view the list of commands we choose to reverse engineer the command `GMON`. Here is the PoC Python script we are going to execute to see if we can crash the application:
+After we view the list of commands we learn there is a vulnerability within the `GMON` command. Here is the PoC Python script we are going to execute to see if we can crash the application:
 ```console
 root@kali:~/Desktop# cat CRASH.py 
 #!/usr/bin/python

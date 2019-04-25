@@ -8,7 +8,7 @@ excerpt: "Introduction to SEH exploits and utilizing egg hunters to achieve code
 Introduction:
 ---
 Exception handling is undoubtedly a vital element within the embodiment of software development. Far are the days of just scraping by with only getting applications to function. Developers need to be implementing graceful exits of programs, in case of any type of error. As the old adage states, "No good deed goes
-unpunished." - the same applies to exception handlers. This blog post will give a brief introduction to exception handler exploits, along with how we can leverage a technique known as an egg hunter to smuggle shellcode when there is not enough room on our stack pointer.
+unpunished." - the same applies to exception handlers. This blog post will give a brief introduction to exception handler exploits, along with how we can leverage a technique known as an egg hunter to smuggle shellcode when there is not enough room on our stack pointer, or any other place we can write uninterrupted.
 
 Exception Handlers: How Do They Work?
 ---

@@ -9,7 +9,7 @@ Introduction:
 ---
 "Wait, Kali Linux is the same thing as Linux?" I can still recall the sheer embarrassment hitting my face. This was me, a 20 year old novice in October of 2017, at one of my school's Cyber Defense Club meetings. In the world of information security, where there are ground breaking developments everyday- I just had come to the realization that there, in fact, was more than one distribution of Linux. In that moment I realized I was being deserted by my peers, and a change was needed. This was the first of many events that propelled me to the elation I felt when I read the words:
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/OSCP.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/OSCP1.png" alt="">
 
 How did that befuddled young man attain one of the industry's most sought after certifications? In this blog post, I am going to elaborate on my background at the time this story begins, my pathway to the cert, various resources I found useful, and I want to debunk a few myths I encountered on my journey that almost deterred me from the challenge.
 

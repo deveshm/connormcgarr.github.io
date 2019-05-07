@@ -4,3 +4,5 @@ date:   2019-05-06
 excerpt: "A 0day I found in an application called Admin Express, how to, by hand, alphanumerically encode shellcode, and the integral details of this exploit."
 ---
 Introduction
+---
+COMING SOON!

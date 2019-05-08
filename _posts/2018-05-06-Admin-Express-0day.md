@@ -57,7 +57,7 @@ Now that we can control our exception handlers we can use the typical `pop <reg>
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/4.png" alt="">
 
-Better view of the addresses (open the above inmage in a new tab to see more clearly):
+Better view of the addresses (open the above image in a new tab to see more clearly):
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/5a.png" alt="">
 

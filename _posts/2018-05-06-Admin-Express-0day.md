@@ -32,7 +32,7 @@ print payload
 #f.write(payload)
 #f.close()
 ```
-A couple of notes about the above exploit. This script will generate 5000 \x41 characters, or A's. Notice how at the bottom of the script, the last three lines are commented out. This is due to the fact that this exploit would get tedious opening up a file everytime. Until we have commenced with the full development of this exploit, we will leave these closed and print straight to the console.
+A couple of notes about the above exploit. This script will generate 5000 `\x41` characters, or A's. Notice how at the bottom of the script, the last three lines are commented out. This is due to the fact that this exploit would get tedious opening up a file everytime. Until we have commenced with the full development of this exploit, we will leave these closed and print straight to the console.
 
 
 Here are the next steps to get started:

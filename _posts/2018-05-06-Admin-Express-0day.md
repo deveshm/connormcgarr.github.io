@@ -61,5 +61,4 @@ Better view of the addresses (open the above inmage in a new tab to see more cle
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/5a.png" alt="">
 
-As you can see, there is a problem. All of the recommended memory addresses contain `00`, or null bytes. As we will find, these are not in our allowed character set. To get around this problem, read line that says: 
-`[+] Done.. Only the first 20 pointers are show here, For more pointers, open seh.txt`. If you open __File Explorer__ and go to __`C:\Program Files\Immunity Inc\Immunity Debugger\seh.txt`__ you can find a list of all instructions that are `pop <reg> pop <reg> ret`.
+As you can see, there is a problem. All of the recommended memory addresses contain `00`, or null bytes. As we will find, these are not in our allowed character set. To get around this problem, read line that says:                                       `[+] Done.. Only the first 20 pointers are show here, For more pointers, open seh.txt`. If you open __File Explorer__ and go to __`C:\Program Files\Immunity Inc\Immunity Debugger\seh.txt`__ you can find a list of all instructions that are `pop <reg> pop <reg> ret`.

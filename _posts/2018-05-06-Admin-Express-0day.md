@@ -149,7 +149,8 @@ You may have to break the bad characters up into two sections, but if you throw 
 
 So there is a dilemma at this point. How can we jump to where our expected shellcode is going to be without our opcode `eb`? We are going to have to use a different type of instruction. The instruction we are going to use is `Jump If Overflow` and `Jump If Not OVerflow`, known as `JO` and `JNO`, respectively.
 
-Look at the below screenshot. These are what are known as the flags. These flags can be used to test conditions, like in high level programming languages like C with `if` conditions, etc:
+Look at the below screenshot. These are what are known as the flags. These flags can be used to test conditions, similar to how `if` statements have variables to test conditions in high level programming languages like C!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/9.png" alt="">
 
+Look in the above image at the `O` flag. This is the flag we will be using! `JO` (Jump Overflow) is an opcode that will perform the amount of bytes appended to the opcode __IF__ that flag is set to `1`, at the time of execution. A `JNO` (Jump If Not Overflow) will occur if the `O` flag is set to 0 at the time of execution.

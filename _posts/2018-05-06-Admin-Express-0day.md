@@ -38,6 +38,23 @@ A couple of notes about the above exploit. This script will generate 5000 \x41 c
 Here are the next steps to get started:
 1. After starting the application in Immunity, click on the __System Compare__  tab in Admin Express.
 2. Run the above PoC script and copy the output to the clipboard.
-3. Paste the contents into the left hand __Folder Path__ field, and press the scale icon to the right of that same __Folder Path__ field
+3. Paste the contents into the left hand __Folder Path__ field, and press the __scale icon__ to the right of that same __Folder Path__ field
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/1.png" alt="">
+
+The application now has crashes! Now on to some more in depth and intricate analysis of the crash.
+
+After the crash, take a look at the registers. It seems at first glance we can control EBP, ESI, EDI, and EDX:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/2.png" alt="">
+
+Seeing as we cannot control the instruction pointer, the logical next choice would be to see if there was an exception caught. If we can overwrite the exception handlers, we can still potentially obtain code execution! After viewing the registers in Immunity, we see we can control nSEH and SEH!
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/3.png" alt="">
+
+Now that we can control our exception handlers we can use the typical `pop <reg> pop <reg> ret` method to get our user supplied instructions onto the stack! We will need to use __mona__ to find an address in Admin Express that contains the instructions of `pop <reg> pop <reg> ret`. Here is the command in mona to use: 
+`!mona seh`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/4.png" alt="">
+
+As you can see, there is a problem. All of the recommended memory addresses contain `00`, or null bytes. As we will find, these are not in our allowed character set. To get around this problem, read line that says `[+] Done.. Only the first 20 pointers are show here, For more pointers, open seh.txt`. If you open __File Explorer__ and go to `C:\Program Files\Immunity Inc\Immunity Debugger\seh.txt` you can find a list of all instructions that are `pop <reg> pop <reg> ret`.

@@ -23,4 +23,4 @@ Going forward, we will be utilizing this proof of concept (PoC) Python script th
 
 
 Here are the next steps to get started:
-* 1. After starting the application in Immunity, click on the __System Compare__  tab in Admin Express.
+* After starting the application in Immunity, click on the __System Compare__  tab in Admin Express.

@@ -16,3 +16,12 @@ While perusing about for some DOS exploits, I stumbled across [this](https://www
 
 Let's Get This Party Started!
 ---
+The vulnerability in this application arises from the __Folder Path__ field within the __System Compare__ configuration tab. [Open the application](https://admin-express.en.softonic.com/download), attach it to [Immunity Debugger](https://www.immunityinc.com/products/debugger/), and run it via Immunity.
+
+Going forward, we will be utilizing this proof of concept (PoC) Python script that will aid us in the exploit development lifecycle.
+
+
+
+Here are the next steps to get started:
+* 1. After starting the application in Immunity, click on the __System Compare__  tab in Admin Express.
+* 2. 

@@ -85,7 +85,7 @@ As you can see, there is a problem. All of the recommended memory addresses cont
 
 You can go to seh.txt choose any of the memory locations that will work. You will find out shortly that we have some bad characters, and some of them may not work. There are a few in there that have no null bytes __AND__ adhere to the character schema. We will get to finding all of the bad characters in a second, just keep [Trying Harder](https://www.offensive-security.com/when-things-get-tough/) The address I chose was: `0x10014C42`.
 
-Before updating the PoC, let's add a jump! The typical thing to do in a SEH exploit would be to do a short jump into the second buffer, where presumably our shellcode is. Here is the updated PoC:
+Before updating the PoC, let's add a jump! The typical thing to do in a SEH exploit would be to do a short jump into the second buffer, where presumably our shellcode is. Remember to restart Immunity, and press play. Here is the updated PoC:
 ```console
 root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
 # Proof of Concept - Admin Express v1.2.5.485 Exploit
@@ -102,4 +102,21 @@ print payload
 #f.write(payload)
 #f.close()
 ```
+Execute the Python script, copying the output, and pasting it back into the __Folder Path__ field, we see the application crashes again! Let us do some more analysis.
+
+We see there is no change in the registers in terms of which we are writing too! Let's view the SEH chain to verify our `pop <reg> pop <reg> ret` is loaded properly:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/6.png" alt="">
+
+Set a breakpoint with `F2` and pass the exception with `Shift` `F9`:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/7.png" alt="">
+
+Step through with `F7`. I am listing all of these commands now, but I will be omitting them from the latter portion of this blog, where the real "magic" happens. We reach our nSEH jump instruction, but we notice something wrong! Our instructions got mangeled:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/8.png" alt="">
+
+
+
+
 

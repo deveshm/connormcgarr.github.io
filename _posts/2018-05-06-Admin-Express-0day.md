@@ -112,7 +112,7 @@ Set a breakpoint with `F2` and pass the exception with `Shift` `F9`:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/7.png" alt="">
 
-Step through with `F7`. I am listing all of these commands now, but I will be omitting them from the latter portion of this blog, where the real "magic" happens. We reach our nSEH jump instruction, but we notice something wrong! Our instructions got mangeled:
+Step through with `F7`. We reach our nSEH jump instruction, but we notice something wrong! Our instructions got mangeled:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/8.png" alt="">
 

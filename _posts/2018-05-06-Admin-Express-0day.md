@@ -83,9 +83,9 @@ Better view of the addresses (open the above image in a new tab to see more clea
 
 As you can see, there is a problem. All of the recommended memory addresses contain `00`, or null bytes. As we will find, these are not in our allowed character set. To get around this problem, read line that says:                                       `[+] Done.. Only the first 20 pointers are shown here, For more pointers, open seh.txt`. If you open __File Explorer__ and go to `C:\Program Files\Immunity Inc\Immunity Debugger\seh.txt` you can find a list of all instructions that contain the instructions `pop <reg> pop <reg> ret`within seh.txt
 
-You can go to __seh.txt__ choose any of the memory locations that will work. You will find out shortly that we have some bad characters, and some of them may not work. There are a few in there that have no null bytes __AND__ adhere to the character schema. We will get to finding all of the bad characters in a second, just keep [Trying Harder](https://www.offensive-security.com/when-things-get-tough/) The address I chose was: `0x10014C42`.
+You can go to __seh.txt__ choose any of the memory locations that adhere to our character schema, and have no null bytes. We will get to finding all of the bad characters in a second, just keep [Trying Harder](https://www.offensive-security.com/when-things-get-tough/) The address I chose was: `0x10014C42`. You are more than welcome to try any addresses that work for you!
 
-Before updating the PoC, let's add a jump! The typical thing to do in a SEH exploit would be to do a short jump into the second buffer, where presumably our shellcode is. Remember to restart Immunity, and press play. Here is the updated PoC:
+Before updating the PoC, let's ask ourselves a question. Now that we can control what gets loaded into the instruction pointer, what should we do? The typical thing to do in a SEH exploit would be to do a short jump into the second buffer of user supplied data, where presumably our shellcode is. Remember to restart Immunity, and press play. Here is the updated PoC:
 ```console
 root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
 # Proof of Concept - Admin Express v1.2.5.485 Exploit

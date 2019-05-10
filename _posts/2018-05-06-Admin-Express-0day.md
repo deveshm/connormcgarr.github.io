@@ -36,7 +36,7 @@ A couple of notes about the above exploit. This script will generate 5000 `\x41`
 
 
 Here are the next steps to get started:
-1. After starting the application in Immunity, click on the __System Compare__  tab in Admin Express.
+1. After attaching and starting the application in Immunity, click on the __System Compare__  tab in Admin Express.
 2. Run the above PoC script and copy the output to the clipboard.
 3. Paste the contents into the left hand __Folder Path__ field, and press the __scale icon__ to the right of that same __Folder Path__ field
 

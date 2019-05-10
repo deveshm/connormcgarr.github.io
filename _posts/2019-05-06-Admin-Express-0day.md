@@ -143,7 +143,7 @@ print payload
 #f.write(payload)
 #f.close()
 ```
-You may have to break the bad characters up into two sections, but if you throw all of these you will figure out the bad characters. To save time, I will provide the character set. The allowed characters for this exploit are as follows (in hex):
+You may have to break the bad characters up into two sections. When printing these characters to the console, you will notice a break in the lines. Just try chunks of the characters at a time. In the end, when you throw all of these characters at the application you will find the allowed character set. To save time, I will provide it to you. The allowed characters for this exploit are as follows (in hex):
 `01-04, 06, 10-7E`. This will prove to provide some challenges going forward. But for now, just remember these characters are bad.
 
 So there is a dilemma at this point. How can we jump to where our expected shellcode is going to be without our opcode `eb`? We are going to have to use a different type of instruction. The instruction we are going to use is `Jump If Overflow` and `Jump If Not OVerflow`, known as `JO` and `JNO`, respectively.

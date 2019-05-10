@@ -81,7 +81,7 @@ Better view of the addresses (open the above image in a new tab to see more clea
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/5a.png" alt="">
 
-As you can see, there is a problem. All of the recommended memory addresses contain `00`, or null bytes. As we will find, these are not in our allowed character set. To get around this problem, read line that says:                                       `[+] Done.. Only the first 20 pointers are shown here, For more pointers, open seh.txt`. If you open __File Explorer__ and go to `C:\Program Files\Immunity Inc\Immunity Debugger\seh.txt` you can find a list of all instructions that are `pop <reg> pop <reg> ret`within seh.txt
+As you can see, there is a problem. All of the recommended memory addresses contain `00`, or null bytes. As we will find, these are not in our allowed character set. To get around this problem, read line that says:                                       `[+] Done.. Only the first 20 pointers are shown here, For more pointers, open seh.txt`. If you open __File Explorer__ and go to `C:\Program Files\Immunity Inc\Immunity Debugger\seh.txt` you can find a list of all instructions that contain the instructions `pop <reg> pop <reg> ret`within seh.txt
 
 You can go to seh.txt choose any of the memory locations that will work. You will find out shortly that we have some bad characters, and some of them may not work. There are a few in there that have no null bytes __AND__ adhere to the character schema. We will get to finding all of the bad characters in a second, just keep [Trying Harder](https://www.offensive-security.com/when-things-get-tough/) The address I chose was: `0x10014C42`.
 

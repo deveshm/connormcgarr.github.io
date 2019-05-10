@@ -72,7 +72,7 @@ print payload
 #f.close()
 ```
 
-we can use the typical `pop <reg> pop <reg> ret` method to get our user supplied instructions onto the stack! We will need to use __mona__ to find an address in Admin Express that contains the instructions of `pop <reg> pop <reg> ret`. Here is the command in mona to use: 
+We can use the typical `pop <reg> pop <reg> ret` method to get our user supplied instructions onto the stack! We will need to use __mona__ to find an address in Admin Express that contains the instructions of `pop <reg> pop <reg> ret`. Here is the command in mona to use: 
 `!mona seh`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/4.png" alt="">

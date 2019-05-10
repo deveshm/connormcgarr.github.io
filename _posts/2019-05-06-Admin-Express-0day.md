@@ -116,7 +116,7 @@ Step through with `F7`. We reach our nSEH jump instruction, but we notice someth
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/8.png" alt="">
 
-Well, this is a problem. A short jump is the typical instruction for jumping we are used to. It is evidently a bad character. We now need to determine what all of the other bad characters are, so we do not run into this problem again. [Here](https://bulbsecurity.com/finding-bad-characters-with-immunity-debugger-and-mona-py/) is a place that automatically stores all of the characters possible into a variable. Here is the updated PoC:
+Well, this is a problem. A short jump is the typical instruction for jumping we are used to. It is evidently a bad character. We now need to determine what all of the other bad characters are, so we do not run into this problem again. [Here](https://bulbsecurity.com/finding-bad-characters-with-immunity-debugger-and-mona-py/) is a place that automatically stores all of the characters possible into a variable. I have also updated the PoC:
 
 ```console
 root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 

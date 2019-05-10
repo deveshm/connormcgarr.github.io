@@ -52,7 +52,7 @@ Seeing as we cannot control the instruction pointer, the logical next choice wou
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3.png" alt="">
 
-As I have already explained in a [previous post](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/) how the exception handler exploits work, I will omit the offset to the exception handlers. I want this post to be more about alphanumeric encoding, stack alignments, and getting creative. I can tell you that the amount of bytes needed to reach the handlers is `4260`
+As I have already explained in a [previous post](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/) how exception handler exploits work, I will omit finding the offset of the exception handlers. I want this post to be more about alphanumeric encoding, stack alignments, and getting creative. I can tell you that the amount of bytes needed to reach the handlers is `4260`
 
 For those of you following along or are interested, your POC should be updated to this:
 

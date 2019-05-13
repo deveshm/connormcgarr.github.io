@@ -306,7 +306,7 @@ Before anything, let's choose the new location of `ESP`. If we scroll down to th
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/19.png" alt="">
 
-What we will need to do now, is some math to get our stack aligned. We will need to take the value of `0012F3F4`, where we want `ESP` to reside, and subtract it from `0012DC98`, which is the current stack pointer value.:
+What we will need to do now, is some math to get our stack aligned. We will need to take the value of `0012F3F4`, where we want `ESP` to reside, and subtract it from `0012DC98`, which is the current stack pointer value:
 
 ```console
  0012DC98

@@ -552,7 +552,7 @@ After putting the 1st line on the stack:
 
 You can see how this is working now, and why we do it in this order. Since I already did an example of the subtraction method above, I am not going to redo it four more times. Here are some things to take note of though:
 1. When you have a value of `00` you need to do the sub method for, your three hex values to be added together are `55 55 56`. This is because this is equal to 256, and because of [modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic).
-2. When you have a `00` value and you get an answer equal to 256 (which is 0), you have to carry a `1` down to the next line. So, if you had these to values:
+2. When you have a `00` value and you get an answer equal to a multiple of 256 (which is 0), you have to carry a `1` down to the next line. So, if you had these to values:
 
 ```console 
 00

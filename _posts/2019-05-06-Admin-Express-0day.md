@@ -221,7 +221,7 @@ As you can see, we have reached the buffer of C's. Let's take note of some addre
 
 Take note of the current `ESP` value. Talking to a friend of mine about shellcode execution when shellcode is generated using the [Win32 API](https://docs.microsoft.com/en-us/windows/desktop/apiindex/windows-api-list), I found out that I needed to save the current stack point value `BEFORE` I execute my shellcode. As you will see later, I will store my current `ESP` value into the `ECX` register, and restore the old stack pointer right before execution of the shellcode.
 
-Taking a look at our buffer of C's, we have about __E4__ hex bytes, or __228__ bytes to work with:
+Taking a look at our buffer of `C`'s, we have about __E4__ hex bytes, or __228__ bytes to work with:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/15.png" alt="">
 
@@ -285,3 +285,11 @@ Stepping through `push esp` you can see that `ESP` has been pushed onto the top 
 Stepping through again, you can see that `ECX` now contains the value of `ESP`:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/18.png" alt="">
+
+After the value of `ESP` was also loaded into `ECX`, we then need to push the value of `ECX` (which now contains `ESP`) onto the stack, so we can call it later. That is what the last instruction does. `ECX` is now pushed onto the stack! We can proceed with the stack alignment now.
+
+Recall earlier when we determined how much space for our shellcode we had? We need to manipulate our stack pointer to go near the end of our `C` buffer. This is because our stack will have to start from the bottom and write upwards. We then need to get `EAX` to equal the value of `ESP`. That way, whenever we write to `EAX` it will be in a place where we can execute.
+
+You may be asking yourself at this point why we need `EAX`. Why do we need to use `EAX`? Why can't we just put our shellcode onto the stack pointer? This is due to the limitation of our characters. We are limited to a few opcodes. Due to this notion, we have to use hexadecimal math to get the values onto the stack that we want. These values will be our shellcode. In order to do this math, we need a register to do this math in! The register we are going to choose is `EAX`.
+
+Let's get into the stack alignment.

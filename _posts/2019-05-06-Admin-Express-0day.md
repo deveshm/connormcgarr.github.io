@@ -211,4 +211,12 @@ payload += "\x41" * 121			# NOP is in the restricted characters. Using \x41 as a
 payload += "\x43" * (5000-len(payload))
 ```
 
-We now have enough room to work with after making all of the jumps! Now that we have made our jumps, what is the next step?
+We now have enough room to work with after making all of the jumps! After we take our jumps, we are going to start documenting some information that will be integral to our smuggling of shellcode. Let's take a look at the following image, after the execution of our jumps:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/13.png" alt="">
+
+As you can see, we have reached the buffer of C's. Let's take note of some addresses here! The address of the current instruction `INC EBX` is located at `0012F313`. We can also see below that the current address of our stack pointer is at `0012DC98`:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/14.png" alt="">
+
+Take note of the current `ESP` value. Talking to a friend of mine about shellcode execution when shellcode is generated using the [Win32 API](https://docs.microsoft.com/en-us/windows/desktop/apiindex/windows-api-list), I found out that I needed to save the current stack point value `BEFORE` I execute my shellcode. As you will see later, I will store my current `ESP` value into the `ECX` register, and restore the old stack pointer right before execution of the shellcode.

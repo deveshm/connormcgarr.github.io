@@ -501,7 +501,7 @@ But what if our shellcode was this:
 "\x00"
 ```
 
-We would have to add three NOPs, to fill out the four bytes needed in the register. But remember something here- NOPs are in our restricted character set! We can actually use `A`'s, `B`'s, or `C`'s to accomplish the same thing. Just remember that each of those three letters actual increment some of the general-purpose registers. Don't forget that, if your shellcode is relying on some of those same registers to do some calculations!
+We would have to add three NOPs, to fill out the four bytes needed in the register. But remember something here- NOPs are in our restricted character set! We can actually use `A`'s, `B`'s, or `C`'s to accomplish the same thing. Just remember that each of those three letters actual increment some of the general-purpose registers. Don't forget that if your shellcode is relying on some of those same registers to do some calculations!
 
 To get our shellcode on the stack, you would do the exact same method as above, but you would zero our the `EAX` register. We keep hearing me say "zero out the register". How exactly do we do this? Generally, you would use the logical [`XOR`](https://accu.org/index.php/journals/1915) function. If you `XOR` a register with itself, the value of the register turns to all `0`'s. You can achieve the same thing with logical [`AND`](https://processing.org/reference/logicalAND.html). Instead of using the register itself, you can use a string of `0`'s and `1`'s, and then perform another `AND` operation, with the inverse of those bits. This will be reflected in the updated PoC shortly. One other thing to note is that the opcode of `and eax` is `\x25`.
 

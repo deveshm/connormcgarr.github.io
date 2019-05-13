@@ -146,6 +146,8 @@ print payload
 You may have to break the bad characters up into two sections. When printing these characters to the console, you will notice a break in the lines. Just try chunks of the characters at a time. In the end, when you throw all of these characters at the application you will find the allowed character set. To save time, I will provide it to you. The allowed characters for this exploit are as follows (in hex):
 `01-04, 06, 10-7E`. This will prove to provide some challenges going forward. But for now, just remember these characters are bad.
 
+Are We There Yet
+---
 So there is a dilemma at this point. How can we jump to where our expected shellcode is going to be without our opcode `eb`? We are going to have to use a different type of instruction. The instruction we are going to use is `Jump If Overflow` and `Jump If Not OVerflow`, known as `JO` and `JNO`, respectively.
 
 Look at the below screenshot. These are what are known as the flags. These flags can be used to test conditions, similar to how `if` statements have variables to test conditions in high level programming languages like C!
@@ -215,6 +217,8 @@ We now have enough room to work with after making all of the jumps! After we tak
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/13.png" alt="">
 
+Will the Stars Align?
+---
 As you can see, we have reached the buffer of C's. Let's take note of some addresses here! The address of the current instruction `INC EBX` is located at `0012F313`. We can also see below that the current address of our stack pointer is at `0012DC98`:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/14a.png" alt="">
@@ -295,8 +299,9 @@ Recall earlier when we determined how much space for our shellcode we had? We ne
 
 You may be asking yourself at this point why we need `EAX`. Why do we need to use `EAX`? Why can't we just put our shellcode onto the stack pointer? This is due to the limitation of our characters. We are limited to a few opcodes. Due to this notion, we have to use hexadecimal math to get the values onto the stack that we want. These values will be our shellcode. In order to do this math, we need a register to do this math in! The register we are going to choose is `EAX`.
 
-Let's get into the stack alignment.
 
+Alphanumeric Encoding
+---
 Before anything, let's choose the new location of `ESP`. If we scroll down to the end of the buffer of `C`'s, our last available address is __`0012F3F7`__. We will use __`0012F3F4`__. In the end, it will be `0012F3F0` that we will use, because four bytes get lost with all of the stack manipulation going on- but we will use `0012F3F4` for our calculations:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/19.png" alt="">
@@ -687,7 +692,9 @@ If you look at our `calc.exe` shellcode, that is the last line in little endian 
 
 We step through the rest of the instructions. After doing that, you can scroll down to see our shellcode has successfully been stored on top of our aligned stack (`0012F3F0` is the aligned stack pointer we used.) and we will be able to execute our shellcode if we step through until we hit our first  logical `XOR` instruction! 
 
-Do not forget one final and __CRUCIAL__ instruction we are missing. I still cannot figure out exactly why, but when calling the kernel in Windows- it does not like the stack to be manipulated when this is taking place. This is the best rationale I can come up with after talking to multiple people about this issue. For this reason, restoring the old stack pointer will let us execute our shellcode. When I tried this without calling the old stack pointer, nothing worked.
+Take Me Back
+---
+Do not forget one final and __CRUCIAL__ instruction we are missing. I still cannot figure out exactly why, but when calling the kernel in Windows- it does not like the stack to be manipulated when this is taking place. This is the best rationale I can come up with after talking to multiple people about this issue. For this reason, restoring the old stack pointer will let us execute our shellcode. When I tried this without calling the old stack pointer, nothing worked. If anyone has any better information on this- PLEASE LET ME KNOW! My contact information is available on the [homepage](https://connormcgarr.github.io).
 
 Recall from above that we saved the old stack pointer in `ECX`. We can use another subtraction method to do this. We will use a `MOV` instruction to move `ECX` into `ESP`. 
 
@@ -816,3 +823,15 @@ f = open('pwn.txt', 'w')
 f.write(payload)
 f.close()
 ```
+
+Going For The Kill
+---
+After executing the shellcode, we achieve code execution!!!!! We have now moved from a PoC of a DOS vulnerability, to full fledged code execution. Here is a screenshot:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/final.png" alt="">
+
+Final Thoughts
+---
+This exploit taught me so much about the exploit development lifecycle and many things that I simply just did not know. I came away from this adventure with a [submission](https://www.exploit-db.com/exploits/46805) published by the Exploit Database and so much knowledge! I hope to help identify harder vulnerabilities in the future to help the information security community as a whole, and documenting these also reiterate lessons for me. Thanks again for listening to me, and let me know if there is anything I missed or misunderstood.
+
+Peace, love, and positivity.

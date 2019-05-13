@@ -305,3 +305,11 @@ What we will need to do now, is some math to get our stack aligned. We will need
 -
  0012F3F7
  ```
+
+Break out your hexadecimal calculators. Make sure your calculator is configured to __DWORD__. The [Windows Caclulator](https://github.com/microsoft/calculator) is a very good one.
+
+If you subtract the two values above you will get:
+
+```console
+FF FF E8 A4
+```

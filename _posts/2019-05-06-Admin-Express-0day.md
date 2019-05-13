@@ -534,7 +534,7 @@ After putting the 2nd line on the stack:
 4th
 ```
 
-After putting the 3rd line on the stack:
+After putting the 1st line on the stack:
 
 ```console
 1st

@@ -302,7 +302,7 @@ You may be asking yourself at this point why we need `EAX`. Why do we need to us
 
 Alphanumeric Encoding
 ---
-Before anything, let's choose the new location of `ESP`. If we scroll down to the end of the buffer of `C`'s, our last available address is __`0012F3F7`__. We will use __`0012F3F4`__. In the end, it will be `0012F3F0` that we will use, because four bytes get lost with all the stack manipulation going on- but we will use `0012F3F4` for our calculations:
+Before anything, let's choose the new location of `ESP`. If we scroll down to the end of the buffer of `C`'s, our last available address is `0012F3F7`. We will use `0012F3F4`. In the end, it will be `0012F3F0` that we will use, because four bytes get lost with all the stack manipulation going on- but we will use `0012F3F4` for our calculations:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/19.png" alt="">
 

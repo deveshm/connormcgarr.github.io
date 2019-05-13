@@ -293,3 +293,16 @@ Recall earlier when we determined how much space for our shellcode we had? We ne
 You may be asking yourself at this point why we need `EAX`. Why do we need to use `EAX`? Why can't we just put our shellcode onto the stack pointer? This is due to the limitation of our characters. We are limited to a few opcodes. Due to this notion, we have to use hexadecimal math to get the values onto the stack that we want. These values will be our shellcode. In order to do this math, we need a register to do this math in! The register we are going to choose is `EAX`.
 
 Let's get into the stack alignment.
+
+Before anything, let's choose the new location of `ESP`. If we scroll down to the end of the buffer of `C`'s, our last available address is __`0012F3F7`__. We will use __`0012F3F4`__:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/19.png" alt="">
+
+What we will need to do now, is some math to get our stack aligned. We will need to take the value of __`0012F3F7`__, where we want `ESP` to reside, and subtract it from __`0012DC98`__, which is the current stack pointer value.:
+
+```console
+ 0012DC98
+-
+ 0012F3F7
+ ---------
+ ```

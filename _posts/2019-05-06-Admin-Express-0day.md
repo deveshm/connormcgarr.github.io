@@ -233,9 +233,11 @@ The `calc.exe` shellcode I will be using is 16 bytes. Shortly, you will see why 
 
 Let's begin with talking about why we need to take into consideration the [LIFO](https://www.cs.cmu.edu/~adamchik/15-121/lectures/Stacks%20and%20Queues/Stacks%20and%20Queues.html) (Last In First Out) structure of the stack.
 
-Since we are not using Metasploit, we are going to manually encode our shellcode. What we are going to do, at a high level, is an alignment of the stack. We are going to manipulate the stack to make the location of `EAX` equal to `ESP`. We will get to the low level details about using `EAX` to put our shellcode on the stack, but for right now let me explain about this stack alignment. Since `EAX` will be the same location of `ESP`, we will essentially be putting our shellcoded onto the top of the stack (remember that ESP points to the top of the stack). Since the stack is __LIFO__, our shellcode will be writing to lower memory addresses. This means we will need to start with the __END__ of our shellcode. 
+Since we are not using Metasploit, we are going to manually encode our shellcode. What we are going to do, at a high level, is an alignment of the stack. We are going to manipulate the stack to make the location of `EAX` equal to `ESP`. We will get to the low level details about using `EAX` to put our shellcode on the stack, but for right now let me explain about this stack alignment. 
 
-Here is an anaology of what I am trying to relay. Imagine I ask you to write an essay. In English, we start with the top left hand of the page and we write from left to right until we reach the bottom right hand corner. There is only one stipulation for this essay I would like you to write. I would like you to start at the bottom of the page, and work your way up the page. If you started with the last word of your essay in the bottom right hand corner of the page, and continued to write backwards from right to left, you would have a coherent essay in the end!
+Since `EAX` will be the same location of `ESP`, we will essentially be putting our shellcoded onto the top of the stack (remember that ESP points to the top of the stack). We will be adding shellcode, and then executing a `push eax` instruction after. A `push` instruction, as you recall, puts an item on top of the stack. Since our stack pointer and `EAX` are at the same place, any `push` instruction will write upwards in memory addresses on top of the current `ESP` value. Essentially this means our shellcode will be put in a place we can control via the `EAX` register. Since the stack is __LIFO__, our shellcode will be writing to lower memory addresses. This means we will need to start with the __END__ of our shellcode. 
+
+Here is an anaology of what I am trying to relay. Imagine I ask you to write an essay. In English, we start with the top left hand of the page and we write from left to right until we reach the bottom right hand corner. There is only one stipulation for this essay I would like you to write. I would like you to start at the bottom of the page, and work your way up the page. If you started with the last word of your essay in the bottom right hand corner of the page, and continued to write backwards from right to left, you would have a coherent essay in the end! If this anaolgy does not make sense, I have a diagram further along in this writeup that will give a bit of a visual to this sentiment I am trying to relay.
 
 This is essentially what we are going to be doing. We are going to use `EAX` to write to where `ESP` is located. This will mean we will be writing to the top of the stack, which will go to lower addresses. Knowing this now, let's align the stack!
 
@@ -338,7 +340,7 @@ A4 = 160
 This hexadecimal method of alphanumeric shellcoding will require 3 values. Essentially what we are going to do is:
 1. Zero out the `EAX` register
 2. Subtract three values from `EAX`
-3. Push the new value of `EAX` onto the stack.
+3. Push the new value of `EAX` onto the newly aligned stack (on top of the new `ESP` value).
 
 Whenever those three values are subtracted from the `EAX` register, that has been zeroed out, the result will be the opcodes we want to execute! What we need to do next, is find three values that equal each of those four numbers above! These three numbers can be any of the numbers allowed within our characer set. Let me give an example. if we have a value of 15, you don't have to use `5, 5, 5`. You could use `13, 1, 1` or `6, 7, 2`. Use whatever you would like! So let's do this for each:
 
@@ -675,4 +677,10 @@ Our stack is now aligned! Let us begin by making `EAX` zero. We step through our
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/25.png" alt="">
 
+Our register is zeroed out. We can now load whatever we want into `EAX` now. After stepping through our three logical `AND` instructions, we see that the value `D0FF77C2` is loaded into the register:
 
+<img src="{{ site.url }}{{ site.baseurl }}/images/27.png" alt="">
+
+If you look at our `calc.exe` shellcode, that is the last line in little endian format! Now we execute the `push eax` instruction, to get the value on the stack. Our stack, as you remember, is aligned so that the top points to where our shellcode will execute! Scrolling down, we see that we have got our instruction on the stack:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/28.png" alt="">

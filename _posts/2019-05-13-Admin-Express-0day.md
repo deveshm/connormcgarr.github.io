@@ -1,6 +1,6 @@
 ---
 title:  "Exploit Development: 0day! Admin Express v1.2.5.485 Folder Path Local SEH Alphanumeric Encoded Buffer Overflow"
-date:   2019-05-06
+date:   2019-05-13
 tags: [posts]
 excerpt: "A 0day I found in an application called Admin Express, how to, by hand, alphanumerically encode shellcode, align the stack properly, and explaining the integral details of this exploit."
 ---
@@ -32,13 +32,13 @@ print payload
 #f.write(payload)
 #f.close()
 ```
-A couple of notes about the above exploit. This script will generate 5000 `\x41` characters, or A's. Notice how at the bottom of the script, the last three lines are commented out. This is due to the fact that this exploit would get tedious opening up a file everytime. Until we have commenced with the full development of this exploit, we will leave these lines commented out and print straight to the console.
+A couple of notes about the above exploit. This script will generate 5000 `\x41` characters, or A's. Notice how at the bottom of the script, the last three lines are commented out. This is due to the fact that this exploit would get tedious opening up a file every time. Until we have commenced with the full development of this exploit, we will leave these lines commented out and print straight to the console.
 
 
 Here are the next steps to get started:
 1. After attaching and starting the application in Immunity, click on the __System Compare__  tab in Admin Express.
 2. Run the above PoC script and copy the output to the clipboard.
-3. Paste the contents into the left hand __Folder Path__ field, and press the __scale icon__ to the right of that same __Folder Path__ field
+3. Paste the contents into the left-hand __Folder Path__ field, and press the __scale icon__ to the right of that same __Folder Path__ field
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/1.png" alt="">
 
@@ -48,11 +48,11 @@ After the crash, take a look at the registers. It seems at first glance we can c
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/2.png" alt="">
 
-Seeing as we cannot control the instruction pointer, the logical next choice would be to see if there was an exception caught. If we can overwrite the exception handlers, we can still potentially obtain code execution my maniipulating the exception handlers and passing the exceptions onto the stack! After viewing the registers in Immunity, we see we can control nSEH and SEH!
+Seeing as we cannot control the instruction pointer, the logical next choice would be to see if there was an exception caught. If we can overwrite the exception handlers, we can still potentially obtain code execution my manipulating the exception handlers and passing the exceptions onto the stack! After viewing the registers in Immunity, we see we can control nSEH and SEH!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3.png" alt="">
 
-As I have already explained in a [previous post](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/) how exception handler exploits work, I will omit finding the offset of the exception handlers. I want this post to be more about alphanumeric encoding, stack alignments, and getting creative. I can tell you that the amount of bytes needed to reach the handlers is __4260__.
+As I have already explained in a [previous post](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/) how exception handler exploits work, I will omit finding the offset of the exception handlers. I want this post to be more about alphanumeric encoding, stack alignments, and getting creative. I can tell you that the number of bytes needed to reach the handlers is __4260__.
 
 For those of you following along or are interested, your POC should be updated to this:
 
@@ -81,9 +81,9 @@ Better view of the addresses (open the above image in a new tab to see more clea
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/5a.png" alt="">
 
-As you can see, there is a problem. All of the recommended memory addresses contain `00`, or null bytes. As we will find, these are not in our allowed character set. To get around this problem, read line that says:                                       `[+] Done.. Only the first 20 pointers are shown here, For more pointers, open seh.txt`. If you open __File Explorer__ and go to `C:\Program Files\Immunity Inc\Immunity Debugger\seh.txt` you can find a list of all instructions that contain the instructions `pop <reg> pop <reg> ret`within seh.txt
+As you can see, there is a problem. All of the recommended memory addresses contain `00`, or null bytes. As we will find, these are not in our allowed character set. To get around this problem, read line that says:                                       `[+] Done.. Only the first 20 pointers are shown here, For more pointers, open seh.txt`. If you open __File Explorer__ and go to `C:\Program Files\Immunity Inc\Immunity Debugger\seh.txt` you can find a list of all instructions that contain the instructions `pop <reg> pop <reg> ret` within seh.txt
 
-You can go to __seh.txt__ choose any of the memory locations that adhere to our character schema, and have no null bytes. We will get to finding all of the bad characters in a second, just keep [Trying Harder](https://www.offensive-security.com/when-things-get-tough/). The address I chose was: `0x10014C42`. You are more than welcome to try any addresses that work for you!
+You can go to __seh.txt__ and choose any of the memory locations that adhere to our character schema and have no null bytes. We will get to finding all of the bad characters in a second, just keep [Trying Harder](https://www.offensive-security.com/when-things-get-tough/). The address I chose was: `0x10014C42`. You are more than welcome to try any addresses that work for you!
 
 Before updating the PoC, let's ask ourselves a question. Now that we can control what gets loaded into the instruction pointer, what should we do? The typical thing to do in a SEH exploit would be to do a short jump into the second buffer of user supplied data, where presumably our shellcode is. Remember to restart Immunity, and press play. Here is the updated PoC:
 ```console
@@ -112,11 +112,11 @@ Set a breakpoint with `F2` and pass the exception with `Shift` `F9`:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/7.png" alt="">
 
-Step through with `F7`. We reach our nSEH jump instruction, but we notice something wrong! Our instructions got mangeled:
+Step through with `F7`. We reach our nSEH jump instruction, but we notice something wrong! Our instructions got mangled:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/8.png" alt="">
 
-Well, this is a problem. A short jump is the typical instruction for jumping we are used to. It is evidently a bad character. We now need to determine what all of the other bad characters are, so we do not run into this problem again. [Here](https://bulbsecurity.com/finding-bad-characters-with-immunity-debugger-and-mona-py/) is a place that automatically stores all of the characters possible into a variable. I have also updated the PoC:
+Well, this is a problem. A short jump is the typical instruction for jumping we are used to. It is evidently a bad character. We now need to determine what all the other bad characters are, so we do not run into this problem again. [Here](https://bulbsecurity.com/finding-bad-characters-with-immunity-debugger-and-mona-py/) is a place that automatically stores all the characters possible into a variable. I have also updated the PoC:
 
 ```console
 root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
@@ -143,22 +143,22 @@ print payload
 #f.write(payload)
 #f.close()
 ```
-You may have to break the bad characters up into two sections. When printing these characters to the console, you will notice a break in the lines. Just try chunks of the characters at a time. In the end, when you throw all of these characters at the application you will find the allowed character set. To save time, I will provide it to you. The allowed characters for this exploit are as follows (in hex):
+You may have to break the bad characters up into two sections. When printing these characters to the console, you will notice a break in the lines. Just try chunks of the characters at a time. In the end, when you throw all these characters at the application you will find the allowed character set. To save time, I will provide it to you. The allowed characters for this exploit are as follows (in hex):
 `01-04, 06, 10-7E`. This will prove to provide some challenges going forward. But for now, just remember these characters are bad.
 
-Are We There Yet
+Are We There Yet?
 ---
-So there is a dilemma at this point. How can we jump to where our expected shellcode is going to be without our opcode `eb`? We are going to have to use a different type of instruction. The instruction we are going to use is `Jump If Overflow` and `Jump If Not OVerflow`, known as `JO` and `JNO`, respectively.
+So, there is a dilemma at this point. How can we jump to where our expected shellcode is going to be without our opcode `eb`? We are going to have to use a different type of instruction. The instruction we are going to use is `Jump If Overflow` and `Jump If Not Overflow`, known as `JO` and `JNO`, respectively.
 
 Look at the below screenshot. These are what are known as the flags. These flags can be used to test conditions, similar to how `if` statements have variables to test conditions in high level programming languages like C!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/9.png" alt="">
 
-Look in the above image at the `O` flag. This is the flag we will be using! `JO` (Jump Overflow) is an opcode that will perform the amount of bytes appended to the opcode __IF__ that flag is set to `1`, at the time of execution. A `JNO` (Jump If Not Overflow) will occur if the `O` flag is set to 0 at the time of execution.
+Look in the above image at the `O` flag. This is the flag we will be using! `JO` (Jump Overflow) is an opcode that will jump the number of bytes appended to the opcode __IF__ that flag is set to `1`, at the time of execution. A `JNO` (Jump If Not Overflow) will occur if the `O` flag is set to 0 at the time of execution.
 
-The reason why we would want to use these opcodes is simple. They adhere to the character set we are limited to! The opcode for `JO` is `\x70` and the opcode for `JNO` is `\x71`. We can actually do something pretty clever here, too. Since these are conditional jumps, that means there must be some type of event or sentiment that must be present in order for the jump to happen. Instead of trying to manipulate the flags to meet the condition needed by the jump, you can stack the opcodes! Here is an example of this: 
+The reason why we would want to use these opcodes is simple. They adhere to the character set we are limited to! The opcode for `JO` is `\x70` and the opcode for `JNO` is `\x71`. We actually can do something pretty clever here, too. Since these are conditional jumps, that means there must be some type of event or sentiment that must be present in order for the jump to happen. Instead of trying to manipulate the flags to meet the condition needed by the jump, you can stack the opcodes! Here is an example of this: 
 
-If I input an opcode of `\x70\x06\x71\x06` this means my instruction will do a `JO` 6 bytes forward __THEN__ a `JNO` 6 bytes forward. But, if my first instruction gets executed, I can disregard the fact I ever had the second instruction. And if the first instruction does not execute, it will default to the second instruction! Before we update the PoC, I want to show something that happened on the stack after our `pop <reg> pop <reg> ret` instructions. There are a few null bytes that were thrown on to the stack as seen below:
+If I input an opcode of `\x70\x06\x71\x06` this means my instruction will do a `JO` 6 bytes forward, __THEN__ a `JNO` 6 bytes forward. But, if my first instruction gets executed, I can disregard the fact I ever had the second instruction. And if the first instruction does not execute, it will default to the second instruction! Before we update the PoC, I want to show something that happened on the stack after our `pop <reg> pop <reg> ret` instructions. There are a few null bytes that were thrown on to the stack as seen below:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/10.png" alt="">
 
@@ -183,7 +183,7 @@ print payload
 #f.close()
 ```
 
-We repeat all of the same steps as above to crash the application, and we see below we have reached our jump:
+We repeat all the same steps as above to crash the application, and we see below we have reached our jump:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/11.png" alt="">
 
@@ -191,7 +191,7 @@ Awesome! The jump is ready to be taken! Our `O` flag is set to 0 at the current 
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/12.png" alt="">
 
-We see there are some null bytes. These bytes are contained in our buffer of C's, not much farther down than our jump instruction. I am a paranoid person when it comes to having enough space for shellcode. Therefore,, I decided to change my PoC to add __a lot__ more jumps. This way, we get way the heck away from those null bytes and we will have plenty of room to write our shellcode.  Here is the updated PoC:
+We see there are some null bytes. These bytes are contained in our buffer of C's, not much farther down than our jump instruction. I am a paranoid person when it comes to having enough space for shellcode. Therefore, I decided to change my PoC to add __a lot__ more jumps. This way, we get way the heck away from those null bytes and we will have plenty of room to write our shellcode.  Here is the updated PoC:
 
 ```console
 root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
@@ -213,7 +213,7 @@ payload += "\x41" * 121			# NOP is in the restricted characters. Using \x41 as a
 payload += "\x43" * (5000-len(payload))
 ```
 
-We now have enough room to work with after making all of the jumps! After we take our jumps, we are going to start documenting some information that will be integral to our smuggling of shellcode. Let's take a look at the following image, after the execution of our jumps:
+We now have enough room to work with after making all the jumps! After we take our jumps, we are going to start documenting some information that will be integral to our smuggling of shellcode. Let's take a look at the following image, after the execution of our jumps:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/13.png" alt="">
 
@@ -223,7 +223,7 @@ As you can see, we have reached the buffer of C's. Let's take note of some addre
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/14a.png" alt="">
 
-Take note of the current `ESP` value. Talking to a friend of mine about shellcode execution when shellcode is generated using the [Win32 API](https://docs.microsoft.com/en-us/windows/desktop/apiindex/windows-api-list), I found out that I needed to save the current stack point value __BEFORE__ I execute my shellcode. As you will see later, I will store my current `ESP` value into the `ECX` register, and restore the old stack pointer right before execution of the shellcode.
+Take note of the current `ESP` value. Talking to a friend of mine about shellcode execution when shellcode is generated using the [Win32 API](https://docs.microsoft.com/en-us/windows/desktop/apiindex/windows-api-list), I found out that I needed to save the current stack point value __BEFORE__ I execute my shellcode. As you will see later, I will store my current `ESP` value into the `ECX` register and restore the old stack pointer right before execution of the shellcode.
 
 Taking a look at our buffer of `C`'s, we have about __E4__ hex bytes, or __228__ bytes to work with:
 
@@ -231,21 +231,21 @@ Taking a look at our buffer of `C`'s, we have about __E4__ hex bytes, or __228__
 
 This will not be enough for a normal reverse shell. We also cannot generate our payload with [Metasploit](https://www.offensive-security.com/metasploit-unleashed/alphanumeric-shellcode/) because of the first seven bytes in the alphanumeric shellcode. These bytes find the absolute memory address of the shellcode, to start decoding. In addition, there are a few characters in Metasploit that will not work. 
 
-Because of these contraints, we are going to shift our focus here. If we wanted to, we could do a jump into our __4260__ byte `A` buffer. We would need to do a manual encode of those opcodes, which I will showcase shortly. This would give us enough room for our shellcode. Since that will take quite some time and my schedule has gotten pretty busy, we will just spawn `calc.exe` as a proof of concept to show that code execution is possible.
+Because of these constraints, we are going to shift our focus here. If we wanted to, we could do a jump into our __4260__ byte `A` buffer. We would need to do a manual encode of those opcodes, which I will showcase shortly. This would give us enough room for our shellcode. Since that will take quite some time and my schedule has gotten pretty busy, we will just spawn `calc.exe` as a proof of concept to show that code execution is possible.
 
-The `calc.exe` shellcode I will be using is 16 bytes. Shortly, you will see why I chose a small payload for this demonstration. Also bear in mind, since we are encoding, there must be some decoding to execute. There will be approximately four to six lines of opcodes for every one line we need actually need to execute. This is why with a reverse shell, you would need to jump back into the buffer of A's to obtain a shell. Again, I will just demonstrate a small payload without the jump. This same technique applies to a normal shell.
+The `calc.exe` shellcode I will be using is 16 bytes. Shortly, you will see why I chose a small payload for this demonstration. Also bear in mind, since we are encoding, there must be some decoding to execute. There will be approximately four to six lines of opcodes for every one line we need actually need to execute. This is why with a reverse shell; you would need to jump back into the buffer of A's to obtain a shell. Again, I will just demonstrate a small payload without the jump. This same technique applies to a normal shell.
 
 Let's begin with talking about why we need to take into consideration the [LIFO](https://www.cs.cmu.edu/~adamchik/15-121/lectures/Stacks%20and%20Queues/Stacks%20and%20Queues.html) (Last In First Out) structure of the stack.
 
 Since we are not using Metasploit, we are going to manually encode our shellcode. What we are going to do, at a high level, is an alignment of the stack. We are going to manipulate the stack to make the location of `EAX` equal to `ESP`. We will get to the low level details about using `EAX` to put our shellcode on the stack, but for right now let me explain about this stack alignment. 
 
-Since `EAX` will be the same location of `ESP`, we will essentially be putting our shellcoded onto the top of the stack (remember that ESP points to the top of the stack). We will be adding shellcode, and then executing a `push eax` instruction after. A `push` instruction, as you recall, puts an item on top of the stack. Since our stack pointer and `EAX` are at the same place, any `push` instruction will write upwards in memory addresses on top of the current `ESP` value. Essentially this means our shellcode will be put in a place we can control via the `EAX` register. Since the stack is __LIFO__, our shellcode will be writing to lower memory addresses. This means we will need to start with the __END__ of our shellcode. 
+Since `EAX` will be the same location of `ESP`, we will essentially be putting our shellcode onto the top of the stack (remember that ESP points to the top of the stack). We will be adding shellcode, and then executing a `push eax` instruction after. A `push` instruction, as you recall, puts an item on top of the stack. Since our stack pointer and `EAX` are at the same place, any `push` instruction will write upwards in memory addresses on top of the current `ESP` value. Essentially this means our shellcode will be put in a place we can control via the `EAX` register. Since the stack is __LIFO__, our shellcode will be writing to lower memory addresses. This means we will need to start with the __END__ of our shellcode. 
 
-Here is an anaology of what I am trying to relay. Imagine I ask you to write an essay. In English, we start with the top left hand of the page and we write from left to right until we reach the bottom right hand corner. There is only one stipulation for this essay I would like you to write. I would like you to start at the bottom of the page, and work your way up the page. If you started with the last word of your essay in the bottom right hand corner of the page, and continued to write backwards from right to left, you would have a coherent essay in the end! If this anaolgy does not make sense, I have a diagram further along in this writeup that will give a bit of a visual to this sentiment I am trying to relay.
+Here is an analogy of what I am trying to relay. Imagine I ask you to write an essay. In English, we start with the top left hand of the page and we write from left to right until we reach the bottom right hand corner. There is only one stipulation for this essay I would like you to write. I would like you to start at the bottom of the page and work your way up the page. If you started with the last word of your essay in the bottom right hand corner of the page, and continued to write backwards from right to left, you would have a coherent essay in the end! If this analogy does not make sense, I have a diagram further along in this writeup that will give a bit of a visual to this sentiment I am trying to relay.
 
 This is essentially what we are going to be doing. We are going to use `EAX` to write to where `ESP` is located. This will mean we will be writing to the top of the stack, which will go to lower addresses. Knowing this now, let's align the stack!
 
-Before we align the stack, recall what was mentioned above about saving the current stack pointer (after all of our jumps). Since we need to save the stack pointer, let's use `ECX`. To do this we are going to use a `push esp` instruction to get the current stack pointer vaule onto the stack. We then are going to use a `pop ecx` instruction to __POP__ whatever is on top of the stack (which is the stack pointer now), into `ECX`. Here is the updated PoC:
+Before we align the stack, recall what was mentioned above about saving the current stack pointer (after all our jumps). Since we need to save the stack pointer, let's use `ECX`. To do this we are going to use a `push esp` instruction to get the current stack pointer value onto the stack. We then are going to use a `pop ecx` instruction to __POP__ whatever is on top of the stack (which is the stack pointer now), into `ECX`. Here is the updated PoC:
 
 ```console
 root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
@@ -302,7 +302,7 @@ You may be asking yourself at this point why we need `EAX`. Why do we need to us
 
 Alphanumeric Encoding
 ---
-Before anything, let's choose the new location of `ESP`. If we scroll down to the end of the buffer of `C`'s, our last available address is __`0012F3F7`__. We will use __`0012F3F4`__. In the end, it will be `0012F3F0` that we will use, because four bytes get lost with all of the stack manipulation going on- but we will use `0012F3F4` for our calculations:
+Before anything, let's choose the new location of `ESP`. If we scroll down to the end of the buffer of `C`'s, our last available address is __`0012F3F7`__. We will use __`0012F3F4`__. In the end, it will be `0012F3F0` that we will use, because four bytes get lost with all the stack manipulation going on- but we will use `0012F3F4` for our calculations:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/19.png" alt="">
 
@@ -314,15 +314,15 @@ What we will need to do now, is some math to get our stack aligned. We will need
  0012F3F4
  ```
 
-Break out your hexadecimal calculators. Make sure your calculator is configured to __DWORD__. The [Windows Caclulator](https://github.com/microsoft/calculator) is a very good one.
+Break out your hexadecimal calculators. Make sure your calculator is configured to __DWORD__. The [Windows Calculator](https://github.com/microsoft/calculator) is a very good one.
 
-If you subtract the two values above you will get a difference of:
+If you subtract the two values above, you will get a difference of:
 
 ```console
 FF FF E8 A4
 ```
 
-You will notice I do this differently later on. For memory addresses, I do not flip any of the bits. This is because it helps me, with a mental note. This does not make sense now, but later it will. When I do hexadecimal math for alphanumeric encoding of instructions that will form opcodes, I flip the bits so I can use [little endian](https://chortle.ccsu.edu/AssemblyTutorial/Chapter-15/ass15_3.html) format in the end when I am inputing the bits into my program. It is just a mental thing for me that I use to keep everything straight. It is just a preference of mine- you can do as you please.
+You will notice I do this differently later on. For memory addresses, I do not flip any of the bits. This is because it helps me, with a mental note. This does not make sense now, but later it will. When I do hexadecimal math for alphanumeric encoding of instructions that will form opcodes, I flip the bits so I can use [little endian](https://chortle.ccsu.edu/AssemblyTutorial/Chapter-15/ass15_3.html) format in the end when I am inputting the bits into my program. It is just a mental thing for me that I use to keep everything straight. It is just a preference of mine- you can do as you please.
 
 Carrying on- we need to list the bits in vertical order:
 
@@ -347,7 +347,7 @@ This hexadecimal method of alphanumeric shellcoding will require 3 values. Essen
 2. Subtract three values from `EAX`
 3. Push the new value of `EAX` onto the newly aligned stack (on top of the new `ESP` value).
 
-Whenever those three values are subtracted from the `EAX` register, that has been zeroed out, the result will be the opcodes we want to execute! What we need to do next, is find three values that equal each of those four numbers above! These three numbers can be any of the numbers allowed within our characer set. Let me give an example. if we have a value of 15, you don't have to use `5, 5, 5`. You could use `13, 1, 1` or `6, 7, 2`. Use whatever you would like! So let's do this for each:
+Whenever those three values are subtracted from the `EAX` register, that has been zeroed out, the result will be the opcodes we want to execute! What we need to do next, is find three values that equal each of those four numbers above! These three numbers can be any of the numbers allowed within our character set. Let me give an example. if we have a value of 15, you don't have to use `5, 5, 5`. You could use `13, 1, 1` or `6, 7, 2`. Use whatever you would like! So, let's do this for each:
 
 ```console
 255 = 85 + 85 + 85
@@ -356,7 +356,7 @@ Whenever those three values are subtracted from the `EAX` register, that has bee
 160 = 54 + 54 + 56
 ```
 
-Awesome! Just one more step now! Take each of those three numbers in each row, and convert them into hexadecimal! For the below snippet, each hexadecimal number is in parentheses:
+Awesome! Just one more step now! Take each of those three numbers in each row and convert them into hexadecimal! For the below snippet, each hexadecimal number is in parentheses:
 
 ```console
 255 = 85(55) + 85 (55) + 85(55)
@@ -398,17 +398,17 @@ _______________________________
 384E5555    364D5555    364D5555
 ```
 
-Our three values are: `364D5555`, `364D5555`, `384E5555`. Whenever you do this math, it change the stack pointer value to `0012F3F4`. Before we do this math though, we will execute a few instructions. They are:
+Our three values are: `364D5555`, `364D5555`, `384E5555`. Whenever you do this math, it changes the stack pointer value to `0012F3F4`. Before we do this math though, we will execute a few instructions. They are:
 1. `push esp` - to get the value of the current stack pointer on the stack.
 2. `pop eax` - to pop the stack pointer value into `EAX`.
 
-After these instructions, we begin commencment of our subtraction math. After the subtraction math, we will then execute a few more instructions. They are:
+After these instructions, we begin commencement of our subtraction math. After the subtraction math, we will then execute a few more instructions. They are:
 1. `push eax` - `EAX` contains the value of the `0012F3F0`, which is where we want our stack pointer value to be, since we will be writing our shellcode up the stack, to lower memory addresses.
 2. `pop esp` - this will pop the value of `EAX` (`0012F3F0`) into the stack pointer.
 
 One thing before we start- `\x2d` is the opcode for `sub eax`, which is subtracting from `EAX`.
 
-After all of these instructions are executed, we can begin writing our shellcode to the stack! Here is the updated PoC, at this point:
+After all these instructions are executed, we can begin writing our shellcode to the stack! Here is the updated PoC, at this point:
 
 ```console
 root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
@@ -501,9 +501,9 @@ But what if our shellcode was this:
 "\x00"
 ```
 
-We would have to add three NOPs, to fill out the four bytes needed in the register. But remember something here- NOPs are in our restricted character set! We can actually use `A`'s, `B`'s, or `C`'s to accomplish the same thing. Just remember that each of those three letters actuall incremement some of the general purpose registers. Don't forget that, if your shellcode is relying on some of those same registers to do some calculations!
+We would have to add three NOPs, to fill out the four bytes needed in the register. But remember something here- NOPs are in our restricted character set! We can actually use `A`'s, `B`'s, or `C`'s to accomplish the same thing. Just remember that each of those three letters actual increment some of the general-purpose registers. Don't forget that, if your shellcode is relying on some of those same registers to do some calculations!
 
-To get our shellcode on the stack, you would do the exact same method as above, but you would zero our the `EAX` register. We keep hearing me say "zero our the register". How exactly do we do this? Generally, you would use the logical [`XOR`](https://accu.org/index.php/journals/1915) function. If you `XOR` a register with itself, the value of the register turns to all `0`'s. You can achieve the same thing with logical [`AND`](https://processing.org/reference/logicalAND.html). Instead of using the register itself, you can use a string of `0`'s and `1`'s, and then perform another `AND` operation, with the inverse of those bits. This will be reflected in the updated PoC shortly. One other thing to note is that the opcode of `and eax` is `\x25`.
+To get our shellcode on the stack, you would do the exact same method as above, but you would zero our the `EAX` register. We keep hearing me say "zero out the register". How exactly do we do this? Generally, you would use the logical [`XOR`](https://accu.org/index.php/journals/1915) function. If you `XOR` a register with itself, the value of the register turns to all `0`'s. You can achieve the same thing with logical [`AND`](https://processing.org/reference/logicalAND.html). Instead of using the register itself, you can use a string of `0`'s and `1`'s, and then perform another `AND` operation, with the inverse of those bits. This will be reflected in the updated PoC shortly. One other thing to note is that the opcode of `and eax` is `\x25`.
 
 Since we are writing to the stack towards upward addresses, you will need to start with the last line of shellcode for your payload (`calc.exe` in my case), and end with your first line. Here is a visual of what will be happening when we write to the stack:
 
@@ -551,8 +551,8 @@ After putting the 1st line on the stack:
 ```
 
 You can see how this is working now, and why we do it in this order. Since I already did an example of the subtraction method above, I am not going to redo it four more times. Here are some things to take note of though:
-1. When you have a value of `00` you need to do the sub method for, your three hex values to be added togther are `55 55 56`. This is because this is equal to 256, and because of [modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic).
-2. When you have a `00` value and you get an answer equal to 256 (which is 0), you have to carry a `1` down to the next line. So if you had these to values:
+1. When you have a value of `00` you need to do the sub method for, your three hex values to be added together are `55 55 56`. This is because this is equal to 256, and because of [modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic).
+2. When you have a `00` value and you get an answer equal to 256 (which is 0), you have to carry a `1` down to the next line. So, if you had these to values:
 
 ```console 
 00
@@ -568,7 +568,7 @@ You would do this:
 
 Notice how the last line only equals 29 instead of 30.
 
-3. The last thing to take note of, is sometimes the calculations just get mangled. I don't really have a good explanation for this one. Sometimes the numbers will be off by a few bytes, sometimes `1`'s do not get carried down to the next line when you reach a multiple of 256, etc. Just keep messing with the values if this happens, and you will figure it out!.
+3. The last thing to take note of, is sometimes the calculations just get mangled. I don't really have a good explanation for this one. Sometimes the numbers will be off by a few bytes, sometimes `1`'s do not get carried down to the next line when you reach a multiple of 256, etc. Just keep messing with the values if this happens, and you will figure it out!
 
 Before I update the PoC, here are the assembler instructions for the opcodes we are going to execute for `calc.exe`:
 
@@ -824,12 +824,12 @@ f.close()
 
 Going For The Kill
 ---
-After executing the shellcode, we achieve code execution!!!!! We have now moved from a PoC of a DOS vulnerability, to full fledged code execution. Here is a screenshot:
+After executing the shellcode, we achieve code execution!!!!! We have now moved from a PoC of a DOS vulnerability, to full-fledged code execution. Here is a screenshot:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/final.png" alt="">
 
 Final Thoughts
 ---
-This exploit taught me so much about the exploit development lifecycle and many things that I simply just did not know. I came away from this adventure with a [submission](https://www.exploit-db.com/exploits/46805) published by the Exploit Database and so much knowledge! I hope to help identify harder vulnerabilities in the future to help the information security community as a whole, and documenting these also reiterate lessons for me. Thanks again for listening to me, and let me know if there is anything I missed or misunderstood.
+This exploit taught me so much about the exploit development lifecycle and many things that I simply just did not know. I came away from this adventure with a [submission](https://www.exploit-db.com/exploits/46805) published by the Exploit Database and so much knowledge! I hope to help identify harder vulnerabilities in the future to help the information security community as a whole and documenting these also reiterate lessons for me. Thanks again for listening to me and let me know if there is anything I missed or misunderstood.
 
 Peace, love, and positivity.

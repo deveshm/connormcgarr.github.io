@@ -690,6 +690,8 @@ Now we execute the logical `AND` instructions and the `push eax` instruction, to
 
 We step through the rest of the instructions. After doing that, you can scroll down to see our shellcode has successfully been stored on top of our aligned stack (`0012F3F0` is the aligned stack pointer we used.) and we will be able to execute our shellcode if we step through until we hit our first  logical `XOR` instruction! 
 
+<img src="{{ site.url }}{{ site.baseurl }}/images/xor.png" alt="">
+
 Take Me Back
 ---
 Do not forget one final and __CRUCIAL__ instruction we are missing. I still cannot figure out exactly why, but when calling the kernel in Windows- it does not like the stack to be manipulated when this is taking place. This is the best rationale I can come up with after talking to multiple people about this issue. For this reason, restoring the old stack pointer will let us execute our shellcode. When I tried this without calling the old stack pointer, nothing worked. If anyone has any better information on this- PLEASE LET ME KNOW! My contact information is available on the [homepage](https://connormcgarr.github.io).

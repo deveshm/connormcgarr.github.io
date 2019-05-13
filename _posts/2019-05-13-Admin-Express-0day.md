@@ -229,7 +229,7 @@ Taking a look at our buffer of `C`'s, we have about __E4__ hex bytes, or __228__
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/15.png" alt="">
 
-This will not be enough for a normal reverse shell. We also cannot generate our payload with [Metasploit](https://www.offensive-security.com/metasploit-unleashed/alphanumeric-shellcode/) because of the first seven bytes in the alphanumeric shellcode. These bytes find the absolute memory address of the shellcode, to start decoding. In addition, there are a few characters in Metasploit that will not work. 
+This will not be enough for a normal reverse shell. We also cannot generate our payload with [Metasploit](https://www.offensive-security.com/metasploit-unleashed/alphanumeric-shellcode/) because the first seven or so bytes in the alphanumeric shellcode generation are not actually alphanumeric. These first seven or so bytes find the absolute memory address of the shellcode, to start decoding. In addition, there are a few characters in Metasploit that will not work. 
 
 Because of these constraints, we are going to shift our focus here. If we wanted to, we could do a jump into our __4260__ byte `A` buffer. We would need to do a manual encode of those opcodes, which I will showcase shortly. This would give us enough room for our shellcode. Since that will take quite some time and my schedule has gotten pretty busy, we will just spawn `calc.exe` as a proof of concept to show that code execution is possible.
 

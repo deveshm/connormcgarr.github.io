@@ -304,5 +304,4 @@ What we will need to do now, is some math to get our stack aligned. We will need
  0012DC98
 -
  0012F3F7
- ---------
  ```

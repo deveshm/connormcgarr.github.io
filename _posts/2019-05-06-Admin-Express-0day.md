@@ -217,6 +217,14 @@ We now have enough room to work with after making all of the jumps! After we tak
 
 As you can see, we have reached the buffer of C's. Let's take note of some addresses here! The address of the current instruction `INC EBX` is located at `0012F313`. We can also see below that the current address of our stack pointer is at `0012DC98`:
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/14.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/14a.png" alt="">
 
 Take note of the current `ESP` value. Talking to a friend of mine about shellcode execution when shellcode is generated using the [Win32 API](https://docs.microsoft.com/en-us/windows/desktop/apiindex/windows-api-list), I found out that I needed to save the current stack point value `BEFORE` I execute my shellcode. As you will see later, I will store my current `ESP` value into the `ECX` register, and restore the old stack pointer right before execution of the shellcode.
+
+Taking a look at our buffer of C's, we have about __E4__ hex bytes, or __228__ bytes to work with. This will not be enough for a normal reverse shell. We also cannot generate our payload with [Metasploit](https://www.offensive-security.com/metasploit-unleashed/alphanumeric-shellcode/) because of the first seven bytes in the alphanumeric shellcode. These bytes find the absolute memory address of the shellcode, to start decoding. In addition, there are a few characters in Metasploit that will not work. 
+
+Because of these contraints, we are going to shift our focus here. If we wanted to, we could do a jump into our __4260__ byte `A` buffer. We would need to do a manual encode of those opcodes, which I will showcase shortly. This would give us enough room for our shellcode. Since that will take quite some time and my schedule has gotten pretty busy, we will just spawn `calc.exe` as a proof of concept to show that code execution is possible.
+
+The `calc.exe` shellcode I will be using is 16 bytes. Shortly, you will see why I chose a small payload for this demonstration. Also bear in mind, since we are encoding, there must be some decoding to execute. There will be approximately four to six lines of opcodes for every one line we need actually need to execute. This is why with a reverse shell, you would need to jump back into the buffer of A's to obtain a shell. Again, I will just demonstrate a small payload without the jump. This same technique applies to a normal shell.
+
+Let's begin with talking about the [LIFO](https://www.cs.cmu.edu/~adamchik/15-121/lectures/Stacks%20and%20Queues/Stacks%20and%20Queues.html) (Last In First Out) structure of the stack.

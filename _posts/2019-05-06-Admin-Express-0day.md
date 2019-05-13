@@ -698,8 +698,6 @@ Do not forget one final and __CRUCIAL__ instruction we are missing. I still cann
 
 Recall from above that we saved the old stack pointer in `ECX`. We can use another subtraction method to do this. We will use a `MOV` instruction to move `ECX` into `ESP`. 
 
-This is what the exploit looks like [now](https://www.exploit-db.com/exploits/46805)
-
 Here is the final exploit visually:
 
 ```console

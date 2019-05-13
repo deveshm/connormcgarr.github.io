@@ -8,7 +8,7 @@ Introduction
 ---
 Get an internship at a Fortune 500 company in information security...? check! Obtain the OSCP before I graduate college...? check! Discover a vulnerability and obtain code execution...? Oh, that is depressing. These are the first three goals I've set for myself, since I've had the inclination to obtain a career within information security. Reviewing the elusive last item on this checklist marred my confidence with every second that passed, and that did not sit well with me. After months of probing the [Exploit Database](https://www.exploit-db.com) for some Denial of Service vulnerabilities, I am very happy to report that I have taken a crash of an application and revitalized it to obtain code execution! 
 
-This blog post ___WILL BE LENGTHY___, but I hope there is some good information you can take away about what I learned about the following domains: alphanumeric shellcode, encoding shellcode, aligning the stack, assembler, hexadecimal math, shellcode that directly references the kernel, and those famous SEH exploits. This writeup will assume you understand exception handler exploits. If you do not know much about those, or want a refresher, you can find my writeup [here](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/). Let's get into it!
+This blog post ___WILL BE LENGTHY___ and less about studious vernacular, but I hope there is some good information you can take away about what I learned about the following domains: alphanumeric shellcode, encoding shellcode, aligning the stack, assembler, hexadecimal math, shellcode that directly references the kernel, and those famous SEH exploits. This writeup will assume you understand exception handler exploits. If you do not know much about those, or want a refresher, you can find my writeup [here](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/). Let's get into it!
 
 The Crash
 ---
@@ -219,7 +219,7 @@ As you can see, we have reached the buffer of C's. Let's take note of some addre
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/14a.png" alt="">
 
-Take note of the current `ESP` value. Talking to a friend of mine about shellcode execution when shellcode is generated using the [Win32 API](https://docs.microsoft.com/en-us/windows/desktop/apiindex/windows-api-list), I found out that I needed to save the current stack point value `BEFORE` I execute my shellcode. As you will see later, I will store my current `ESP` value into the `ECX` register, and restore the old stack pointer right before execution of the shellcode.
+Take note of the current `ESP` value. Talking to a friend of mine about shellcode execution when shellcode is generated using the [Win32 API](https://docs.microsoft.com/en-us/windows/desktop/apiindex/windows-api-list), I found out that I needed to save the current stack point value __BEFORE__ I execute my shellcode. As you will see later, I will store my current `ESP` value into the `ECX` register, and restore the old stack pointer right before execution of the shellcode.
 
 Taking a look at our buffer of `C`'s, we have about __E4__ hex bytes, or __228__ bytes to work with:
 
@@ -294,16 +294,16 @@ You may be asking yourself at this point why we need `EAX`. Why do we need to us
 
 Let's get into the stack alignment.
 
-Before anything, let's choose the new location of `ESP`. If we scroll down to the end of the buffer of `C`'s, our last available address is __`0012F3F7`__. We will use __`0012F3F4`__:
+Before anything, let's choose the new location of `ESP`. If we scroll down to the end of the buffer of `C`'s, our last available address is __`0012F3F7`__. We will use __`0012F3F4`__. In the end, it will be `0012F3F0` that we will use, because four bytes get lost with all of the stack manipulation going on- but we will use `0012F3F4` for our calculations:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/19.png" alt="">
 
-What we will need to do now, is some math to get our stack aligned. We will need to take the value of __`0012F3F7`__, where we want `ESP` to reside, and subtract it from __`0012DC98`__, which is the current stack pointer value.:
+What we will need to do now, is some math to get our stack aligned. We will need to take the value of `0012F3F4`, where we want `ESP` to reside, and subtract it from `0012DC98`, which is the current stack pointer value.:
 
 ```console
  0012DC98
 -
- 0012F3F7
+ 0012F3F4
  ```
 
 Break out your hexadecimal calculators. Make sure your calculator is configured to __DWORD__. The [Windows Caclulator](https://github.com/microsoft/calculator) is a very good one.
@@ -353,8 +353,8 @@ Awesome! Just one more step now! Take each of those three numbers in each row, a
 ```console
 255 = 85(55) + 85 (55) + 85(55)
 255 = 85(55) + 85 (55) + 85(55)
-232 = 77(4D) + 77(4D) + 78(4E)
-160 = 54(36) + 54(36) + 56(38)
+232 = 78(4E) + 77 (4D) + 77(4D)
+160 = 54(36) + 54 (36) + 56(38)
 ```
 
 Starting with the bottom row, we need to take each hexadecimal value and write it going up the columns! For instance, here is the first value:
@@ -395,8 +395,10 @@ Our three values are: `364D5555`, `364D5555`, `384E5555`. Whenever you do this m
 2. `pop eax` - to pop the stack pointer value into `EAX`.
 
 After these instructions, we begin commencment of our subtraction math. After the subtraction math, we will then execute a few more instructions. They are:
-1. `push eax` - `EAX` contains the value of the `0012F3F4`, which is where we want our stack pointer value to be, since we will be writing our shellcode up the stack, to lower memory addresses.
-2. `pop esp` - this will pop the value of `EAX` (`0012F3F4`) into the stack pointer.
+1. `push eax` - `EAX` contains the value of the `0012F3F0`, which is where we want our stack pointer value to be, since we will be writing our shellcode up the stack, to lower memory addresses.
+2. `pop esp` - this will pop the value of `EAX` (`0012F3F0`) into the stack pointer.
+
+One thing before we start- `\x2d` is the opcode for `sub eax`, which is subtracting from `EAX`.
 
 After all of these instructions are executed, we can begin writing our shellcode to the stack! Here is the updated PoC, at this point:
 
@@ -451,3 +453,19 @@ print payload
 #f.write(payload)
 #f.close()
 ```
+
+After crashing the application and making our jumps, we arrive at our instructions:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/20.png" alt="">
+
+We already know what the first three instructions will do. After stepping through those, we arrive at `push esp` and `pop eax`. Stepping through these instructions makes our schema of registers look like the following:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/21.png" alt="">
+
+`ESP` and `EAX` contain the same values. Now, we want to manipulate EAX to equal the value of `0012F3F0`, which eventually we want to manipulate `ESP` to equal. After stepping through our three `sub eax` instructions, we see `EAX` is now filled with the following value:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/22.png" alt="">
+
+Excellent! To get this value also into `ESP`, we execute our last two instructions of `push eax`, to get it on the stack, and `pop esp`, to pop the value into `ESP`! After execution, this is what our registers look like:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/23.png" alt="">

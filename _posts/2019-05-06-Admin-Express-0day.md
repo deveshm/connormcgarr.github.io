@@ -314,7 +314,7 @@ If you subtract the two values above you will get a difference of:
 FF FF E8 A4
 ```
 
-You will notice I do this differently later on. For memory addresses, I do not flip any of the bytes. This is because it helps me, with a mental note. This does not make sense now, but later it will. When I do hexadecimal math for alphanumeric encoding of instructions that will form opcodes, I flip the bits so I can use [little endian](https://chortle.ccsu.edu/AssemblyTutorial/Chapter-15/ass15_3.html) format in the end. It is just a mental thing for me that I use to keep everything straight. You can do as you please.
+You will notice I do this differently later on. For memory addresses, I do not flip any of the bits. This is because it helps me, with a mental note. This does not make sense now, but later it will. When I do hexadecimal math for alphanumeric encoding of instructions that will form opcodes, I flip the bits so I can use [little endian](https://chortle.ccsu.edu/AssemblyTutorial/Chapter-15/ass15_3.html) format in the end when I am inputing the bits into my program. It is just a mental thing for me that I use to keep everything straight. It is just a preference of mine- you can do as you please.
 
 Carrying on- we need to list the bits in vertical order:
 

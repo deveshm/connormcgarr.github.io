@@ -245,7 +245,7 @@ Here is an analogy of what I am trying to relay. Imagine I ask you to write an e
 
 Let me reiterate one more time. Essentially what we are going to be doing is using `EAX` to write to where `ESP` is located. When we push our shellcode onto the stack, it will go to a portion that we control. In addition, our shellcode will write up the stack, to lower memory addresses. Knowing this now, let's align the stack!
 
-Before we align the stack, recall what was mentioned above about saving the current stack pointer (after all our jumps). Since we need to save the stack pointer, let's use `ECX`. To do this we are going to use a `push esp` instruction to get the current stack pointer value onto the stack. We then are going to use a `pop ecx` instruction to __POP__ whatever is on top of the stack (which is the stack pointer now), into `ECX`. Here is the updated PoC:
+Before we align the stack, recall what was mentioned above about saving the current stack pointer (after all our jumps). Since we need to save the stack pointer, let's use `ECX`. To do this, we are going to use a `push esp` instruction to get the current stack pointer value onto the stack. We then are going to use a `pop ecx` instruction to pop whatever is on top of the stack (which is the stack pointer now), into `ECX`. Here is the updated PoC:
 
 ```console
 root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 

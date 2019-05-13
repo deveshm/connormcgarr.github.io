@@ -476,11 +476,11 @@ We already know what the first three instructions will do. After stepping throug
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/22.png" alt="">
 
-Excellent! To get this value also into `ESP`, we execute our last two instructions of `push eax`, to get it on the stack, and `pop esp`, to pop the value into `ESP`! After execution, this is what our registers look like:
+Excellent! We have ended at the end of our buffer of `C`'s! To get this value also into `ESP`, we execute our last two instructions of `push eax`, to get it on the stack, and `pop esp`, to pop the value into `ESP`! After execution, this is what our registers look like:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/23.png" alt="">
 
-Perfect! Essentially now, we are in the driver's seat! What we can do now is we can manipulate `EAX` with whatever values we want, and they will write upwards in memory addresses, where `ESP` is pointing to! Remembering this, we should start with our last piece of shellcode.
+Perfect! Essentially now, we are in the driver's seat! What we can do now is we can manipulate `EAX` with whatever values we want, and they will write to lower memory addresses (visually up the stack), from where `ESP` is pointing to! Remembering this, we should start with our last piece of shellcode.
 
 We are lucky here that our shellcode has four lines with four bytes each. If we had shellcode with 17 bytes, for instance, we would have to add some [NOPs](https://en.wikipedia.org/wiki/NOP_(code)). Here is what our shellcode looks like:
 

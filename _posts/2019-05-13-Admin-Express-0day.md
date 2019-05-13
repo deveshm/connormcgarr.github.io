@@ -684,7 +684,7 @@ Our stack is now aligned! Let us begin by making `EAX` zero. We step through our
 
 Our register is zeroed out. We can now load whatever we want into `EAX` now. 
 
-If you look at our `calc.exe` shellcode, that is the last line in little endian format! Now we execute the logical `AND` instructions and the `push eax` instruction, to get the value on the stack. Our stack, as you remember, is aligned so that the top points to where our shellcode will execute! Scrolling down, we see that we have got our instruction on the stack:
+Now we execute the logical `AND` instructions and the `push eax` instruction, to get the value on the stack. Our stack, as you remember, is aligned so that the top points to where our shellcode will execute! Scrolling down, we see that we have got our instruction on the stack, in little endian format (compare this value to the last line of the `calc.exe` shellcode):
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/28.png" alt="">
 

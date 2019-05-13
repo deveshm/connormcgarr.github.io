@@ -274,3 +274,14 @@ print payload
 #f.write(payload)
 #f.close()
 ```
+Our instructions are ready for execution:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/17.png" alt="">
+
+Stepping through `pop esp` you can see that `ESP` is now on top of the stack (remember that our stack pointer was at `0012DC98` before execution):
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/16.png" alt="">
+
+Stepping through again, you can see that `ECX` now contains the value of `ESP`:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/18.png" alt="">

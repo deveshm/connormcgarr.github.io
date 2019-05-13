@@ -278,7 +278,7 @@ Our instructions are ready for execution:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/17.png" alt="">
 
-Stepping through `pop esp` you can see that `ESP` is now on top of the stack (remember that our stack pointer was at `0012DC98` before execution):
+Stepping through `push esp` you can see that `ESP` has been pushed onto the top of the stack (remember that our stack pointer was at `0012DC98` before execution):
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/16.png" alt="">
 

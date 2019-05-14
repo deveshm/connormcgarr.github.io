@@ -48,7 +48,7 @@ After the crash, take a look at the registers. It seems at first glance we can c
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/2.png" alt="">
 
-Seeing as we cannot control the instruction pointer, the logical next choice would be to see if there was an exception caught. If we can overwrite the exception handlers, we can still potentially obtain code execution my manipulating the exception handlers and passing the exceptions onto the stack! After viewing the registers in Immunity, we see we can control nSEH and SEH!
+Seeing as we cannot control the instruction pointer, the logical next choice would be to see if there was an exception caught. If we can overwrite the exception handlers, we can still potentially obtain code execution by manipulating the exception handlers and passing the exceptions onto the stack! After viewing the registers in Immunity, we see we can control nSEH and SEH!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3.png" alt="">
 

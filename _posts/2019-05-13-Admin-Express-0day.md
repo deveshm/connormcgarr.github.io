@@ -32,7 +32,7 @@ print payload
 #f.write(payload)
 #f.close()
 ```
-A couple of notes about the above exploit. This script will generate 5000 `\x41` characters, or A's. Notice how at the bottom of the script, the last three lines are commented out. This is due to the fact that this exploit would get tedious opening up a file every time. Until we have completed the full development of this exploit, we will leave these lines commented out and print straight to the console.
+A couple of notes about the above exploit. This script will generate 5,000 `\x41` characters, or A's. Notice how at the bottom of the script, the last three lines are commented out. This is due to the fact that this exploit would get tedious opening up a file every time. Until we have completed the full development of this exploit, we will leave these lines commented out and print straight to the console.
 
 
 Here are the next steps to get started:
@@ -52,7 +52,7 @@ Seeing as we cannot control the instruction pointer, the logical next choice wou
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3.png" alt="">
 
-As I have already explained in a [previous post](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/) how exception handler exploits work, I will omit finding the offset of the exception handlers. I want this post to be more about alphanumeric encoding, stack alignments, and getting creative. I can tell you that the number of bytes needed to reach the handlers is __4260__.
+As I have already explained in a [previous post](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/) how exception handler exploits work, I will omit finding the offset of the exception handlers. I want this post to be more about alphanumeric encoding, stack alignments, and getting creative. I can tell you that the number of bytes needed to reach the handlers is __4,260__.
 
 For those of you following along or are interested, your POC should be updated to this:
 
@@ -231,7 +231,7 @@ Taking a look at our buffer of `C`'s, we have about __E4__ hex bytes, or __228__
 
 This will not be enough for a normal reverse shell. We also cannot generate our payload with [Metasploit](https://www.offensive-security.com/metasploit-unleashed/alphanumeric-shellcode/) because the first seven or so bytes in the alphanumeric shellcode generation are not actually alphanumeric. These first seven or so bytes find the absolute memory address of the shellcode, to start decoding. In addition, there are a few characters in Metasploit that will not work. 
 
-Because of these constraints, we are going to shift our focus here. If we wanted to, we could do a jump into our __4260__ byte `A` buffer. We would need to do a manual encode of those jump back opcodes, which I will showcase shortly. This would give us enough room for a shellcode that spawns a shell. Since that will take quite some time and my schedule has gotten pretty busy, we will just spawn `calc.exe` as a proof of concept to show that code execution is possible. We will not be jumping backwards or performing a shell. If you wish to do that, you now know how.
+Because of these constraints, we are going to shift our focus here. If we wanted to, we could do a jump into our __4,260__ byte `A` buffer. We would need to do a manual encode of those jump back opcodes, which I will showcase shortly. This would give us enough room for a shellcode that spawns a shell. Since that will take quite some time and my schedule has gotten pretty busy, we will just spawn `calc.exe` as a proof of concept to show that code execution is possible. We will not be jumping backwards or performing a shell. If you wish to do that, you now know how.
 
 The `calc.exe` shellcode I will be using is 16 bytes. Shortly, you will see why I chose a small payload for this demonstration. Also bear in mind, since we are encoding, there must be some decoding to execute. There will be approximately four to six lines of opcodes for every one line we need actually need to execute. This is why with a reverse shell; you would need to jump back into the buffer of A's to obtain a shell. Again, I will just demonstrate a small payload without the jump. This same technique applies to a normal shell.
 

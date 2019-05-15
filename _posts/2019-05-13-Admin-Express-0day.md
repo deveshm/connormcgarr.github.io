@@ -85,7 +85,7 @@ As you can see, there is a problem. All of the recommended memory addresses cont
 
 You can go to __seh.txt__ and choose any of the memory locations that adhere to our character schema and have no null bytes. We will get to finding all of the bad characters in a second, just keep [Trying Harder](https://www.offensive-security.com/when-things-get-tough/). The address I chose was: `0x10014C42`. You are more than welcome to try any addresses that work for you!
 
-Before updating the PoC, let's ask ourselves a question. Now that we can control what gets loaded into the instruction pointer, what should we do? The typical thing to do in a SEH exploit would be to do a short jump into the second buffer of user supplied data, where presumably our shellcode is. Remember to restart Immunity, and press play. Here is the updated PoC:
+Before updating the PoC, let's ask ourselves a question. Now that we can control what gets loaded into the instruction pointer, what should we do? The typical thing to do in an SEH exploit would be to do a short jump into the second buffer of user supplied data, where presumably our shellcode is. Remember to restart Immunity, and press play. Here is the updated PoC:
 ```console
 root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
 # Proof of Concept - Admin Express v1.2.5.485 Exploit

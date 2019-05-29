@@ -239,11 +239,11 @@ Let's begin with talking about why we need to take into consideration the [LIFO]
 
 Since we are not using Metasploit, we are going to manually encode our shellcode. What we are going to do, at a high level, is an alignment of the stack. We are going to manipulate the stack to make the location of `EAX` equal to `ESP`. We will get to the low level details about using `EAX` to put our shellcode on the stack, but for right now let me explain about this stack alignment. 
 
-Since `EAX` will be the same location of `ESP`, we will essentially be putting our shellcode onto the top of the stack (remember that ESP points to the top of the stack). We will be adding shellcode, and then executing a `push eax` instruction after. A `push` instruction, as you recall, puts an item on top of the stack. Since our stack pointer and `EAX` are at the same place, any `push` instruction will write to lower memory addresses on top of the current `ESP` value. Essentially this means our shellcode will be put in a place we can control via the `EAX` register. Since the stack is __LIFO__, our shellcode will be writing to lower memory addresses. This means we will need to start with the __END__ of our shellcode. 
+Since `EAX` will be the same location of `ESP`, we will essentially be pushing our decoded shellcode onto the top of the aligned stack (remember that ESP points to the top of the stack, and we will control where that is). We will be writing the encoded shellcode, and then executing a `push eax` instruction after each of the encoded instructions. A `push` instruction, as you recall, puts an item on top of the stack. Since our stack pointer and `EAX` are at the same place, any `push eax` instruction will write whatever is in `EAX`, to lower memory addresses (in relation the current `ESP` value). We will be encoding each line of shellcode and then executing a `push eax` instruction, to get it on the stack. This means that our decoded shellcode will start at `ESP`, which is wherever we are aligning it to, and grow towards the lower addresses (visually up the stack in the debugger), as each piece of encoded shellcode is decoded. Essentially, as each encoded instruction is executed, the decoded instructions will visually grow towards those instructions (which is another way of saying, growing towards the lower memory addresses). Since the stack is __LIFO__, we eventually will meet our decoded shellcode, simply by just executing our encoded instructions! This means we will need to begin with pushing the __END__ of our shellcode onto the stack. 
 
 Here is an analogy of what I am trying to relay. Imagine I ask you to write an essay. In English, we start with the top left hand of the page and we write from left to right until we reach the bottom right hand corner. There is only one stipulation for this essay I would like you to write. I would like you to start at the bottom of the page and work your way up. If you started with the last word of your essay in the bottom right hand corner of the page, and continued to write backwards from right to left, you would have a coherent essay in the end! The only difference is that you wrote it in reverse order. If this analogy does not make sense, I have a diagram further along in this writeup that will give a bit of a visual to this sentiment I am trying to relay.
 
-Let me reiterate one more time. Essentially what we are going to be doing is using `EAX` to write to where `ESP` is located. When we push our shellcode onto the stack, it will go to a portion that we control. In addition, our shellcode will write up the stack, to lower memory addresses. Knowing this now, let's align the stack!
+Let me reiterate one more time. Essentially what we are going to be doing is using `EAX` to write to where `ESP` is located. When we push our shellcode onto the stack, it will grow towards a portion of the stack that we control. In addition, our decoded shellcode will write visually upwards on the stack, to lower memory addresses. Knowing this now, let's align the stack!
 
 Before we align the stack, recall what was mentioned above about saving the current stack pointer (after all our jumps). Since we need to save the stack pointer, let's use `ECX`. To do this, we are going to use a `push esp` instruction to get the current stack pointer value onto the stack. We then are going to use a `pop ecx` instruction to pop whatever is on top of the stack (which is the stack pointer now), into `ECX`. Here is the updated PoC:
 
@@ -517,37 +517,46 @@ Since we are writing to the stack towards upward addresses, you will need to sta
 After putting the 4th line on the stack:
 
 ```console
+LOWER ADDRESSES
 -
 -
 -
 4th line
+HIGHER ADDRESSES
 ```
 
 After putting the 3rd line on the stack:
 
 ```console
+LOWER ADDRESSES
 -
 -
-3rd
-4th
+3rd line
+4th line
+HIGHER ADDRESSES
 ```
+
 
 After putting the 2nd line on the stack:
 
 ```console
+LOWER ADDRESSES
 -
-2nd
-3rd
-4th
+2nd line
+3rd line
+4th line
+HIGHER ADDRESSES
 ```
 
 After putting the 1st line on the stack:
 
 ```console
+LOWER ADDRESSES
 1st
 2nd
 3rd
 4th
+HIGHER ADDRESSES
 ```
 
 You can see how this is working now, and why we do it in this order. Since I already did an example of the subtraction method above, I am not going to redo it four more times. Here are some things to take note of though:

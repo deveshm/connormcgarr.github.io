@@ -247,10 +247,10 @@ Let me reiterate one more time, with a diagram. Imagine we have 4 lines of shell
 
 ```console
 LOWER ADDRESSES
-1st
-2nd
-3rd
-4th
+4th decoded instruction
+3rd decoded instruction
+2nd decoded instruction
+1st decoded instruction
 HIGHER ADDRESSES
 ```
 If we write our shellcode properly, taking into consideration little endian and how the stack writes after a `push` instruction, we can take the fact execution goes from lower to higher addresses, and we will find ourselves executing our actual decoded shellcode.

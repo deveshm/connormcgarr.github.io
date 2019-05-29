@@ -243,7 +243,17 @@ Since `EAX` will be the same location of `ESP`, we will essentially be pushing o
 
 Here is an analogy of what I am trying to relay. Imagine I ask you to write an essay. In English, we start with the top left hand of the page and we write from left to right until we reach the bottom right hand corner. There is only one stipulation for this essay I would like you to write. I would like you to start at the bottom of the page and work your way up. If you started with the last word of your essay in the bottom right hand corner of the page, and continued to write backwards from right to left, you would have a coherent essay in the end! The only difference is that you wrote it in reverse order. If this analogy does not make sense, I have a diagram further along in this writeup that will give a bit of a visual to this sentiment I am trying to relay.
 
-Let me reiterate one more time. Essentially what we are going to be doing is using `EAX` to write to where `ESP` is located. When we push our shellcode onto the stack, it will grow towards a portion of the stack that we control. In addition, our decoded shellcode will write visually upwards on the stack, to lower memory addresses. Knowing this now, let's align the stack!
+Let me reiterate one more time, with a diagram. Imagine we have 4 lines of shellcode. Here is what would happen. Execution of the encoded instructions would happen from the lower addresses and continue to the higher addresses. As each __decoded__ instruction is calculated, it would get pushed onto the stack, and be located at ESP. As each encoded instruction gets executed, the decoded instructions would start piling up from the stack pointer, towards the lower addresses. Here is a diagram (I will give more detail about this diagram later):
+
+```console
+LOWER ADDRESSES
+1st
+2nd
+3rd
+4th
+HIGHER ADDRESSES
+```
+If we write our shellcode properly, taking into consideration little endian and how the stack writes after a `push` instruction, we can take the fact execution goes from lower to higher addresses, and we will find ourselves executing our actual decoded shellcode.
 
 Before we align the stack, recall what was mentioned above about saving the current stack pointer (after all our jumps). Since we need to save the stack pointer, let's use `ECX`. To do this, we are going to use a `push esp` instruction to get the current stack pointer value onto the stack. We then are going to use a `pop ecx` instruction to pop whatever is on top of the stack (which is the stack pointer now), into `ECX`. Here is the updated PoC:
 
@@ -514,7 +524,7 @@ Since we are writing to the stack towards upward addresses, you will need to sta
 "\xc2\x77\xff\xd0" - 4th line
 ```
 
-After putting the 4th line on the stack:
+After pushing the 4th line of decoded shellcode on the stack:
 
 ```console
 LOWER ADDRESSES
@@ -525,7 +535,7 @@ LOWER ADDRESSES
 HIGHER ADDRESSES
 ```
 
-After putting the 3rd line on the stack:
+After psuhing the 3rd line of decoded shellcode on the stack:
 
 ```console
 LOWER ADDRESSES
@@ -537,7 +547,7 @@ HIGHER ADDRESSES
 ```
 
 
-After putting the 2nd line on the stack:
+After pushing the 2nd line of decoded shellcode on the stack:
 
 ```console
 LOWER ADDRESSES
@@ -548,7 +558,7 @@ LOWER ADDRESSES
 HIGHER ADDRESSES
 ```
 
-After putting the 1st line on the stack:
+After pushing the 1st line of decoded shellcode on the stack:
 
 ```console
 LOWER ADDRESSES

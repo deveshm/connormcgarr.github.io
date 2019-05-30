@@ -357,7 +357,7 @@ This hexadecimal method of alphanumeric shellcoding will require 3 values. Essen
 2. Subtract three values from `EAX`
 3. Push the new value of `EAX` onto the newly aligned stack (on top of the new `ESP` value).
 
-Whenever those three values are subtracted from the `EAX` register, that has been zeroed out, the result will be the opcodes we want to execute! What we need to do next, is find three values that equal each of those four numbers above! These three numbers can be any of the numbers allowed within our character set. Let me give an example. if we have a value of 15, you don't have to use `5, 5, 5`. You could use `13, 1, 1` or `6, 7, 2`. Use whatever you would like! So, let's do this for each:
+Whenever those three values are subtracted from the `EAX` register, that has been zeroed out, the result will be the opcodes we want to execute! What we need to do next, is find three __DECIMAL__ values that equal each of those four numbers above! These three numbers can be any of the numbers allowed within our character set. Let me give an example. if we have a value of 15, you don't have to use `5, 5, 5`. You could use `13, 1, 1` or `6, 7, 2`. Use whatever you would like! So, let's do this for each:
 
 ```console
 255 = 85 + 85 + 85

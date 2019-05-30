@@ -408,7 +408,7 @@ _______________________________
 384E5555    364D5555    364D5555
 ```
 
-Our three values are: `364D5555`, `364D5555`, `384E5555`. Whenever you do this math, it changes the stack pointer value to `0012F3F4`. Before we do this math though, we will execute a few instructions. They are:
+Our three values are: `364D5555`, `364D5555`, `384E5555`. Whenever you do this math, it changes the stack pointer value to `0012F3F0`. Before we do this math though, we will execute a few instructions. They are:
 1. `push esp` - to get the value of the current stack pointer on the stack.
 2. `pop eax` - to pop the stack pointer value into `EAX`.
 

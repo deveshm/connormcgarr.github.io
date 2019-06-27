@@ -383,7 +383,7 @@ Starting with the bottom row, we need to take each hexadecimal value and write i
 232 = 78(4E) + 77 (4D) + 77(4D)
 160 = 54(36) + 54 (36) + 56(38)
 _______________________________
-384E5555
+364E5555
 ```
 
 The second value is:
@@ -394,7 +394,7 @@ The second value is:
 232 = 78(4E) + 77 (4D) + 77(4D)
 160 = 54(36) + 54 (36) + 56(38)
 _______________________________
-384E5555    364D5555
+364E5555    364D5555
 ```
 
 The last value is:
@@ -405,7 +405,7 @@ The last value is:
 232 = 78(4E) + 77 (4D) + 77(4D)
 160 = 54(36) + 54 (36) + 56(38)
 _______________________________
-384E5555    364D5555    364D5555
+364E5555    364D5555    384D5555
 ```
 
 Our three values are: `364D5555`, `364D5555`, `384E5555`. Whenever you do this math, it changes the stack pointer value to `0012F3F0`. Before we do this math though, we will execute a few instructions. They are:

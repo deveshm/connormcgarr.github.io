@@ -117,3 +117,7 @@ Now that we are viewing the exedcutable itself, again, __right click__ on any di
 Find the __WS_32.recv__ function in the __Destination__ column. (Pro tip: click on the __Destintation__ header to sort alphabetically):
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/04.png" alt="">
+
+Set a breakpoint:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/05.png" alt="">

@@ -149,7 +149,7 @@ nasm > mov edi, esp
 00000000  89E7              mov edi,esp
 ```
 
-The first instruction of __`xor ecx, ecx`__ is to 'zero' out the ECX register, for our calculations.  XOR'ing any value with itself, will result in a zero value.
+The first instruction of __`xor ecx,ecx`__ is to 'zero' out the ECX register, for our calculations.  XOR'ing any value with itself, will result in a zero value.
 
 The second instruction will add `0x88` bytes to the CL register. The CL register (counter low), is an 8 bit register (with CH, or counter high)that makes up the 16 bit register CX. CX is a 16 bit register that makes up the 32 bit register (x86) ECX. 
 

@@ -33,7 +33,9 @@ buffer+="Content-Length: 1048580\r\n\r\n"
 buffer+= bindshell 
 ```
 
-If we take a look at the `buffer` parameter, we can clearly see that this is an HTTP request. The vulnerability seems to arise from the [Host](https://www.itprotoday.com/devops-and-software-development/what-host-header) header. So, in order for this exploit to be successful- one must successfully replicate a valid HTTP request. This is no different than what the `recv()` function requires. We are tasked with successfully fulfilling the valid parameters in order to call the function.
+If we take a look at the `buffer` parameter, we can clearly see that this is an HTTP request. The vulnerability seems to arise from the [Host](https://www.itprotoday.com/devops-and-software-development/what-host-header) header. So, in order for this exploit to be successful- one must successfully replicate a valid HTTP request. 
+
+This is synonymous what the `recv()` function requires. We are tasked with successfully fulfilling the valid parameters in order to call the function.
 
 Let's take a look at the Microsoft documentation on this.
 
@@ -47,3 +49,9 @@ int recv(
   int    flags
 );
 ```
+
+The first parameter, ```c++ SOCKET s```, is the file descriptor that references the socket connection. A file descriptor is a piece of data that the Operating System uses to references a certain resource (file, socket connection, I/OP resource, etc.). Since we will be working within the x86 architecture, this will look something like this- `0x00000088` (this number will vary). 
+
+Also, one thing to remember, is a file descriptor is utilized by the OS. The file descriptor is not actually a raw value of `0x00000088` (or whatever value the OS is using). The OS would not know what to do with a this value, as it is not a coherent memory address, just an arbitrary value. The OS utilized a memory address that points to the fild descriptor value (a pointer).
+
+The second parameter, ```c++ char *buf```

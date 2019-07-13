@@ -35,7 +35,7 @@ buffer+= bindshell
 
 If we take a look at the `buffer` parameter, we can clearly see that this is an HTTP request. The vulnerability seems to arise from the [Host](https://www.itprotoday.com/devops-and-software-development/what-host-header) header. So, in order for this exploit to be successful- one must successfully replicate a valid HTTP request. 
 
-This is synonymous what the `recv()`function requires. We are tasked with successfully fulfilling the valid parameters in order to call the function.
+This is synonymous what the `recv()` function requires. We are tasked with successfully fulfilling the valid parameters in order to call the function.
 
 Let's take a look at the Microsoft documentation on this.
 

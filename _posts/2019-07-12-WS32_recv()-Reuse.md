@@ -33,3 +33,4 @@ buffer+="Content-Length: 1048580\r\n\r\n"
 buffer+= bindshell 
 ```
 
+If we take a look at the `buffer` parameter, we can clearly see that this is an HTTP request. The vulnerability seems to arise from the `[HOST](https://www.itprotoday.com/devops-and-software-development/what-host-header)` header

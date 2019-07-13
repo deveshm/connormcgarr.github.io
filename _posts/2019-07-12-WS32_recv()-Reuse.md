@@ -39,7 +39,7 @@ This is synonymous what the `recv()` function requires. We are tasked with succe
 
 Let's take a look at the Microsoft documentation on this.
 
-Looking at the function call, here are the parameters needed:
+Looking at the function call, here are the parameters needed. Let's break this down:
 
 ```c++
 int recv(
@@ -50,8 +50,12 @@ int recv(
 );
 ```
 
-The first parameter, ```c++ SOCKET s```, is the file descriptor that references the socket connection. A file descriptor is a piece of data that the Operating System uses to references a certain resource (file, socket connection, I/OP resource, etc.). Since we will be working within the x86 architecture, this will look something like this- `0x00000088` (this number will vary). 
+The first parameter, `SOCKET s`, is the file descriptor that references the socket connection. A file descriptor is a piece of data that the Operating System uses to references a certain resource (file, socket connection, I/OP resource, etc.). Since we will be working within the x86 architecture, this will look something like this- `0x00000088` (this number will vary). 
 
 Also, one thing to remember, is a file descriptor is utilized by the OS. The file descriptor is not actually a raw value of `0x00000088` (or whatever value the OS is using). The OS would not know what to do with a this value, as it is not a coherent memory address, just an arbitrary value. The OS utilized a memory address that points to the fild descriptor value (a pointer).
 
-The second parameter, ```c++ char *buf```
+The second parameter, `char *buf` is a pointer to the memory location the buffer is received at. Essentially, when developing our second stage payload, we will want to specify a memory location our execution will eventually reach.
+
+The third parameter, `int len` is the size of the buffer. Remember, this is going to be a hexademical representation of the decimal value we supply. A shell is around 350-3500 bytes. Let's remmeber this going forward.
+
+The fourth parameter, `int flags`, is a numerical value that will allow for debugging any errors. As exploit developers, we will want this value to be zero- which is the `flags` parameters way of saying "there is no error".

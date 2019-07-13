@@ -136,8 +136,10 @@ LIFO (Last In First Out)
 ---
 Let's remember one thing about the stack. The stack is a data structure that accepts data in a last in first out format. This means the first piece of data pushed onto the stack, will be the last item to be popped off the stack, or executed. Knowing this, we will need to push our parameters on the stack, in reverse order. Having said this, we will need to manipulate our file descriptor first. 
 
-File Descriptor
+Generating the File Descriptor
 ---
+Although we weill need to push our parameters on the stack in reverse order, we will start by generating the file descriptor. 
+
 From the observations above- it seems that our file descriptor is the value `0x00000088`. Knowing this, we will create a piece of shellcode to reflect this. Here are the instructions, using [nasm_shell](https://github.com/fishstiqz/nasmshell):
 
 ```console
@@ -145,13 +147,27 @@ nasm > xor ecx, ecx
 00000000  31C9              xor ecx,ecx
 nasm > add cl, 0x88
 00000000  80C188            add cl,0x88
+nasm > push ecx
+00000000  51                push ecx
 nasm > mov edi, esp
 00000000  89E7              mov edi,esp
 ```
 
-The first instruction of __`xor ecx,ecx`__ is to 'zero' out the ECX register, for our calculations.  XOR'ing any value with itself, will result in a zero value.
+The first instruction of:
 
-The second instruction will add `0x88` bytes to the CL register. The CL register (counter low), is an 8 bit register (with CH, or counter high)that makes up the 16 bit register CX. CX is a 16 bit register that makes up the 32 bit register (x86) ECX. 
+```console
+xor ecx, ecx
+```
+
+is to 'zero' out the ECX register, for our calculations. Remember, XOR'ing any value with itself, will result in a zero value.
+
+The second instruction:
+
+```console
+add cl, 0x88
+```
+
+will add `0x88` bytes to the CL register. The CL register (counter low), is an 8 bit register (with CH, or counter high)that makes up the 16 bit register CX. CX is a 16 bit register that makes up the 32 bit register (x86) ECX. 
 
 Here is a diagram that outlines this better:
 
@@ -169,4 +185,26 @@ The 32 bit register is comprised of 8 bytes: `0x12345678`. The number 8 represen
         cl
 ```
 
-The reason we would want to add directly to CL, instead of ECX- is because this guarentees our data will be properly inserted into the register. Adding directly to a register may result in bytes being placed in unintended locations.
+The reason we would want to add directly to CL, instead of ECX- is because this guarentees our data will be properly inserted into the register. Adding directly to a register may result in bytes being placed in unintended locations. We will use this knowledge later, as well.
+
+
+The third instruction:
+
+```console
+push ecx
+```
+is to get the value onto the top of the stack. In other words, the value of `0x00000088` is being stored in ESP- as ESP contains the value of the item on top of the stack.
+
+The last instruction:
+
+```console
+mov edi, esp
+```
+
+is in order move the contents of ESP, into EDI. The reason we do this, is because this will create a memory address (ESP's address, which contains a pointer to the value `0x00000088`). EDI now is a memory address that points to the value of the file descriptor. 
+
+Although we did not find the ACTUAL file desciptor the OS generated, we are essentially "tricking" the OS into thinking this is the file description. The OS is only looking for a pointer that references teh value `0x00000088`, not a specific memory address.
+
+Flags
+---
+Now that the file descriptor is out of the way- we will start with the last parameter, the flags. 

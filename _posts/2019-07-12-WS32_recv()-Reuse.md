@@ -132,3 +132,41 @@ Execution is paused
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/07.png" alt="">
 
+LIFO (Last In First Out)
+---
+Let's remember one thing about the stack. The stack is a data structure that accepts data in a last in first out format. This means the first piece of data pushed onto the stack, will be the last item to be popped off the stack, or executed. Knowing this, we will need to push our parameters on the stack, in reverse order. Having said this, we will need to manipulate our file descriptor first. 
+
+File Descriptor
+---
+From the observations above- it seems that our file descriptor is the value `0x00000088`. Knowing this, we will create a piece of shellcode to reflect this. Here are the instructions, using [nasm_shell](https://github.com/fishstiqz/nasmshell):
+
+```console
+nasm > xor ecx, ecx
+00000000  31C9              xor ecx,ecx
+nasm > add cl, 0x88
+00000000  80C188            add cl,0x88
+nasm > mov edi, esp
+00000000  89E7              mov edi,esp
+```
+
+The first instruction of __`xor ecx, ecx`__ is to 'zero' out the ECX register, for our calculations.  XOR'ing any value with itself, will result in a zero value.
+
+The second instruction will add `0x88` bytes to the CL register. The CL register (counter low), is an 8 bit register (with CH, or counter high)that makes up the 16 bit register CX. CX is a 16 bit register that makes up the 32 bit register (x86) ECX. 
+
+Here is a diagram that outlines this better:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/08.png" alt="">
+
+A Word About Data Sizes
+--
+Remember, a 32 bit register, when referencing the data inside of it, is known as a [__DWORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/262627d8-3418-4627-9218-4ffe110850b2), or double word. A 16 bit register when referencing the data in it, is known as a [__WORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/f8573df3-a44a-4a50-b070-ac4c3aa78e3c). An 8 bit register's data is known as a [__byte__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/d7edc080-e499-4219-a837-1bc40b64bb04). 
+
+The 32 bit register is comprised of 8 bytes: `0x12345678`. The number 8 represents the most significant byte. The CL register also is at the most significat byte location in the ECX register. This means, if we add 0x88 to the CL register, ECX will look like this:
+
+```console
+0x00000088
+        ↑↑
+        cl
+```
+
+The reason we would want to add directly to CL, instead of ECX- is because this guarentees our data will be properly inserted into the register. Adding directly to a register may result in bytes being placed in unintended locations.

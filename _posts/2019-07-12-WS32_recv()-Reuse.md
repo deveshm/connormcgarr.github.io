@@ -57,3 +57,6 @@ The __second__ parameter, `char *buf` is a pointer to the memory location the bu
 The __third__ parameter, `int len` is the size of the buffer. Remember, this is going to be a hexademical representation of the decimal value we supply. A shell is around 350-3500 bytes. Let's remmeber this going forward.
 
 The __fourth__ parameter, `int flags`, is a numerical value that will allow for adding semantics/options to the function. We will just have this parameter set to `0`, as to not influence or change the function in any unintended way.
+
+Finding the Call to WS_32.recv()
+---

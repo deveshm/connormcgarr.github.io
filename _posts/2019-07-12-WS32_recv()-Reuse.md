@@ -177,7 +177,7 @@ A Word About Data Sizes
 --
 Remember, a 32 bit register, when referencing the data inside of it, is known as a [__DWORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/262627d8-3418-4627-9218-4ffe110850b2), or a double word. A 16 bit register when referencing the data in it, is known as a [__WORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/f8573df3-a44a-4a50-b070-ac4c3aa78e3c). An 8 bit register's data is known as a [__byte__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/d7edc080-e499-4219-a837-1bc40b64bb04). 
 
-The 32 bit register is comprised of 8 bytes: `0x12345678`. The number 8 represents the most significant byte. The CL register also is at the most significat byte location in the ECX register. This means, if we add 0x88 to the CL register, ECX will look like this:
+The 32 bit register is comprised of 8 bytes: `0x12345678`. The number 8 represents the most significant byte. The CL register is located at the most significat byte of the ECX register (the same location as 8). This means, if we add 0x88 to the CL register, ECX will look like this:
 
 ```console
 0x00000088

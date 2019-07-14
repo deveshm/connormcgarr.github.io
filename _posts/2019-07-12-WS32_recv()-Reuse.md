@@ -253,21 +253,21 @@ xor ecx, ecx
 add cl, 0x88
 ```
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/10.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/010.png" alt="">
 
 ```console
 push ecx
 ```
 A look at the stack: 
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/11.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/011.png" alt="">
 
 ```console
 mov edi, esp
 ```
 EDI and ESP both contain the memory address that points to the value `0x00000088`
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/12.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/012.png" alt="">
 
 Flags
 ---

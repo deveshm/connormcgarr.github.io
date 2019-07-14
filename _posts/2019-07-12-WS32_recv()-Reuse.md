@@ -697,3 +697,12 @@ All of our parameters are now on the stack!
 
 Calling WS_32.recv()
 ---
+
+Let's revist where the call actually happens. In Immunity, select the __Enter expression to follow__ button, right under the __Window__ button at the top of the window:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/026.png" alt="">
+
+If you double click on the instruction itself, you will see the actual instruction that is executed when the call happens:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/027.png" alt="">
+

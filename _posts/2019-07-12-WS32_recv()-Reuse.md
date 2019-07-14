@@ -704,5 +704,5 @@ Let's revist where the call actually happens. In Immunity, select the __Enter ex
 
 If you double click on the instruction itself, you will see the actual instruction that is executed when the call happens:
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/027.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/028.png" alt="">
 

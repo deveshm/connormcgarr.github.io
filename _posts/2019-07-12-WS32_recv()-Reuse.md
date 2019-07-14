@@ -110,9 +110,11 @@ Let's find the function call now. Close Immunity and vulnserver.exe. Restart vul
 
 __Right click__ on any disassembled instruction and select __View > Module 'vulnserv'__ (the executable itself).
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/03.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/02.png" alt="">
 
 Now that we are viewing the executable itself, again, __right click__ on any disassembled instruction. Select __Search For > All intermodular calls__. This refers to all calls to the __.dll__ dependencies of the application. As the `recv()` function is apart of __WS_32.dll__, we will need to search for the intermodular calls.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/03.png" alt="">
 
 Find the __WS_32.recv__ function in the __Destination__ column. (Pro tip: click on the __Destination__ header to sort alphabetically):
 

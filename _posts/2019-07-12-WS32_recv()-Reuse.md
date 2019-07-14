@@ -106,7 +106,7 @@ s.connect(("172.16.55.143", 9999))
 s.send(command+crash)
 ```
 
-Let' find the function call now. Close Immunity and vulnserver.exe. Restart vulnserver.exe and the reattach within Immunity.
+Let's find the function call now. Close Immunity and vulnserver.exe. Restart vulnserver.exe and the reattach within Immunity.
 
 __Right click__ on any disassembled instruction and select __View > Module 'vulnserv'__ (the executable itself).
 

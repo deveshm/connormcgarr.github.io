@@ -187,7 +187,7 @@ The 32-bit register is comprised of 4 bytes: __`0x11223344`__. The numbers __44_
         cl
 ```
 
-The reason we would want to add directly to CL, instead of ECX- is because this guarantees our data will be properly inserted into the register. Adding directly to a register may result in bytes being placed in unintended locations. We will use this knowledge later, as well.
+The reason we would want to add directly to CL, instead of ECX, is because this guarantees our data will be properly inserted into the register. Adding directly to a 32-bit register may result in bytes being placed in unintended locations. We will use this knowledge later, as well.
 
 
 The third instruction:
@@ -205,9 +205,9 @@ mov edi, esp
 
 This will move the contents of ESP, into EDI. The reason we do this, is because this will create a memory address (ESP's address, which contains a pointer to the value __`0x00000088`__). EDI now is a memory address that points to the value of the file descriptor. 
 
-Although we did not find the ACTUAL file descriptor the OS generated, we are essentially "tricking" the OS into thinking this is the file description. The OS is only looking for a pointer that references the value __`0x00000088`__, not a specific memory address.
+Although we did not find the ACTUAL file descriptor the OS generated, we are essentially "tricking" the OS into thinking this is the file descriptor. The OS is only looking for a pointer that references the value __`0x00000088`__, not a specific memory address.
 
-Before executing the POC, make sure to add a couple of software breakpoints (\xCC) BEFORE the shellcode! This is to pause execution, to allow for accurate calculations.
+Before executing the POC, make sure to add a couple of software breakpoints (`\xCC`) BEFORE the shellcode! This is to pause execution, to allow for accurate calculations.
 
 Here is the updated POC (also, remember to remove the breakpoint set earlier on the call to WS_32.recv()):
 
@@ -336,7 +336,7 @@ Flags
 ---
 Now that the file descriptor is out of the way- we will start with the last parameter, the flags. 
 
-The flags are the most painless of the flags. All that is needed is a value of __`0x00000000`__ on the stack. Here is the shellcode for this:
+The flags are the most painless of the parameters. All that is needed is a value of __`0x00000000`__ on the stack. Here is the shellcode for this:
 
 ```console
 nasm > xor edx, edx
@@ -417,11 +417,11 @@ A glimpse of the stack, with a value of zero
 
 BufSize
 ---
-Here is where we will determine our buffer size. Since we are working with hexadecimal, we will choose an easy number that is equivalent to a decimal amount enough for a shell (more than 350 bytes). We will choose 512 decimal, or 0x00000200 in __DWORD__ hexadecimal.
+Here is where we will determine our buffer size. Since we are working with hexadecimal, we will choose an easy number that is equivalent to a decimal amount enough for a shell (more than 350 bytes). We will choose 512 decimal, or __`0x00000200`__ in __DWORD__ hexadecimal.
 
-We will deploy a technique talked about above- (when we added to cl). Since EDX is already equal to zero- from our flags parameter.
+We will deploy a technique referenced above- (when we added to cl). Since EDX is already equal to zero from our flags parameter, let's use this register to do our calculations.
 
-This time, we will add to the DH (data high) register, which is the 8-bit register within the 16 bit register DX, which is a part of the 32 bit register EDX. This register is not at the MOST significant byte, but close to.
+This time, we will add to the DH (data high) register, which is the 8-bit register within the 16-bit register DX, which is a part of the 32-bit register EDX. This register is not at the MOST significant byte, but close to.
 
 When we add to DH (in context of EDX), it will look a little something like this:
 
@@ -500,11 +500,11 @@ Our BufSize and flags parameters are now on the stack!
 
 Buffer (Length):
 ---
-As mentioned earlier, this is the parameter that will determine where our buffer will land. We want this location to be in a place where execution will reach. We also need to take into account, that we manipulated ESP earlier, but subtracting 50 from it.
+As mentioned earlier, this is the parameter that will determine where our buffer will land. We want this location to be in a place where execution will reach. We also need to take into account that we manipulated ESP earlier by subtracting 50 from it.
 
 Knowing this, we will have to do a slight stack alignment. Here, we will use EBX as our register to perform our calculations.
 
-We will push the value of ESP onto the stack and pop it into EBX. We will then perform calculations to EBX- to get it equal to the location we would like our buffer to end. Then, we will push this item onto the stack, as our second to last (or visually second) parameter.
+We will push the value of ESP onto the stack and pop it into EBX. We will then perform calculations to EBX- to get it equal to the location we would like our buffer to land. Then, we will push this item onto the stack, as our second to last (or visually second) parameter.
 
 Before we get into that though, let's see what we are working with.
 
@@ -523,7 +523,7 @@ Let's remember what we have accomplished and what we have left:
 3. We need to eventually push our file descriptor pointer onto the stack
 4. We need to call the `WS_32.recv()` function.
 
-It should probably only take around 2-=30 more bytes to accomplish what we have left. Let's take this into consideration when choosing a buffer location.
+It should probably only take around 20-30 more bytes to accomplish what we have left. Let's take this into consideration when choosing a buffer location.
 
 Referring to the disassembler image above, it looks like __`00C0F9F0`__ may be a good candidate!
 
@@ -539,9 +539,9 @@ Subtract the current ESP value from the wanted value:
        4C
 ```
 
-We will need to add `0x4C` to our current ESP value.
+We will need to add `0x4C` to our current ESP value to get our buffer to land where we want.
 
-TO do our calculations, we will need to push the current stack pointer onto the stack and pop it into EBX. Then, we will need to perform a calculation on EBX to get it equal to __`00C0F9F0`__. Then we will push the value onto the stack.
+To do our calculations, we will need to push the current stack pointer onto the stack and pop it into EBX. Then, we will need to perform a calculation on EBX to get it equal to __`00C0F9F0`__. Then we will push the value onto the stack.
 
 Shellcode instructions:
 
@@ -630,7 +630,11 @@ It is time to push our file descriptor onto the stack. Remember- our file descri
 
 We would like the value of __`0x00000088`__ to be on the stack. Recall that the value of __`0x00000088`__ is pointed to by EDI! That means if we can push the data that EDI references (or points to), we could get the file descriptor onto the stack.
 
-We will need to `push dword ptr ds:[edi]`
+We will need to execute this instruction:
+
+```console
+push dword ptr ds:[edi]`
+```
 
 This will push the double word (__DWORD__, we are using a 32-bit register) pointer referenced in the data segment (ds) of EDI.
 
@@ -710,15 +714,17 @@ If you double click on the instruction itself, you will see the actual instructi
 
 This is the instruction we will actually need to execute! This is where the actual call to the 1st instruction of the function occurs. There is one slight issue though- this address contains a null byte!
 
-As exploit developers know, a null byte (__0x00__) can be a death sentence. The operating system recognizes this character as a string terminator and will disregard anything that comes after it. 
+As exploit developers know, a null byte (__\x00__) can be a death sentence. The operating system recognizes this character as a string terminator and will disregard anything that comes after it. 
 
-We do, however have a way to circumvent this, thanks to the assembly instruction [shr[(https://www.aldeid.com/wiki/X86-assembly/Instructions/shr)!
+We do, however, have a way to circumvent this thanks to the assembly instruction [shr](https://www.aldeid.com/wiki/X86-assembly/Instructions/shr)!
 
 The instruction `shr`, or shift right, will shift the bits to the right. 
 
-If we could move the value __40252C11__ into a register (__0040252C__ is the actual address) and then shift the bits to the right, we should end up with our value! The __11__ value is just there to fulfill the 32-bit register. 
+If we could move the value __`40252C11`__ into a register (__`0040252C`__ is the actual address) and then shift the bits to the right, we should end up with our value! The __11__ value is just there to fill the 32-bit register. 
 
-Then, let's throw this value into EAX. At this point we could execute `shr eax, 0x8` instruction. This will shift the contents of EAX to the right by 8 bits and dynamically add the two bytes needed to fulfill the x86 register in least significant bit location, in the form of zeros.
+Let's say we hold this value (__`40252C11`__) in EAX. 
+
+At this point we could execute `shr eax, 0x8` instruction. This will shift the contents of EAX to the right by 8 bits and dynamically add the byte needed to fill the x86 register in least significant bit location, in the form of zeros.
 
 ```console
 40252C11
@@ -730,7 +736,7 @@ to
 0040252C
 ```
 
-Each value of the 32 bit register (0x12345678) is representative of 4 bits. (`8 x 4 = 32)`. 
+Each value of a 32-bit register (__`0x12345678`__) is representative of 4 bits. (`8 x 4 = 32`). 
 
 Shifting the bits by 8 bits should accomplish this!
 
@@ -749,9 +755,9 @@ nasm > call eax
 
 More experienced exploit developers may ask, "Why would you just not jump to EAX? It is generally more reliable."
 
-The answer here is simple. A `jmp` will simply just go to that memory location. A `call` instruction will push the instruction after the current instruction pointer (EIP) onto the stack. Then, it will jump to the location.
+The answer here is simple. A `jmp` will simply just go to that memory location. A `call` instruction will push the instruction after the current instruction pointer (EIP) onto the stack. Then, it will jump to that location.
 
-As you can see, a `call` instruction will actually push a value onto the stack. This is needed in order to get all of our parameters on the stack, in the correct order. If we simply just used a `jmp` all of our stack instructions will be one instruction off, because we are depending on the `call` instruction to push all of our instructions down into the correct place. 
+As you can see, a `call` instruction will actually push a value onto the stack. This is needed in order to get all of our parameters on the stack, in the correct order. If we simply just used a `jmp`, all of our parameters on the stack will be one line off, because we are depending on the `call` instruction to push all of our instructions down into the correct place. 
 
 Before we update the POC, we will have to add a buffer of 512 bytes, to satisfy the BufSize parameter we specified. In addition, since this is a two stage payload, we will sleep the connection for 5 seconds, before sending the second stage payload- to make sure everything gets a chance to execute.
 
@@ -913,6 +919,8 @@ Look at that! At memory address __`00C0F9F0`__, we have received our second stag
 
 The most interesting thing, however, is the fact we control EIP!
 
+These next 2 images are blurry. Open them in a new tab to get a better view. 
+
 EIP before stepping through one instruction:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/034.png" alt="">
@@ -1020,8 +1028,8 @@ s.close()
 
 Final Thoughts
 ---
-I thought this was a pretty interesting technique. So much can be done with shellcoding and exploit development by utilizing the Windows API, as you cannot make a directly syscall (like Linux). Obviously, the file descriptor may be something to be concerned about, as it varies on operating systems. I have only ever seen a file descriptor that references a socket connection with either a value of __`80, 84, 88`__, or __`90__`.
+I thought this was a pretty interesting technique. So much can be done with shellcoding and exploit development by utilizing the Windows API, as you cannot make a directly syscall (like Linux). Obviously, the file descriptor may be something to be concerned about, as it varies on operating systems. I have only ever seen a file descriptor that references a socket connection with either a value of __`80, 84, 88`__, or __`90`__.
 
-Any questions or things I could have done better- I am always open to constructive criticism.
+Any questions or things I could have done better- please contact me. I am always open to constructive criticism.
 
 Peace, love, and positivity :-)

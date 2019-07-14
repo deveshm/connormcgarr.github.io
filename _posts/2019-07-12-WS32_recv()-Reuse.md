@@ -60,7 +60,7 @@ The fourth parameter, `int flags`, is a numerical value that will allow for addi
 
 Finding the Call to WS_32.recv()
 ---
-As any network based buffer overflow works, we find a vulnerable parameter, command, or other field- and send data to that parameter. Here is the POC does just that:
+As any network based buffer overflow works, we find a vulnerable parameter, command, or other field- and send data to that parameter. This POC does just that:
 
 ```python
 import os

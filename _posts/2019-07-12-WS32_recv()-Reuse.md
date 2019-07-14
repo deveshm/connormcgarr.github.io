@@ -633,7 +633,7 @@ We would like the value of __`0x00000088`__ to be on the stack. Recall that the 
 We will need to execute this instruction:
 
 ```console
-push dword ptr ds:[edi]`
+push dword ptr ds:[edi]
 ```
 
 This will push the double word (__DWORD__, we are using a 32-bit register) pointer referenced in the data segment (ds) of EDI.

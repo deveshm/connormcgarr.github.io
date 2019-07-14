@@ -112,7 +112,7 @@ __Right click__ on any disassembled instruction and select __View > Module 'vuln
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/02.png" alt="">
 
-Now that we are viewing the executable itself, again, __right click__ on any disassembled instruction. Select __Search For > All intermodular calls__. This refers to all calls to the __.dll__ dependencies of the application. As the `recv()` function is apart of __WS_32.dll__, we will need to search for the intermodular calls.
+Now that we are viewing the executable itself again, __right click__ on any disassembled instruction. Select __Search For > All intermodular calls__. This refers to all calls to the __.dll__ dependencies of the application. As the `recv()` function is apart of __WS_32.dll__, we will need to search for the intermodular calls.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/03.png" alt="">
 
@@ -136,13 +136,13 @@ Execution is paused
 
 LIFO (Last In First Out)
 ---
-Let's remember one thing about the stack. The stack is a data structure that accepts data in a last in first out format. This means the first piece of data pushed onto the stack, will be the last item to be popped off the stack, or executed. Knowing this, we will need to push our parameters on the stack, in reverse order. Having said this, we will need to manipulate our file descriptor first. 
+Let's remember one thing about the stack. The stack is a data structure that accepts data in a "last in first out" format. This means the first piece of data pushed onto the stack, will be the last item to be popped off the stack, or executed. Knowing this, we will need to push our parameters on the stack in reverse order. Having said this, we will need to manipulate our file descriptor first. 
 
 Generating the File Descriptor
 ---
 Although we will need to push our parameters on the stack in reverse order, we will start by generating the file descriptor. 
 
-From the observations above- it seems that our file descriptor is the value __`0x00000088`__. Knowing this, we will create a piece of shellcode to reflect this. Here are the instructions, using [nasm_shell](https://github.com/fishstiqz/nasmshell):
+From the observations above- it seems that our file descriptor is the value __`0x00000088`__. Knowing this, we will create a piece of shellcode to reflect this. Here are the instructions generated, using [nasm_shell](https://github.com/fishstiqz/nasmshell):
 
 ```console
 nasm > xor ecx, ecx
@@ -161,7 +161,7 @@ The first instruction of:
 xor ecx, ecx
 ```
 
-We are using this instruction to 'zero' out the ECX register, for our calculations. Remember, XOR'ing any value with itself, will result in a zero value.
+We are using this instruction to 'zero' out the ECX register for our calculations. Remember, XOR'ing any value with itself, will result in a zero value.
 
 The second instruction:
 
@@ -169,7 +169,7 @@ The second instruction:
 add cl, 0x88
 ```
 
-This adds `0x88` bytes to the CL register. The CL register (counter low), is an 8-bit register (with CH, or counter high)that makes up the 16 bit register CX. CX is a 16-bit register that makes up the 32 bit register (x86) ECX. 
+This adds `0x88` bytes to the CL register. The CL register (counter low), is an 8-bit register (in unison with CH, or counter high) that makes up the 16 bit register CX. CX is a 16-bit register that makes up the 32-bit register (x86) ECX. 
 
 Here is a diagram that outlines this better:
 
@@ -177,9 +177,9 @@ Here is a diagram that outlines this better:
 
 A Word About Data Sizes
 --
-Remember, a 32-bit register, when referencing the data inside of it, is known as a [__DWORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/262627d8-3418-4627-9218-4ffe110850b2), or a double word. A 16-bit register when referencing the data in it, is known as a [__WORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/f8573df3-a44a-4a50-b070-ac4c3aa78e3c). An 8-bit register's data is known as a [__byte__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/d7edc080-e499-4219-a837-1bc40b64bb04). 
+Remember, a 32-bit register when referencing the data inside of it is known as a [__DWORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/262627d8-3418-4627-9218-4ffe110850b2), or a double word. A 16-bit register when referencing the data in it, is known as a [__WORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/f8573df3-a44a-4a50-b070-ac4c3aa78e3c). An 8-bit register's data is known as a [__byte__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/d7edc080-e499-4219-a837-1bc40b64bb04). 
 
-The 32-bit register is comprised of 8 bytes: __`0x12345678`__. The number 8 represents the most significant byte. The CL register is located at the most significant byte of the ECX register (the same location as 8). This means, if we add 0x88 to the CL register, ECX will look like this:
+The 32-bit register is comprised of 4 bytes: __`0x11223344`__. The numbers __44__ represents the most significant byte. The CL register is located at the most significant byte of the ECX register (the same location as __44__). This means, if we add 0x88 to the CL register, ECX will look like this:
 
 ```console
 0x00000088

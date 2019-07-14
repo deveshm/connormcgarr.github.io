@@ -278,7 +278,7 @@ As mentioned earlier about LIFO, there is another property of the stack that is 
 
 What we can do to circumvent this constraint, is to subtract the value of ESP, which is a memory address, by 50. This means our stack will be located ABOVE our shellcode. And since the stack grows downwards, it will never reach our shellcode. This is because the shellcode, which is growing towards the higher addresses, is growing in the opposite way of the stack- and the stack is located above our shellcode:
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/014.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/014a.png" alt="">
 
 Here is how we will do this:
 

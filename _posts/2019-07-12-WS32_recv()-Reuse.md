@@ -54,7 +54,7 @@ Also, one thing to remember, a file descriptor is utilized by the OS. The file d
 
 The second parameter, `char *buf`, is a pointer to the memory location the buffer is received at. Essentially, when developing our second stage payload, we will want to specify a memory location our execution will eventually reach.
 
-The third parameter, `int len`, is the size of the buffer. Remember, this is going to be a hexadecimal representation of the decimal value we supply. A shell is around 350-3500 bytes. Let's remember this going forward.
+The third parameter, `int len`, is the size of the buffer. Remember, this is going to be a hexadecimal representation of the decimal value we supply. A shell is around 350-450 bytes. Let's remember this going forward.
 
 The fourth parameter, `int flags`, is a numerical value that will allow for adding semantics/options to the function. We will just have this parameter set to zero, as to not influence or change the function in any unintended way.
 

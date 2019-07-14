@@ -48,7 +48,7 @@ int recv(
 );
 ```
 
-The first parameter, `SOCKET s`, is the file descriptor that references the socket connection. A file descriptor is a piece of data that the Operating System uses to reference a certain resource (file, socket connection, I/OP resource, etc.). Since we will be working within the x86 architecture, this will look something like this- __`0x00000090`__ (this number will vary). 
+The first parameter, `SOCKET s`, is the file descriptor that references the socket connection. A file descriptor is a piece of data that the Operating System uses to reference a certain resource (file, socket connection, I/O resource, etc.). Since we will be working within the x86 architecture, this will look something like this- __`0x00000090`__ (this number will vary). 
 
 Also, one thing to remember, a file descriptor is utilized by the OS. The file descriptor is not actually a raw value of __`0x00000090`__ (or whatever value the OS is using). The OS would not know what to do with this value, as it is not a coherent memory address- just an arbitrary value. The OS needs to utilize a memory address that points to the file descriptor value (a pointer).
 

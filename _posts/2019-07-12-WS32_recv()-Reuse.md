@@ -496,3 +496,19 @@ Our BufSize and flags parameters are now on the stack!:
 
 Buffer (Length):
 ---
+As mentioned earlier, this is the parameter that will determine where our buffer will land. We want this location to be in a place where execution will reach. We also need to take into account, that we manipulated ESP earlier, but subtracting 50 from it.
+
+Knowing this, we will have to do a slight stack alignment. Here, we will use EBX as our register to perform our calculations.
+
+We will push the value of ESP onto the stack and pop it into EBX. We will then perform calculations to EBX- to get it equal to the location we would like our buffer to end. Then, we will push this item onto the stack, as our second to last (or visually second) parameter.
+
+Before we get into that though, let's see what we are working with.
+
+Registers after execution of all instructions:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/020.png" alt="">
+
+Disassembler after instructions:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/021.png" alt="">
+

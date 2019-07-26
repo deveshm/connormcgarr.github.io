@@ -31,7 +31,7 @@ buffer+="Content-Length: 1048580\r\n\r\n"
 buffer+= bindshell 
 ```
 
-If we take a look at the `buffer` parameter, we can clearly see that this is an HTTP request. The vulnerability seems to arise from the [Host](https://www.itprotoday.com/devops-and-software-development/what-host-header) header. So, in order for this exploit to be successful- one must successfully replicate a valid HTTP request and then deliver the payload (shell, or proof of concept- or whatever it may be). If the HTTP request is not properly fulfilled, the back end server will most likely not eve bat at eye at the request, and just discard it.
+If we take a look at the `buffer` parameter, we can clearly see that this is an HTTP request. The vulnerability seems to arise from the [Host](https://www.itprotoday.com/devops-and-software-development/what-host-header) header. So, in order for this exploit to be successful- one must successfully replicate a valid HTTP request and then deliver the payload (shell, or proof of concept- or whatever it may be). If the HTTP request is not properly fulfilled, the back end server will most likely not even bat at eye at the request, and just discard it.
 
 This is synonymous with what the `recv()` function requires. We are tasked with successfully fulfilling valid parameters in order to call the function. When, and only when, the function has all of the parameters it needs will it execute properly
 

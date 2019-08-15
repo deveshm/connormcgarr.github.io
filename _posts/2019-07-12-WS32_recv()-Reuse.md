@@ -179,7 +179,7 @@ A Word About Data Sizes
 --
 Remember, a 32-bit register when referencing the data inside of it is known as a [__DWORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/262627d8-3418-4627-9218-4ffe110850b2), or a double word. A 16-bit register when referencing the data in it, is known as a [__WORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/f8573df3-a44a-4a50-b070-ac4c3aa78e3c). An 8-bit register's data is known as a [__byte__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/d7edc080-e499-4219-a837-1bc40b64bb04). 
 
-The 32-bit register is comprised of 4 bytes: __`0x11223344`__. The numbers __44__ represents the most significant byte. The CL register is located at the most significant byte of the ECX register (the same location as __44__). This means, if we add `0x88` to the CL register, ECX will look like this:
+The 32-bit register is comprised of 4 bytes: __`0x11223344`__. The numbers __44__ represents the least significant byte. The CL register is located at the least significant byte of the ECX register (the same location as __44__). This means, if we add `0x88` to the CL register, ECX will look like this:
 
 ```console
 0x00000088
@@ -421,7 +421,7 @@ Here is where we will determine our buffer size. Since we are working with hexad
 
 We will deploy a technique referenced above- (when we added to cl). Since EDX is already equal to zero from our flags parameter, let's use this register to do our calculations.
 
-This time, we will add to the DH (data high) register, which is an 8-bit register within the 16-bit register DX, which is a part of the 32-bit register EDX. This register is not at the MOST significant byte, but close to.
+This time, we will add to the DH (data high) register, which is an 8-bit register within the 16-bit register DX, which is a part of the 32-bit register EDX. This register is not at the LEAST significant byte, but close to.
 
 When we add to DH (in context of EDX), it will look a little something like this:
 
@@ -724,7 +724,7 @@ If we could move the value __`40252C11`__ into a register (__`0040252C`__ is the
 
 Let's say we hold this value (__`40252C11`__) in EAX. 
 
-At this point we could execute `shr eax, 0x8` instruction. This will shift the contents of EAX to the right by 8 bits and dynamically add the byte needed to fill the x86 register in least significant bit location, in the form of zeros.
+At this point we could execute `shr eax, 0x8` instruction. This will shift the contents of EAX to the right by 8 bits and dynamically add the byte needed to fill the EAX register in most significant bit location (least significant if viewing from a little endian perspective) in the form of zeros.
 
 ```console
 40252C11

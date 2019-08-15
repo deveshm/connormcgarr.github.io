@@ -421,7 +421,7 @@ Here is where we will determine our buffer size. Since we are working with hexad
 
 We will deploy a technique referenced above- (when we added to cl). Since EDX is already equal to zero from our flags parameter, let's use this register to do our calculations.
 
-This time, we will add to the DH (data high) register, which is the 8-bit register within the 16-bit register DX, which is a part of the 32-bit register EDX. This register is not at the MOST significant byte, but close to.
+This time, we will add to the DH (data high) register, which is an 8-bit register within the 16-bit register DX, which is a part of the 32-bit register EDX. This register is not at the MOST significant byte, but close to.
 
 When we add to DH (in context of EDX), it will look a little something like this:
 

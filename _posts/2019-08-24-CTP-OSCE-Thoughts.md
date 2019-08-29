@@ -13,7 +13,6 @@ Introduction
 
 _Cracking The Perimeter_, stylized as _CTP_, is the accompanying course to the Offensive Security Certificed Expert (OSCE). This course is often seen as "outdated". There is a reason why Offensive Security certifications do not have an expiration date. There is a reason why very few of the courses receive updates. There are reasons why Offensive Security alumni are frequently sought out in the information security market. I will hit on all of these notions in the middle and latter parts of this post.
 
----
 What are the prerequisites to this course?
 ---
 

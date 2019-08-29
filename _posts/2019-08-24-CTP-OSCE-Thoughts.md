@@ -46,7 +46,7 @@ The content of the course really opens your eyes to what goes on under the hood.
 The exam?
 ---
 
-I will try not to discourage any readers I may have, but this exam was brutal. I have a short lived information security career at the time of this post, but up until the time this post was written, it is easily the hardest thing I have ever done. In my life.
+I will try not to discourage any readers I may have, but this exam was brutal. I have a short lived information security career at the time of this post, but up until the time this post was written- it is easily the hardest thing I have ever done. In my life.
 
 It is, however, possible.
 
@@ -93,6 +93,7 @@ These are not the only things you need to know, but these were the main resource
 - [Aligning the stack/Alphanumeric shellcode 2](https://connormcgarr.github.io/Admin-Express-0day/)
 - [HP NNM](https://www.youtube.com/watch?v=gHISpAZiAm0). This is from the creator of the _CTP_ course, [muts](https://twitter.com/muts?lang=en).
 - [Windows API docs](https://docs.microsoft.com/en-us/windows/win32/apiindex/windows-api-list)
+- Practice on [Vulnserver](https://github.com/stephenbradshaw/vulnserver). Download the zip and unzip it. Simply run the __.exe__.
 
 If the stack alignment and alphanumeric shellcoding become difficult, it is well explained in the course.
 

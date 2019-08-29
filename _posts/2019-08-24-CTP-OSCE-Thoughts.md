@@ -20,7 +20,7 @@ Are you an [OSCP](https://www.offensive-security.com/information-security-certif
 
 If you answered "yes" to any of these questions, this course and exam are probably for you. One thing to note as well, there is a common misconception that one must have the OSCP and/or have completed the PWK course. This is not true. Although beneficial, it is not necessary.
 
-Here are the recommended [prerequisistes](https://www.offensive-security.com/ctp-syllabus/#pre-req) to the course.
+Here are the recommended [prerequisites](https://www.offensive-security.com/ctp-syllabus/#pre-req) to the course.
 
 As stated by Offensive Security, there does need to be a slight tolerance for pain and suffering. This course/certification is going to require some work. Pain and suffering does not mean you will never understand the material. It refers to the fact that indeed, you will be stuck from time to time. Read/review until you understand a concept. Utilize your student forums, too! Your fellow peers won't let you go through it alone.
 

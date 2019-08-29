@@ -77,7 +77,7 @@ OSCE is not a matter the outdated content. It is a matter of understanding the m
 
 Although I think that the courses are always valuable, in any state, if Offensive Security updated the OSCE tomorrow- that would be awesome! I would be 100 percent behind it, and I am sure the material would be amazing. However, that does not take away anything from someone who obtained the OSCE 2 days before the new materials were released. The certification is about actually thinking, and not just tallying up completed objectives.
 
-Remember what compentecies are gained from these exams. Not just technical knowledge, but ingenious thinking and being persistent until the job is done. That is why the Offensive Security courses get updated at strategic times, and why the certifications do not expire.
+Remember what competencies are gained from these exams. Not just technical knowledge, but ingenious thinking and being persistent until the job is done. That is why the Offensive Security courses get updated at strategic times, and why the certifications do not expire.
 
 Resources
 ---

@@ -18,7 +18,7 @@ What are the prerequisites to this course?
 
 Are you an [OSCP](https://www.offensive-security.com/information-security-certifications/oscp-offensive-security-certified-professional/) alumni? Did you take joy in the exploit development segment of the [_PWK_](https://www.offensive-security.com/information-security-training/penetration-testing-training-kali-linux/) course? Do you just have an overall affection in the exploit development lifecycle, x86 assembly, web applications, and infrastructure exploitation?
 
-If you answered "yes" to any of these questions, this course and exam are probably for you. One thing to note as well, there is a common misconception that one must have the OSCP and/or completing the PWK course. This is not true. Although beneficial, it is not necessary.
+If you answered "yes" to any of these questions, this course and exam are probably for you. One thing to note as well, there is a common misconception that one must have the OSCP and/or have completed the PWK course. This is not true. Although beneficial, it is not necessary.
 
 Here are the recommended [prerequisistes](https://www.offensive-security.com/ctp-syllabus/#pre-req) to the course.
 

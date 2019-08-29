@@ -41,12 +41,12 @@ For me, one of the two modules before any assembly/exploit development, that inv
 
 I most enjoyed the modules about the exploit development cycle. This included: fuzzing to identify vulnerabilities, creating POCs, making precise calculations, defeating constrained buffer space, defeating ASLR on Windows Vista, and adhering to specific alphanumeric constraints.
 
-The content of the course really opens your eyes to what goes on under the hood.
+The content of the course really opens your eyes to what goes on under the hood. Slowly but surely, it becomes apparent why the course is designed the way it is.
 
 The exam?
 ---
 
-I will try not to discourage any readers I may have, but this exam was brutal. I have a short lived information securiry career at the time of this post, but up unil right now (the time this post was written), it was easily the hardest thing I have ever done.
+I will try not to discourage any readers I may have, but this exam was brutal. I have a short lived information security career at the time of this post, but up unil right now (the time this post was written), it was easily the hardest thing I have ever done.
 
 It is, however possible.
 

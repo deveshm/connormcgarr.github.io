@@ -22,7 +22,7 @@ If you answered "yes" to any of these questions, this course and exam are probab
 
 Here are the recommended [prerequisites](https://www.offensive-security.com/ctp-syllabus/#pre-req) to the course.
 
-As stated by Offensive Security, there does need to be a slight tolerance for pain and suffering. This course/certification is going to require some work. Pain and suffering does not mean you will never understand the material. It refers to the fact that indeed, you will be stuck from time to time. Read/review until you understand a concept. Utilize your student forums, too! Your fellow peers won't let you go through it alone.
+As stated by Offensive Security, there does need to be a slight tolerance for pain and suffering. They are referring to the fact that indeed, you will be stuck from time to time. Sometimes it may feel like there is no end in sight. Never give up when you feel this way. Read/review until you understand a concept. Utilize your student forums, too! Your fellow peers won't let you go through it alone.
 
 I would recommend dabbling in and being familiar with CPU registers within the x86 (32 bit) architecture, down to the 8 bit reigsters within them. This [article](https://en.wikibooks.org/wiki/X86_Assembly/X86_Architecture) is a good place to start.
 

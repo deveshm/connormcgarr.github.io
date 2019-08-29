@@ -58,7 +58,7 @@ There is a reason there is an accompanying course to the exam. Take inspiration 
 
 A few questions I always reiterate to myself when I don't know where else to turn are: "What am I trying to accomplish? What do I already know? How can I expand on what I know? What kinds of questions should I be asking myself, or Google, in order to accomplish this goal?"
 
-tHiS cOuRsE iS sO oUtDaTeD oMg oFfSeC tEaCh mE sOmEtHiNg rElEvAnT
+tHiS cOuRsE iS sO oUtDaTeD oMg oFfSeC tEaCh mE sOmEtHiNg rElEvAnT!
 ---
 
 This is the most comical of the comments I see, and where the real ranting will begin.

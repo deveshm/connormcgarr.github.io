@@ -351,11 +351,10 @@ A4 = 160
 ```
 
 This hexadecimal method of alphanumeric shellcoding will require 3 values. Essentially what we are going to do is:
-1. Zero out the `EAX` register
-2. Subtract three values from `EAX`
-3. Push the new value of `EAX` onto the newly aligned stack (on top of the new `ESP` value).
+1. Subtract three values from `EAX`
+2. Push the new value of `EAX` onto the newly aligned stack (on top of the new `ESP` value).
 
-Whenever those three values are subtracted from the `EAX` register, that has been zeroed out, the result will be the opcodes we want to execute! What we need to do next, is find three __DECIMAL__ values that equal each of those four numbers above! These three numbers can be any of the numbers allowed within our character set. Let me give an example. if we have a value of 15, you don't have to use `5, 5, 5`. You could use `13, 1, 1` or `6, 7, 2`. Use whatever you would like! So, let's do this for each:
+What we need to do next, is find three __DECIMAL__ values that equal each of those four numbers above! These three numbers can be any of the numbers allowed within our character set. Let me give an example. if we have a value of 15, you don't have to use `5, 5, 5`. You could use `13, 1, 1` or `6, 7, 2`. Use whatever you would like! So, let's do this for each:
 
 ```console
 255 = 85 + 85 + 85
@@ -511,7 +510,7 @@ But what if our shellcode was this:
 
 We would have to add three NOPs, to fill out the four bytes needed in the register. But remember something here- NOPs are in our restricted character set! We can actually use `A`'s, `B`'s, or `C`'s to accomplish the same thing. Just remember that each of those three letters actual increment some of the general-purpose registers. Don't forget that if your shellcode is relying on some of those same registers to do some calculations!
 
-To get our shellcode on the stack, you would do the exact same method as above, but you would zero out the `EAX` register. We keep hearing me say "zero out the register". How exactly do we do this? Generally, you would use the logical [`XOR`](https://accu.org/index.php/journals/1915) function. If you `XOR` a register with itself, the value of the register turns to all `0`'s. You can achieve the same thing with logical [`AND`](https://processing.org/reference/logicalAND.html). Instead of using the register itself, you can use a string of `0`'s and `1`'s, and then perform another `AND` operation, with the inverse of those bits. This will be reflected in the updated PoC shortly. One other thing to note is that the opcode of `and eax` is `\x25`.
+To get our shellcode on the stack, you would do the exact same method as above, but you would first zero out the `EAX` register. Then, the three lines of SUB statements would be executed after the AND statement, and then pushed onto the stack. We keep hearing me say "zero out the register". How exactly do we do this? Generally, you would use the logical [`XOR`](https://accu.org/index.php/journals/1915) function. If you `XOR` a register with itself, the value of the register turns to all `0`'s. You can achieve the same thing with logical [`AND`](https://processing.org/reference/logicalAND.html). Instead of using the register itself, you can use a string of `0`'s and `1`'s, and then perform another `AND` operation, with the inverse of those bits. This will be reflected in the updated PoC shortly. One other thing to note is that the opcode of `and eax` is `\x25`.
 
 Since we are writing to the stack towards upward addresses, you will need to start with the last line of shellcode for your payload (`calc.exe` in my case), and end with your first line. Here is a visual of what will be happening when we write to the stack:
 

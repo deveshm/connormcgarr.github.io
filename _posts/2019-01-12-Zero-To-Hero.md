@@ -6,7 +6,7 @@ excerpt: "How I went from a naive college kid, who did not know there was more t
 ---
 Introduction
 ---
-<img src="{{ site.url }}{{ site.baseurl }}/images/offsec-student-certified-emblem-rgb-osce.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/offsec-student-certified-emblem-rgb-oscp.png" alt="">
 
 "Wait, Kali Linux is the same thing as Linux?" I can still recall the sheer embarrassment hitting my face. This was me, a 20 year old novice in October of 2017, at one of my school's Cyber Defense Club meetings. In the world of information security, where there are ground breaking developments everyday- I just had come to the realization that there, in fact, was more than one distribution of Linux. In that moment I realized I was being deserted by my peers, and a change was needed. This was the first of many events that propelled me to the elation I felt when I read the words:
 

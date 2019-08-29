@@ -37,11 +37,26 @@ The full syllabus can be found [here](https://www.offensive-security.com/documen
 
 After the first two modules, the course focuses on things like: signature antivirus bypassing, backdooring portable executables, fuzzing, [egghunters](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/), [structured exception handler (SEH) exploits](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/), alphanumeric shellcode, and Cisco exploitation.
 
-For me, the module that involved manually finding [Local File Inclusion (LFI)](https://www.owasp.org/index.php/Testing_for_Local_File_Inclusion) vulnerabilities and chaining them with other attack vectors to obtain remote code exeuction was eye opening.
+For me, one of the two modules before any assembly/exploit development, that involved manually finding [Local File Inclusion (LFI)](https://www.owasp.org/index.php/Testing_for_Local_File_Inclusion) vulnerabilities and chaining them with other attack vectors to obtain remote code exeuction, was eye opening.
 
-I most enjoyed the module about the exploit development cycle. This included: fuzzing to identify vulnerabilities, creating POCs, making precise calculations, and adhering to specific alphanumeric constraints.
+I most enjoyed the modules about the exploit development cycle. This included: fuzzing to identify vulnerabilities, creating POCs, making precise calculations, defeating constrained buffer space, defeating ASLR on Windows Vista, and adhering to specific alphanumeric constraints.
 
 The content of the course really opens your eyes to what goes on under the hood.
 
 The exam?
+---
+
+I will try not to discourage any readers I may have, but this exam was brutal. I have a short lived information securiry career at the time of this post, but up unil right now (the time this post was written), it was easily the hardest thing I have ever done.
+
+It is, however possible.
+
+Although I won't be able to hit on any specifics, there are a small number of objectives that need to be satisfied within the 48 hour alloted time slot. The total amount of points from the objectives is 90, and the successful examinee will be able to acquire 75 of those 90 points.
+
+As far as advice goes, never give up.
+
+There is a reason there is an accompanying course to the exam. Take inspiration from the course, and any research you may have expanded on throughout the course. Think laterally, creatively, and with a purpose.
+
+A few questions I always reiterate to myself when I don't know where else to turn are: "What am I trying to accomplish? What do I already know? How can I expand on what I know? What kinds of quesitons should I ask to accomplish this goal?"
+
+tHiS cOuRsE iS sO oUtDaTeD oMg oFfSeC
 ---

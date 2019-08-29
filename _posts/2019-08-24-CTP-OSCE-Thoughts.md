@@ -16,6 +16,32 @@ _Cracking The Perimeter_, stylized as _CTP_, is the accompanying course to the O
 What are the prerequisites to this course?
 ---
 
-Are you an [OSCP](https://www.offensive-security.com/information-security-certifications/oscp-offensive-security-certified-professional/) alumnus? Did you love the exploit development section of the [_PWK_](https://www.offensive-security.com/information-security-training/penetration-testing-training-kali-linux/) course? Do you just have an overall interest in the exploit development lifecycle, x86 assembly, web applications, and infrastructure exploitation?
+Are you an [OSCP](https://www.offensive-security.com/information-security-certifications/oscp-offensive-security-certified-professional/) alumni? Did you take joy in the exploit development segment of the [_PWK_](https://www.offensive-security.com/information-security-training/penetration-testing-training-kali-linux/) course? Do you just have an overall affection in the exploit development lifecycle, x86 assembly, web applications, and infrastructure exploitation?
 
-If you answered "yes" to any of these questions, this course and exam are probably for you. One thing to note as well, there is a common misconception that one must have the OSCP and/or completing the PWK course.
+If you answered "yes" to any of these questions, this course and exam are probably for you. One thing to note as well, there is a common misconception that one must have the OSCP and/or completing the PWK course. This is not true. Although beneficial, it is not necessary.
+
+Here are the recommended [prerequisistes](https://www.offensive-security.com/ctp-syllabus/#pre-req) to the course.
+
+As stated by Offensive Security, there does need to be a slight tolerance for pain and suffering. This course/certification is going to require some work. Pain and suffering does not mean you will never understand the material. It refers to the fact that indeed, you will be stuck from time to time. Read/review until you understand a concept. Utilize your student forums, too! Your fellow peers won't let you go through it alone.
+
+I would recommend dabbling in and being familiar with CPU registers within the x86 (32 bit) architecture, down to the 8 bit reigsters within them. This [article](https://en.wikibooks.org/wiki/X86_Assembly/X86_Architecture) is a good place to start.
+
+I would, in addition, recommend getting intimate with either [Immunity Debugger](https://debugger.immunityinc.com/ID_register.py) or [OllyDbg](http://www.ollydbg.de/download.htm).
+
+What's the content of the course like?
+---
+
+The content of the course is heavily focused on exploit development and assembly, after the first two modules.
+
+The full syllabus can be found [here](https://www.offensive-security.com/documentation/cracking-the-perimeter-syllabus.pdf).
+
+After the first two modules, the course focuses on things like: signature antivirus bypassing, backdooring portable executables, fuzzing, [egghunters](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/), [structured exception handler (SEH) exploits](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/), alphanumeric shellcode, and Cisco exploitation.
+
+For me, the module that involved manually finding [Local File Inclusion (LFI)](https://www.owasp.org/index.php/Testing_for_Local_File_Inclusion) vulnerabilities and chaining them with other attack vectors to obtain remote code exeuction was eye opening.
+
+I most enjoyed the module about the exploit development cycle. This included: fuzzing to identify vulnerabilities, creating POCs, making precise calculations, and adhering to specific alphanumeric constraints.
+
+The content of the course really opens your eyes to what goes on under the hood.
+
+The exam?
+---

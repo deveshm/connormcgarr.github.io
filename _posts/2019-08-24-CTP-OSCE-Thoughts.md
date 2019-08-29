@@ -6,3 +6,5 @@ excerpt: "My thoughts on the Cracking The Perimeter course/OSCE Exam and how I c
 ---
 Introduction
 ---
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/08.png" alt="">

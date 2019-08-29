@@ -92,5 +92,17 @@ These are not the only things you need to know, but these were the main resource
 - [Aligning the stack/Alphanumeric shellcode 1](https://blog.knapsy.com/blog/2017/05/01/quickzip-4-dot-60-win7-x64-seh-overflow-egghunter-with-custom-encoder/)
 - [Aligning the stack/Alphanumeric shellcode 2](https://connormcgarr.github.io/Admin-Express-0day/)
 - [HP NNM](https://www.youtube.com/watch?v=gHISpAZiAm0). This is from the creator of the _CTP_ course, [muts](https://twitter.com/muts?lang=en).
+- [Windows API docs](https://docs.microsoft.com/en-us/windows/win32/apiindex/windows-api-list)
 
 If the stack alignment and alphanumeric shellcoding become difficult, it is well explained in the course.
+
+Closing thoughts
+---
+
+The thing I took away most from this course was a path to tool independence. This course starts to create a culture of beginning to stop just using tools without a purpose or knowledge of the outcomes. _CTP_ requires you understand what is going on, at the binary level.
+
+The feeling of developing an exploit on your own, is one of the best feelings. The knowledge you gain from understanding shellcoding and the Windows API is very much applicable to modern day payload creation.
+
+In essence, this was an amazing course by Offensive Security, and I highly recommend it. Remember, NEVER GIVE UP AND NEVER GIVE IN! YOU CAN DO IT!
+
+Peace, love, and positivity!

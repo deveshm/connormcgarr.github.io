@@ -11,7 +11,7 @@ Introduction
 
 "Can you please update the course materials?" "I'll take this course when the materials are updated!" These are some of the retorts I frequently see, in response to words of commendation and praise that the Offensive Security community attribute to the [_Cracking The Perimeter_](https://www.offensive-security.com/information-security-training/cracking-the-perimeter/) course and [OSCE](https://www.offensive-security.com/information-security-certifications/osce-offensive-security-certified-expert/) exam.
 
-_Cracking The Perimeter_, stylized as _CTP_, is the accompanying course to the Offensive Security Certificed Expert (OSCE). This course is often seen as "outdated". There is a reason why Offensive Security certifications do not have an expiration date. There is a reason why very few of the courses receive updates. There are reasons why Offensive Security alumni are frequently sought out in the information security market. I will hit on all of these notions in the middle and latter parts of this post.
+_Cracking The Perimeter_, stylized as _CTP_, is the accompanying course to the Offensive Security Certificed Expert (OSCE). This course is often seen as "outdated". There is a reason why Offensive Security certifications do not have an expiration date. There is a reason why very few of the courses receive updates. There are reasons why Offensive Security alumni are frequently sought out in the information security market. I will hit on all of these notions in the middle and latter parts of this post. Always remember to trust the process, when it comes to Offensive Security. There is a reason why they have accrued so much noteriety.
 
 What are the prerequisites to this course?
 ---

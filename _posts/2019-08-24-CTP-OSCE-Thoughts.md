@@ -8,3 +8,4 @@ Introduction
 ---
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/offsec-student-certified-emblem-rgb-osce.png" alt="">
+

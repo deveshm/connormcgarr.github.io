@@ -105,4 +105,6 @@ The feeling of developing an exploit on your own, is one of the best feelings. T
 
 In essence, this was an amazing course by Offensive Security, and I highly recommend it. Remember, NEVER GIVE UP AND NEVER GIVE IN! YOU CAN DO IT!
 
+<img src="{{ site.url }}{{ site.baseurl }}/images/OSCE.png" alt="">
+
 Peace, love, and positivity!

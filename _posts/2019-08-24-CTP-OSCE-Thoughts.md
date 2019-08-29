@@ -75,7 +75,7 @@ How can you run if you don't know how to walk?
 
 OSCE is not a matter the outdated content. It is a matter of understanding the material from the course, along with thinking in multiple dimensions and laterally. That is why these courses are created with the certification challenges. It is so students learn how to apply what they know in effective and creative new ways, not just regurgitate what was memorized in the course.
 
-Although I think that the courses are always valuable, in any state, if Offensive Security updated the OSCE tomorrow- that would be awesome! I would be 100 percent behind it, and I am sure the material would be amazing. However, that does not take away anything from someone who obtained the OSCE 2 days before the new materials were released. The certification is about actually thinking, and not just tallying up completed objectives.
+Although I think that the courses are always valuable, in any state, if Offensive Security updated the OSCE tomorrow- that would be awesome! I would be 100 percent behind it, and I am sure the material would be amazing. However, that does not take away anything from someone who obtained the OSCE if new course materials came along 2 days later. The certification is about actually thinking, and not just tallying up completed objectives.
 
 Remember what competencies are gained from these exams. Not just technical knowledge, but ingenious thinking and being persistent until the job is done. That is why the Offensive Security courses get updated at strategic times, and why the certifications do not expire.
 

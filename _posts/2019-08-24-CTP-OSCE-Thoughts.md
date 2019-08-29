@@ -31,7 +31,7 @@ I would, in addition, recommend getting intimate with either [Immunity Debugger]
 What's the content of the course like?
 ---
 
-The content of the course is heavily focused on exploit development and assembly, after the first two modules.
+The content of the course is heavily focused on Windows exploit development and assembly, after the first two modules.
 
 The full syllabus can be found [here](https://www.offensive-security.com/documentation/cracking-the-perimeter-syllabus.pdf).
 
@@ -56,7 +56,41 @@ As far as advice goes, never give up.
 
 There is a reason there is an accompanying course to the exam. Take inspiration from the course, and any research you may have expanded on throughout the course. Think laterally, creatively, and with a purpose.
 
-A few questions I always reiterate to myself when I don't know where else to turn are: "What am I trying to accomplish? What do I already know? How can I expand on what I know? What kinds of quesitons should I ask to accomplish this goal?"
+A few questions I always reiterate to myself when I don't know where else to turn are: "What am I trying to accomplish? What do I already know? How can I expand on what I know? What kinds of quesitons should I be asking myself, or Google, in order to accomplish this goal?"
 
 tHiS cOuRsE iS sO oUtDaTeD oMg oFfSeC tEaCh mE sOmEtHiNg rElEvAnT
 ---
+
+This is the most comical of the comments I see, and where the real ranting will begin.
+
+Why do you think Offensive Security certifications never expire? Why do you think many organizations value any Offensive Security certified personnel, and invest in their training?
+
+The reason is clear. Although there defintley is a lot of technical acumen to be obtained from these courses- the courses are all about the ["Try Harder"](https://www.offensive-security.com/offsec/say-try-harder/) mentality and mindset.
+
+The reason why certifications don't expire, in my opinion, is this. Anyone who obtained the OSCP when the course was _Penetration with BackTrack_ has the same validity as anyone who took the updated course, _Penetration with Kali Linux_. This is because Offensive Security is aware that anyone who can complete the course at one stage, would be able to do it at any other stage (given the fact they have access to the same resources as students who enroll in updated courses). The exams are desinged in such a way that the lateral thinking and creativity are just as important, if not more, than the technical aspects of the exams. In all reality, anyone who is persistent enough to obtain the cert in 2009, could replicate the same dedication and discipline in 2039.
+
+The course is called _Cracking the Perimeter_ for a reason. There is so much more out there in the world of offensive security. This course barely scratches the surface- yet is still like drinking from a garden hose. All of the concepts taught in the course, are needed in order to understand modern day exploit mitigations.
+
+How can you run if you don't know how to walk?
+
+OSCE is not a matter the outdated content. It is a matter of understanding the material from the course, along with thinking in multiple dimensions and laterally. That is why these courses are created with the certification challenges. It is so students learn how to apply what they know in effective and creative new ways, not just regurgitate what was memorized in the course.
+
+Although I think that the courses are always valuable, in any state, if Offensive Security updated the OSCE tomorrow- that would be awesome! I would be 100 percent behind it, and I am sure the material would be amazing. However, that does not take away anything from someone who obtained the OSCE 2 days before the new materials were released. The certification is about actually thinking, and not just tallying up completed objectives.
+
+Remember what compentecies are gained from these exams. Not just technical knowledge, but ingenious thinking and being persistent until the job is done. That is why the Offensive Security courses get updated at strategic times, and why the certifications do not expire.
+
+Resources
+---
+
+These are not the only things you need to know, but these were the main resources I used:
+
+- [Google](https://www.google.com/)
+- [Jumping to shellcode](https://www.abatchy.com/2017/05/jumping-to-shellcode.html)
+- [List of x86 opcodes](http://sparksandflames.com/files/x86InstructionChart.html)
+- [Types of jumps](http://www.unixwiz.net/techtips/x86-jumps.html)
+- [SEH exploits/egghunters](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/)
+- [Aligning the stack/Alphanumeric shellcode 1](https://blog.knapsy.com/blog/2017/05/01/quickzip-4-dot-60-win7-x64-seh-overflow-egghunter-with-custom-encoder/)
+- [Aligning the stack/Alphanumeric shellcode 2](https://connormcgarr.github.io/Admin-Express-0day/)
+- [HP NNM](https://www.youtube.com/watch?v=gHISpAZiAm0). This is from the creator of the _CTP_ course, [muts](https://twitter.com/muts?lang=en).
+
+If the stack alignment and alphanumeric shellcoding become difficult, it is well explained in the course.

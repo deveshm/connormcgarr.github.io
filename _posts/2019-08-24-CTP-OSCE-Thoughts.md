@@ -35,7 +35,7 @@ The content of the course is heavily focused on Windows exploit development and 
 
 The full syllabus can be found [here](https://www.offensive-security.com/documentation/cracking-the-perimeter-syllabus.pdf).
 
-After the first two modules, the course focuses on things like: signature antivirus bypassing, backdooring portable executables, fuzzing, [egghunters](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/), [structured exception handler (SEH) exploits](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/), alphanumeric shellcode, and Cisco exploitation.
+After the first two modules, the course focuses on things like: bypassing signature based antivirus applications, backdooring portable executables, fuzzing, [egghunters](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/), [structured exception handler (SEH) exploits](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/), alphanumeric shellcode, and Cisco exploitation.
 
 For me, one of the two modules before any assembly/exploit development, that involved manually finding [Local File Inclusion (LFI)](https://www.owasp.org/index.php/Testing_for_Local_File_Inclusion) vulnerabilities and chaining them with other attack vectors to obtain remote code execution, was eye opening.
 

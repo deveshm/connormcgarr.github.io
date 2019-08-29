@@ -46,9 +46,9 @@ The content of the course really opens your eyes to what goes on under the hood.
 The exam?
 ---
 
-I will try not to discourage any readers I may have, but this exam was brutal. I have a short lived information security career at the time of this post, but up unil right now (the time this post was written), it was easily the hardest thing I have ever done.
+I will try not to discourage any readers I may have, but this exam was brutal. I have a short lived information security career at the time of this post, but up until the time this post was written, it is easily the hardest thing I have ever done. In my life.
 
-It is, however possible.
+It is, however, possible.
 
 Although I won't be able to hit on any specifics, there are a small number of objectives that need to be satisfied within the 48 hour alloted time slot. The total amount of points from the objectives is 90, and the successful examinee will be able to acquire 75 of those 90 points.
 

@@ -81,7 +81,7 @@ naver_site_verification  :
 
 # Social Sharing
 twitter:
-  username               : 33y0re
+  username               : 
 facebook:
   username               :
   app_id                 :
@@ -108,7 +108,8 @@ author:
   avatar           : "/assets/images.jpeg"
   bio              : "OSCP. OSCE. Just another penetration tester. Security through obscurity, am I right?!"
   location         : "United States"
-  linkedin	   : "connor-mcgarr-oscp-osce-7522a6152"
+  linkedin	       : "connor-mcgarr-oscp-osce-7522a6152"
+  twitter          : "33y0re"
   email            :
   links:
     - label: "Email"
@@ -125,7 +126,10 @@ footer:
       url: "https://github.com/connormcgarr"
     - label: "Linkedin"
       icon: "fab fa-fw fa-linkedin"
-      url: "https://www.linkedin.com/in/connor-mcgarr-oscp-7522a6152/"
+      url: "https://www.linkedin.com/in/connor-mcgarr-oscp-osce-7522a6152/"
+    - label: "Twitter"
+      icon: "fab fa-fw fa-twitter"
+      url: "https://twitter.com/33y0re"
 
 
 # Reading Files

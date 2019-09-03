@@ -81,7 +81,7 @@ naver_site_verification  :
 
 # Social Sharing
 twitter:
-  username               :
+  username               : 33y0re
 facebook:
   username               :
   app_id                 :
@@ -117,10 +117,6 @@ author:
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/connormcgarr"
-    - label: “Twitter”
-      icon: “fab fa-fw fa-twitter”
-      url: “https://twitter.com/33y0re”
-
 # Site Footer
 footer:
   links:

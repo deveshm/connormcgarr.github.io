@@ -14,7 +14,7 @@ As mentioned before, in order to execute a successful exploit, we must find out 
 
 Here is a snippet of source code from [muts'](https://twitter.com/muts?lang=en) famous HP NNM Exploit:
 
-```
+```python
 import socket
 import os
 import sys

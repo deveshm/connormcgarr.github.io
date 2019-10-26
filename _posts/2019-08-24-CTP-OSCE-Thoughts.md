@@ -24,7 +24,7 @@ Here are the recommended [prerequisites](https://www.offensive-security.com/ctp-
 
 As stated by Offensive Security, there does need to be a slight tolerance for pain and suffering. They are referring to the fact that indeed, you will be stuck from time to time. Sometimes it may feel like there is no end in sight. Never give up when you feel this way. Read/review until you understand a concept. Utilize your student forums, too! Your fellow peers won't let you go through it alone.
 
-I would recommend dabbling in and being familiar with CPU registers within the x86 (32 bit) architecture, down to the 8 bit registers within them. This [article](https://en.wikibooks.org/wiki/X86_Assembly/X86_Architecture) is a good place to start.
+I would recommend dabbling in and being familiar with CPU registers within the x86 (32-bit) architecture, down to the 8-bit registers within them. This [article](https://en.wikibooks.org/wiki/X86_Assembly/X86_Architecture) is a good place to start.
 
 I would, in addition, recommend getting intimate with either [Immunity Debugger](https://debugger.immunityinc.com/ID_register.py) or [OllyDbg](http://www.ollydbg.de/download.htm).
 

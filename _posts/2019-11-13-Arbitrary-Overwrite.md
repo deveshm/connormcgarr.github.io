@@ -48,3 +48,32 @@ Now, the variable `UserWriteWhatWhere` has been attributed to the datatype `PWRI
 
 Let's move on to the source file, [ArbitraryWrite.c](https://github.com/hacksysteam/HackSysExtremeVulnerableDriver/blob/master/Driver/HEVD/Windows/ArbitraryWrite.c).
 
+The above function, `TriggerArbitraryWrite()` is passed to the source file.
+
+Then, the `What` and `Where` pointers decalred earlier in the struct, are initialized as __NULL__ pointers:
+
+```c
+PULONG_PTR What = NULL;
+PULONG_PTR Where = NULL;
+```
+
+Then finally, we reach our vulnerability:
+
+```c
+#else
+        DbgPrint("[+] Triggering Arbitrary Write\n");
+
+        //
+        // Vulnerability Note: This is a vanilla Arbitrary Memory Overwrite vulnerability
+        // because the developer is writing the value pointed by 'What' to memory location
+        // pointed by 'Where' without properly validating if the values pointed by 'Where'
+        // and 'What' resides in User mode
+        //
+
+        *(Where) = *(What);
+```
+
+As you can see, an adversary could write the value pointed by `What` to the memory location referenced by `Where`. The real issue is that there is no validation using a Windows API function such as `ProbeForRead()` or `ProbeForWrite()`, that validate whether or not the values of `What` and `Where` reside in user land. Knowing this, we will be able to utilize our user land shellcode going forward for the exploit.
+
+IOCTL
+---

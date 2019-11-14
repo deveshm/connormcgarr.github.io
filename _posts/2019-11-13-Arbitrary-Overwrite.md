@@ -43,3 +43,8 @@ TriggerArbitraryWrite(
     _In_ PWRITE_WHAT_WHERE UserWriteWhatWhere
 );
 ```
+
+Now, the variable `UserWriteWhatWhere` has been attributed to the datatype `PWRITE_WHAT_WHERE`. As you can recall from above, `PWRITE_WHAT_WHERE` is a pointer to the struct that contains `What` and `Where` pointers (Which will be exploited later on). From now on `UserWriteWhatWhere` also points to the struct.
+
+Let's move on to the source file, [ArbitraryWrite.c](https://github.com/hacksysteam/HackSysExtremeVulnerableDriver/blob/master/Driver/HEVD/Windows/ArbitraryWrite.c).
+

@@ -27,3 +27,17 @@ This returns a few elements of each process. We are most interested in the "Proc
 `dt nt!_EPROCESS <address>`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_2.png" alt="">
+
+`dt` will display information about various variables, data types, etc. As you can see from the image above, various information about the SYSTEM process has been displayed. If you continue down the kd windows in WinDbg, you will see the `Token` element, at an offset of 0x358:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_3.png" alt="">
+
+What does this mean? That means for each process on Windows, the access token is located at an offset of 0x358. We will for sure be using this information later. Before moving on though, let's take a look at how the `Token` element is stored.
+
+As you can see from the above image, there is something called `_EX_FAST_REF`, or an Executive Fast Reference union. The difference between a union and a structure, is that a union stores data types at the same memory location (notice there is no difference in offset of the elements of `_EX_FAST_REF` in the image below). This is what the access token of a process is stored in. Let's take a closer look at this strucutre:
+
+`dt nt!_EX_FAST_REF`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_4.png" alt="">
+
+Take a look at the `RefCnt` element. This is a value, appended to the access token, that keeps track of references of the access token. On x86, this is 3 bits. On x64 (which is our current architecture) this is 4 bits, as shown above. We want to clear these bits out, using logical AND. That way, we just extract the actual value of the `Token`, and not other unnecessary metadata.

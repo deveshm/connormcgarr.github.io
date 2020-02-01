@@ -84,7 +84,9 @@ As you can see, `cmd.exe` has become a privileged process! Now the only question
 
 Assembly? Who Needs It. I Will Never Need To Know That- It's Irrelevant
 ---
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_MEME_1.png" alt="">
+
 Small rant here- isn't it so funny the same ones who say exploit development is a waste of time and irrelevant are the same ones who will use Eternal Blue on pentesting projects? ;)
 
 Anyways, let's develop an assembly program that can dynamically do the above tasks in x64.
-

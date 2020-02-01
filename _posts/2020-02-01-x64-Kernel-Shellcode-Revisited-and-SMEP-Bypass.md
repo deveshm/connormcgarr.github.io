@@ -1,5 +1,5 @@
 ---
-title: "Exploit Development: Panic! At The Kernel - Token Stealing Payloads Revisited on x64 and Bypassing SMEP (UNDER CONSTRUCTION)"
+title: "Exploit Development: Panic! At The Kernel - Token Stealing Payloads Revisited on Windows 10 x64 and Bypassing SMEP (UNDER CONSTRUCTION)"
 date:  2020-02-01
 tags: [posts]
 excerpt: "Revisiting token stealing payloads on Windows 10 x64 and diving into bypassing SMEP"
@@ -59,3 +59,5 @@ So, let's use logical AND to try to clear out those last few bits.
 As you can see, the result is 7. This is not the value we want- it is actually the inverse of it. Logic tells us, we should take the inverse of 0xf, -0xf.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_7.png" alt="">
+
+So- we have finally exctracted the 

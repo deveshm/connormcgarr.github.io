@@ -81,3 +81,10 @@ Now, let's take a look back at our previous `cmd.exe` process.
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_10.png" alt="">
 
 As you can see, `cmd.exe` has become a privileged process! Now the only question remains- how do we do this dynamically with a piece of shellcode?
+
+Assembly? Who Needs It. I Will Never Need To Know That- It's Irrelevant
+---
+Small rant here- isn't it so funny the same ones who say exploit development is a waste of time and irrelevant are the same ones who will use Eternal Blue on pentesting projects? ;)
+
+Anyways, let's develop an assembly program that can dynamically do the above tasks in x64.
+

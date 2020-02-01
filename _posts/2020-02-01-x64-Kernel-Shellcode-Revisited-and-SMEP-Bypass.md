@@ -87,6 +87,8 @@ Assembly? Who Needs It. I Will Never Need To Know That- It's Irrelevant
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_MEME1.png" alt="">
 
-Small rant here- isn't it so funny the same ones who say exploit development is a waste of time and irrelevant are the same ones who will use Eternal Blue ;)
+Small rant here- isn't it so funny the same ones who say exploit development is a waste of time and irrelevant are the same ones who will use Eternal Blue. ;)
+
+Assembly will always hold a dear place in my heart, and I think everyone should at least know the fundementals and understand how powerful it is.
 
 Anyways, let's develop an assembly program that can dynamically do the above tasks in x64.

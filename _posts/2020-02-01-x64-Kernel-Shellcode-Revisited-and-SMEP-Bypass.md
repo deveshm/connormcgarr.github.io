@@ -80,4 +80,4 @@ Now, let's take a look back at our previous `cmd.exe` process.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_10.png" alt="">
 
-As you can see, `cmd.exe` has become a privileged process! Now the only question remains- now do we do this dynamically with a piece of shellcode?
+As you can see, `cmd.exe` has become a privileged process! Now the only question remains- how do we do this dynamically with a piece of shellcode?

@@ -6,3 +6,4 @@ excerpt: "Revisiting Token Stealing Payloads on Windows 10 x64 and diving into b
 ---
 Introduction
 ---
+Same ol' story with this blog post- I am trying to continue and further my research/overall knowledge on Windows kernel exploitation, in order to prepare for [AWE](https://www.blackhat.com/us-20/training/schedule/index.html#advanced-windows-exploitation-19158), and just my overall knowledge of exploit development.

@@ -60,4 +60,24 @@ As you can see, the result is 7. This is not the value we want- it is actually t
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_7.png" alt="">
 
-So- we have finally exctracted the 
+So- we have finally extracted the value of the raw access token. At this point, let's see what happens when we copy this token to a normal `cmd.exe` session.
+
+Openenig a new `cmd.exe` process on the debuggee machine:
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_7_a.png" alt="">
+
+After spawning a `cmd.exe` process on the debuggee, let's identify the process address in the debugger.
+
+`!process 0 0 cmd.exe`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_8.png" alt="">
+
+Now that we have the process address located at `0xffffe6028694d580` for `cmd.exe`. We also know, based on our research earlier, that the `Token` of a process is located at an offset of 0x358 from the process. Let's Use WinDbg to overwrite the `cmd.exe` access token with the access token of the SYSTEM process.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_9.png" alt="">
+
+Now, let's take a look back at our previous `cmd.exe` process.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_10.png" alt="">
+
+As you can see, `cmd.exe` has become a privileged process! Now the only question remains- now do we do this dynamically with a piece of shellcode?

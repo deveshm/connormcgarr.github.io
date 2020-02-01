@@ -24,20 +24,38 @@ Once that is setup, execute the following command, to dump the process list:
 
 This returns a few elements of each process. We are most interested in the "Process address", which has been outlined in the image above at address `0xffffe60284651040`. Since we have enumerated that address, we can enumerate much more detailed information about the `_EPROCESS` structure of the SYSTEM process.
 
-`dt nt!_EPROCESS <address>`
+`dt nt!_EPROCESS <Process address>`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_2.png" alt="">
 
-`dt` will display information about various variables, data types, etc. As you can see from the image above, various information about the SYSTEM process has been displayed. If you continue down the kd windows in WinDbg, you will see the `Token` element, at an offset of 0x358:
+`dt` will display information about various variables, data types, etc. As you can see from the image above, various information about the SYSTEM process has been displayed. If you continue down the kd windows in WinDbg, you will see the `Token` element, at an offset of 0x358.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_3.png" alt="">
 
 What does this mean? That means for each process on Windows, the access token is located at an offset of 0x358. We will for sure be using this information later. Before moving on though, let's take a look at how the `Token` element is stored.
 
-As you can see from the above image, there is something called `_EX_FAST_REF`, or an Executive Fast Reference union. The difference between a union and a structure, is that a union stores data types at the same memory location (notice there is no difference in offset of the elements of `_EX_FAST_REF` in the image below). This is what the access token of a process is stored in. Let's take a closer look at this strucutre:
+As you can see from the above image, there is something called `_EX_FAST_REF`, or an Executive Fast Reference union. The difference between a union and a structure, is that a union stores data types at the same memory location (notice there is no difference in offset of the elements of `_EX_FAST_REF` in the image below). This is what the access token of a process is stored in. Let's take a closer look at this structure.
 
 `dt nt!_EX_FAST_REF`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_4.png" alt="">
 
 Take a look at the `RefCnt` element. This is a value, appended to the access token, that keeps track of references of the access token. On x86, this is 3 bits. On x64 (which is our current architecture) this is 4 bits, as shown above. We want to clear these bits out, using logical AND. That way, we just extract the actual value of the `Token`, and not other unnecessary metadata.
+
+To extract the value of the token, we simply need to view the `EX_FAST_REF` union of the SYSTEM process at an offset of 0x358 (which is where our token resides). From there, we can figure out how to go about clearing out `RefCnt`.
+
+`dt nt!_EX_FAST_REF <Process address>+0x358`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_5.png" alt="">
+
+As you can see, `RefCnt` is equal to 0y0111. 0y denotes a binary value. So this means `RefCnt` in this instance equals 7 in decimal.
+
+So, let's use logical AND to try to clear out those last few bits.
+
+`? TOKEN & 0xf`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_6.png" alt="">
+
+As you can see, the result is 7. This is not the value we want- it is actually the inverse of it. Logic tells us, we should take the inverse of 0xf, -0xf.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_7.png" alt="">

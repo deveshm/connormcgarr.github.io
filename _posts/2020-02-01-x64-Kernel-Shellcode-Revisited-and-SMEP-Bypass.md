@@ -91,4 +91,14 @@ Small rant here- isn't it so funny the same ones who say exploit development is 
 
 Assembly will always hold a dear place in my heart, and I think everyone should at least know the fundementals and understand how powerful it is.
 
-Anyways, let's develop an assembly program that can dynamically do the above tasks in x64.
+Anyways, let's develop an assembly program that can dynamically perform the above tasks in x64.
+
+So let's start with this logic- we want to enumerate the current process. The current process during exploitation will be the process that triggers the vulnerability (the process where the exploit code is ran from). We want to get this process, because eventually we want to copy the SYSTEM access token to it. Let's do that
+
+`PsGetCurrentProcessId()` is a Windows API function that identifies current thread and the process the thread resides in. This is identical to `IoGetCurrentProcess()`, and Microsoft recommends users to invoke `PsGetCurrentProgress()` instead. This function returns a pointer to the current PID's thread. Let's unassemble that function in WinDbg.
+
+`uf nt!PsGetCurrentProcess`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_11.png" alt="">
+
+Let's take a look at the first instruction `mov rax, qword ptr gs:[188h]`.

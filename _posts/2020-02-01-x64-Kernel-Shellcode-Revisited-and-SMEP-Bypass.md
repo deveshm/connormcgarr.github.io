@@ -141,8 +141,8 @@ Let's start building out an assembly program that tracks what we are doing.
 
 _start:
 	mov rax, [gs:0x188]		    ; Current thread (KTHREAD)
-	mov rax, [rax + 0xb8]	    ; Current process (EPROCESS)
-  mov rbx, rax			        ; Copy current process to rbx
+	mov rax, [rax + 0xb8]	   	    ; Current process (EPROCESS)
+  	mov rbx, rax			    ; Copy current process to rbx
 ```
 
 Notice that I copied the current process, stored in RAX, into RBX as well. You will see why this is needed here shortly.

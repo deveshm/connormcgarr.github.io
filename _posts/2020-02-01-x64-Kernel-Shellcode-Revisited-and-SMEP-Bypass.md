@@ -162,4 +162,4 @@ Let's take a look at the data type of `ActivePorcessLinks`, `_LIST_ENTRY`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_16.png" alt="">
 
-This data type is a doubly linked list. This means that each element in the linked list not only points to the next element, but it also points to the previous one. Essentially, the elements point in each direction.
+This data type is a doubly linked list. This means that each element in the linked list not only points to the next element, but it also points to the previous one. Essentially, the elements point in each direction. This linked list is responsible for keeping track of all active processes.

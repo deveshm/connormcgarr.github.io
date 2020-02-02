@@ -114,3 +114,52 @@ This shows the GS segment register, at an offset of 0x188, holds an address of `
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_13_a.png" alt="">
 
 As you can see, we have verified that `nt!KiInitialThread` represents the address of the current thread.
+
+Recall what was mentioned about threads and processes earlier. Threads are the part of a process that actually perform execution of code (for our purposes, these are kernel threads). Now that we have identified the current thread, let's identify the process associated with that thread (which would be the current process). Let's go back to the image above where we unassembled the `PSGetCurrentProcess()` function.
+
+`mov rax, qword ptr [rax,0B8h]`
+
+RAX alread contains the value of the GS segment register at an offset of 0x188 (which contains the current thread). The above assembly instruction will move the value of `nt!KiInitialThread + 0xB8` into RAX. Logic tells us this has to be the location of our current process, as the only instruction left in the `PsGetCurrentProcess()` routine is a `ret`. Let's investigate this further.
+
+Since we believe this is going to be our current process, let's view this data in an `_EPROCESS` structure.
+
+`dt nt!_EPROCESS poi(nt!KiInitialThread+0xb8)`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_14.png" alt="">
+
+First, a little WinDbg kung-fu. `poi` essentially dereferences a pointer, which means obtaining the value a pointer points to.
+
+And as you can see, we have found where our current proccess is! The PID for the current process at this time is the SYSTEM process (PID = 4). This is subject to change dependent on what is executing, etc. But, it is very important we are able to identify the current process.
+
+Let's start building out an assembly program that tracks what we are doing.
+
+```nasm
+; Windows 10 x64 Token Stealing Payload
+; Author Connor McGarr
+
+[BITS 64]
+
+_start:
+	mov rax, [gs:0x188]		    ; Current thread (KTHREAD)
+	mov rax, [rax + 0xb8]	    ; Current process (EPROCESS)
+  mov rbx, rax			        ; Copy current process to rbx
+```
+
+Notice that I copied the current process, stored in RAX, into RBX as well. You will see why this is needed here shortly.
+
+Take Me For A Loop!
+---
+
+Let's take a loop at a few more elements of the `_EPROCESS` structure.
+
+`dt nt!_EPROCESS`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_15.png" alt="">
+
+Let's take a look at the data type of `ActivePorcessLinks`, `_LIST_ENTRY`
+
+`dt nt!_LIST_ENTRY`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_16.png" alt="">
+
+This data type is a doubly linked list. This means that each element in the linked list not only points to the next element, but it also points to the previous one. Essentially, the elements point in each direction.

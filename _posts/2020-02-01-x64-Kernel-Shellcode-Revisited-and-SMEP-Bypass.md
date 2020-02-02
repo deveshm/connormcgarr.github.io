@@ -125,7 +125,7 @@ Since we believe this is going to be our current process, let's view this data i
 
 `dt nt!_EPROCESS poi(nt!KiInitialThread+0xb8)`
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/64_14.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_41_a.png" alt="">
 
 First, a little WinDbg kung-fu. `poi` essentially dereferences a pointer, which means obtaining the value a pointer points to.
 
@@ -163,3 +163,5 @@ Let's take a look at the data type of `ActivePorcessLinks`, `_LIST_ENTRY`
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_16.png" alt="">
 
 This data type is a doubly linked list. This means that each element in the linked list not only points to the next element, but it also points to the previous one. Essentially, the elements point in each direction. This linked list is responsible for keeping track of all active processes.
+
+There are two elements of `_EPROCESS` we need to keep track of. On Windows 10 x64, located at an offset of 0x2e0, `UniqueProcessId`

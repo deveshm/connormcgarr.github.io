@@ -186,4 +186,3 @@ __loop:
 	cmp rcx, 4 			; Compare PID to SYSTEM PID 
 	jnz __loop			; Loop until SYSTEM PID is found
 ```
-```

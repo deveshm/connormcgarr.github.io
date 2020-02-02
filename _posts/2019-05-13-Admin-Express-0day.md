@@ -217,11 +217,11 @@ We now have enough room to work with after making all the jumps! After we take o
 
 Will the Stars Align?
 ---
-As you can see, we have reached the buffer of C's. Let's take note of some addresses here! The address of the current instruction `INC EBX` is located at `0012F313`. We can also see below that the current address of our stack pointer is at `0012DC98`:
+As you can see, we have reached the buffer of C's. Let's take note of some addresses here! The address of the current instruction `inc ebx` is located at `0012F313`. We can also see below that the current address of our stack pointer is at `0012DC98`:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/14a.png" alt="">
 
-Take note of the current `ESP` value. For a reason I cannot explain (and outline later), I found out that I needed to save the current stack point value __BEFORE__ I execute my shellcode. As you will see later, I will store my current `ESP` value into the `ECX` register and restore the old stack pointer right before execution of the shellcode.
+Take note of the current ESP value. For a reason I cannot explain (and outline later), I found out that I needed to save the current stack point value __BEFORE__ I execute my shellcode. As you will see later, I will store my current ESP value into the ECX register and restore the old stack pointer right before execution of the shellcode.
 
 Taking a look at our buffer of `C`'s, we have about __E4__ hex bytes, or __228__ bytes to work with:
 
@@ -235,9 +235,9 @@ The `calc.exe` shellcode I will be using is 16 bytes. Shortly, you will see why 
 
 Let's begin with talking about why we need to take into consideration the [LIFO](https://www.cs.cmu.edu/~adamchik/15-121/lectures/Stacks%20and%20Queues/Stacks%20and%20Queues.html) (Last In First Out) structure of the stack.
 
-Since we are not using Metasploit, we are going to manually encode our shellcode. What we are going to do, at a high level, is an alignment of the stack. We are going to manipulate the stack to make the location of `EAX` equal to `ESP`. We will get to the low level details about using `EAX` to put our shellcode on the stack, but for right now let me explain about this stack alignment. 
+Since we are not using Metasploit, we are going to manually encode our shellcode. What we are going to do, at a high level, is an alignment of the stack. We are going to manipulate the stack to make the location of EAX equal to ESP. We will get to the low level details about using EAX to put our shellcode on the stack, but for right now let me explain about this stack alignment. 
 
-Since `EAX` will be the same location of `ESP`, we will essentially be pushing our decoded shellcode onto the top of the aligned stack (remember that ESP points to the top of the stack, and we will control where that is). We will be writing the encoded shellcode, and then executing a `push eax` instruction after each of the encoded instructions. A `push` instruction, as you recall, puts an item on top of the stack. Since our stack pointer and `EAX` are at the same place, any `push eax` instruction will write whatever is in `EAX`, to lower memory addresses (in relation the current `ESP` value). We will be encoding each line of shellcode and then executing a `push eax` instruction, to get it on the stack. This means that our decoded shellcode will start at `ESP`, which is wherever we are aligning it to, and grow towards the lower addresses (visually up the stack in the debugger), as each piece of encoded shellcode is decoded. Essentially, as each encoded instruction is executed, the decoded instructions will visually grow towards those instructions (which is another way of saying, growing towards the lower memory addresses). Since the stack is __LIFO__, we eventually will meet our decoded shellcode, simply by just executing our encoded instructions! This means we will need to begin with pushing the __END__ of our shellcode onto the stack. 
+Since EAX will be the same location of ESP, we will essentially be pushing our decoded shellcode onto the top of the aligned stack (remember that ESP points to the top of the stack, and we will control where that is). We will be writing the encoded shellcode, and then executing a `push eax` instruction after each of the encoded instructions. A `push` instruction, as you recall, puts an item on top of the stack. Since our stack pointer and EAX are at the same place, any `push eax` instruction will write whatever is in EAX, to lower memory addresses (in relation the current ESP value). We will be encoding each line of shellcode and then executing a `push eax` instruction, to get it on the stack. This means that our decoded shellcode will start at ESP, which is wherever we are aligning it to, and grow towards the lower addresses (visually up the stack in the debugger), as each piece of encoded shellcode is decoded. Essentially, as each encoded instruction is executed, the decoded instructions will visually grow towards those instructions (which is another way of saying, growing towards the lower memory addresses). Since the stack is __LIFO__, we eventually will meet our decoded shellcode, simply by just executing our encoded instructions! This means we will need to begin with pushing the __END__ of our shellcode onto the stack. 
 
 Here is an analogy of what I am trying to relay. Imagine I ask you to write an essay. In English, we start with the top left hand of the page and we write from left to right until we reach the bottom right hand corner. There is only one stipulation for this essay I would like you to write. I would like you to start at the bottom of the page and work your way up. If you started with the last word of your essay in the bottom right hand corner of the page, and continued to write backwards from right to left, you would have a coherent essay in the end! The only difference is that you wrote it in reverse order. If this analogy does not make sense, I have a diagram further along in this writeup that will give a bit of a visual to this sentiment I am trying to relay.
 
@@ -253,7 +253,7 @@ HIGHER ADDRESSES
 ```
 If we write our shellcode properly, taking into consideration little endian and how the stack writes after a `push` instruction, we can take the fact execution goes from lower to higher addresses, and we will find ourselves executing our actual decoded shellcode.
 
-Before we align the stack, recall what was mentioned above about saving the current stack pointer (after all our jumps). Since we need to save the stack pointer, let's use `ECX`. To do this, we are going to use a `push esp` instruction to get the current stack pointer value onto the stack. We then are going to use a `pop ecx` instruction to pop whatever is on top of the stack (which is the stack pointer now), into `ECX`. Then, we will `push ecx`, to get the old stack pointer onto the stack, in order to perform a `MOV ECX,ESP` later. Here is the updated PoC:
+Before we align the stack, recall what was mentioned above about saving the current stack pointer (after all our jumps). Since we need to save the stack pointer, let's use ECX. To do this, we are going to use a `push esp` instruction to get the current stack pointer value onto the stack. We then are going to use a `pop ecx` instruction to pop whatever is on top of the stack (which is the stack pointer now), into ECX. Then, we will `push ecx`, to get the old stack pointer onto the stack, in order to perform a `mov ecx,esp` later. Here is the updated PoC:
 
 ```console
 root@kali:~/ADMIN_EXPRESS/POC# cat poc.py 
@@ -293,28 +293,28 @@ Our instructions are ready for execution:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/17.png" alt="">
 
-Stepping through `push esp` you can see that `ESP` has been pushed onto the top of the stack (remember that our stack pointer was at `0012DC98` before execution):
+Stepping through `push esp` you can see that ESP has been pushed onto the top of the stack (remember that our stack pointer was at `0012DC98` before execution):
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/16.png" alt="">
 
-Stepping through again, you can see that `ECX` now contains the value of `ESP`:
+Stepping through again, you can see that ECX now contains the value of ESP:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/18.png" alt="">
 
-After the value of `ESP` was also loaded into `ECX`, we then need to push the value of `ECX` (which now contains `ESP`) onto the stack, so we can call it later. That is what the last instruction does. `ECX` is now pushed onto the stack! We can proceed with the stack alignment now.
+After the value of ESP was also loaded into ECX, we then need to push the value of ECX (which now contains ESP) onto the stack, so we can call it later. That is what the last instruction does. ECX is now pushed onto the stack! We can proceed with the stack alignment now.
 
-Recall earlier when we determined how much space for our shellcode we had? We need to manipulate our stack pointer to go near the end of our `C` buffer. This is because our stack will have to start from the bottom and write upwards. We then need to get `EAX` to equal the value of `ESP`. That way, whenever we write to `EAX` it will be in a place where we can execute.
+Recall earlier when we determined how much space for our shellcode we had? We need to manipulate our stack pointer to go near the end of our `C` buffer. This is because our stack will have to start from the bottom and write upwards. We then need to get EAX to equal the value of ESP. That way, whenever we write to EAX it will be in a place where we can execute.
 
-You may be asking yourself at this point why we need `EAX`. Why do we need to use `EAX`? Why can't we just put our shellcode onto the stack pointer? This is due to the limitation of our characters. We are limited to a few opcodes. Due to this notion, we have to use hexadecimal math to get the values onto the stack that we want. These values will be our shellcode. In order to do this math, we need a register to do this math in! The register we are going to choose is `EAX`.
+You may be asking yourself at this point why we need EAX. Why do we need to use EAX? Why can't we just put our shellcode onto the stack pointer? This is due to the limitation of our characters. We are limited to a few opcodes. Due to this notion, we have to use hexadecimal math to get the values onto the stack that we want. These values will be our shellcode. In order to do this math, we need a register to do this math in! The register we are going to choose is EAX.
 
 
 Alphanumeric Encoding
 ---
-Before anything, let's choose the new location of `ESP`. If we scroll down to the end of the buffer of `C`'s, our last available address is `0012F3F7`. We will use `0012F3F4`. In the end, it will be `0012F3F0` that we will use, because four bytes get lost with all the stack manipulation going on- but we will use `0012F3F4` for our calculations:
+Before anything, let's choose the new location of ESP. If we scroll down to the end of the buffer of `C's`, our last available address is `0012F3F7`. We will use `0012F3F4`. In the end, it will be `0012F3F0` that we will use, because four bytes get lost with all the stack manipulation going on- but we will use `0012F3F4` for our calculations:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/19.png" alt="">
 
-What we will need to do now, is some math to get our stack aligned. We will need to take the value of `0012F3F4`, where we want `ESP` to reside, and subtract it from `0012DC98`, which is the current stack pointer value:
+What we will need to do now, is some math to get our stack aligned. We will need to take the value of `0012F3F4`, where we want ESP to reside, and subtract it from `0012DC98`, which is the current stack pointer value:
 
 ```console
  0012DC98
@@ -351,8 +351,8 @@ A4 = 160
 ```
 
 This hexadecimal method of alphanumeric shellcoding will require 3 values. Essentially what we are going to do is:
-1. Subtract three values from `EAX`
-2. Push the new value of `EAX` onto the newly aligned stack (on top of the new `ESP` value).
+1. Subtract three values from EAX
+2. Push the new value of EAX onto the newly aligned stack (on top of the new ESP value).
 
 What we need to do next, is find three __DECIMAL__ values that equal each of those four numbers above! These three numbers can be any of the numbers allowed within our character set. Let me give an example. if we have a value of 15, you don't have to use `5, 5, 5`. You could use `13, 1, 1` or `6, 7, 2`. Use whatever you would like! So, let's do this for each:
 
@@ -407,13 +407,13 @@ _______________________________
 
 Our three values are: `364D5555`, `364D5555`, `384E5555`. Whenever you do this math, it changes the stack pointer value to `0012F3F0`. Before we do this math though, we will execute a few instructions. They are:
 1. `push esp` - to get the value of the current stack pointer on the stack.
-2. `pop eax` - to pop the stack pointer value into `EAX`.
+2. `pop eax` - to pop the stack pointer value into EAX.
 
 After these instructions, we begin commencement of our subtraction math. After the subtraction math, we will then execute a few more instructions. They are:
-1. `push eax` - `EAX` contains the value of the `0012F3F0`, which is where we want our stack pointer value to be, since we will be writing our shellcode up the stack, to lower memory addresses.
-2. `pop esp` - this will pop the value of `EAX` (`0012F3F0`) into the stack pointer.
+1. `push eax` - EAX contains the value of the `0012F3F0`, which is where we want our stack pointer value to be, since we will be writing our shellcode up the stack, to lower memory addresses.
+2. `pop esp` - this will pop the value of EAX (`0012F3F0`) into the stack pointer.
 
-One thing before we start- `\x2d` is the opcode for `sub eax`, which is subtracting from `EAX`.
+One thing before we start- `\x2d` is the opcode for `sub eax`, which is subtracting from EAX.
 
 After all these instructions are executed, we can begin writing our shellcode to the stack! Here is the updated PoC, at this point:
 
@@ -479,15 +479,15 @@ We already know what the first three instructions will do. After stepping throug
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/21.png" alt="">
 
-`ESP` and `EAX` contain the same values. Now, we want to manipulate EAX to equal the value of `0012F3F0`, which eventually we want to manipulate `ESP` to equal. After stepping through our three `sub eax` instructions, we see `EAX` is now filled with the following value:
+ESP and EAX contain the same values. Now, we want to manipulate EAX to equal the value of `0012F3F0`, which eventually we want to manipulate ESP to equal. After stepping through our three `sub eax` instructions, we see EAX is now filled with the following value:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/22.png" alt="">
 
-Excellent! We have ended at the end of our buffer of `C`'s! To get this value also into `ESP`, we execute our last two instructions of `push eax`, to get it on the stack, and `pop esp`, to pop the value into `ESP`! After execution, this is what our registers look like:
+Excellent! We have ended at the end of our buffer of `C`'s! To get this value also into ESP, we execute our last two instructions of `push eax`, to get it on the stack, and `pop esp`, to pop the value into ESP! After execution, this is what our registers look like:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/23.png" alt="">
 
-Perfect! Essentially now, we are in the driver's seat! What we can do now is we can manipulate `EAX` with whatever values we want, and they will write to lower memory addresses (visually up the stack), from where `ESP` is pointing to! Remembering this, we should start with our last piece of shellcode.
+Perfect! Essentially now, we are in the driver's seat! What we can do now is we can manipulate EAX with whatever values we want, and they will write to lower memory addresses (visually up the stack), from where ESP is pointing to! Remembering this, we should start with our last piece of shellcode.
 
 Explanation of why this shellcode is crafted the way it is, will come later. For now, realize that we are lucky here that our shellcode has four lines with four bytes each. If we had shellcode with 17 bytes, for instance, we would have to add some [NOPs](https://en.wikipedia.org/wiki/NOP_(code)). Here is what our shellcode looks like:
 
@@ -509,7 +509,7 @@ But what if our shellcode was this:
 
 We would have to add three NOPs, to fill out the four bytes needed in the register. But remember something here- NOPs are in our restricted character set! We can actually use `A`'s, `B`'s, or `C`'s to accomplish the same thing. Just remember that each of those three letters actual increment some of the general-purpose registers. Don't forget that if your shellcode is relying on some of those same registers to do some calculations!
 
-To get our shellcode on the stack, you would do the exact same method as above, but you would first zero out the `EAX` register. Then, the three lines of SUB statements would be executed after the AND statement, and then pushed onto the stack. We keep hearing me say "zero out the register". How exactly do we do this? Generally, you would use the logical [`XOR`](https://accu.org/index.php/journals/1915) function. If you `XOR` a register with itself, the value of the register turns to all `0`'s. You can achieve the same thing with logical [`AND`](https://processing.org/reference/logicalAND.html). Instead of using the register itself, you can use a string of `0`'s and `1`'s, and then perform another `AND` operation, with the inverse of those bits. This will be reflected in the updated PoC shortly. One other thing to note is that the opcode of `and eax` is `\x25`.
+To get our shellcode on the stack, you would do the exact same method as above, but you would first zero out the EAX register. Then, the three lines of SUB statements would be executed after the AND statement, and then pushed onto the stack. We keep hearing me say "zero out the register". How exactly do we do this? Generally, you would use the logical [`XOR`](https://accu.org/index.php/journals/1915) function. If you `XOR` a register with itself, the value of the register turns to all `0`'s. You can achieve the same thing with logical [`AND`](https://processing.org/reference/logicalAND.html). Instead of using the register itself, you can use a string of `0`'s and `1`'s, and then perform another `AND` operation, with the inverse of those bits. This will be reflected in the updated PoC shortly. One other thing to note is that the opcode of `and eax` is `\x25`.
 
 Since we are writing to the stack towards upward addresses, you will need to start with the last line of shellcode for your payload (`calc.exe` in my case), and end with your first line. Here is a visual of what will be happening when we write to the stack:
 
@@ -694,13 +694,13 @@ After crashing the application again, we reach our subtraction instructions:
 
 The usual suspects are at the top, that we have gone through. We step through those.
 
-Our stack is now aligned! Let us begin by making `EAX` zero. We step through our first two `AND` instructions:
+Our stack is now aligned! Let us begin by making EAX zero. We step through our first two `AND` instructions:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/26.png" alt="">
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/25.png" alt="">
 
-Our register is zeroed out. We can now load whatever we want into `EAX` now. 
+Our register is zeroed out. We can now load whatever we want into EAX now. 
 
 Now we execute the logical `AND` instructions and the `push eax` instruction, to get the value on the stack. Our stack, as you remember, is aligned so that the top points to where our shellcode will execute! Scrolling down, we see that we have got our instruction on the stack, in little endian format (compare this value to the last line of the `calc.exe` shellcode):
 
@@ -712,7 +712,7 @@ We step through the rest of the instructions. After doing that, you can scroll d
 
 I still cannot figure out exactly why, but if I did not restore the original stack pointer, the shellcode broke. The shellcode seems to need one instruction executed before the call to ```msvcrt.system``` occurs, in order for the application not to trip over itself. As conveluted as it may sound, this is the best rationale I can come up. If anyone has any better information on this- PLEASE LET ME KNOW! My contact information is available on the [homepage](https://connormcgarr.github.io).
 
-Recall from above that we saved the old stack pointer in `ECX`. We can use another subtraction method to do this. We will use a `MOV` instruction to move `ECX` into `ESP`. 
+Recall from above that we saved the old stack pointer in ECX. We can use another subtraction method to do this. We will use a `MOV` instruction to move ECX into ESP. 
 
 Here is the final exploit visually:
 

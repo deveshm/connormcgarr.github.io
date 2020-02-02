@@ -101,4 +101,16 @@ So let's start with this logic- we want to enumerate the current process. The cu
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_11.png" alt="">
 
-Let's take a look at the first instruction `mov rax, qword ptr gs:[188h]`.
+Let's take a look at the first instruction `mov rax, qword ptr gs:[188h]`. As you can see, the GS segment register is in use here. This segment is a data segment, used to access different types of data structures. If you take a closer look at this segment, at an offset of 0x188 bytes, you will see `KiInitialThread`. This is a pointer to the `_KTHREAD` in the current threads `_ETHREAD` structure. The `_ETHREAD` structure is the thread object for a thread. `nt!KiInitialThread` is the address of this structure. Let's take a closer look
+
+`dqs gs:[188h]`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_12.png" alt="">
+
+This shows the GS segment register holds an address 0f `0xffffd500e0c0cc00` (different on your machine because of ASLR/KASLR). This should be the current thread. Let's verify this with WinDbg.
+
+`!thread -p`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_13.png" alt="">
+
+As you can see, we have verified that `nt!KiInitialThread` represents the address of the current thread.

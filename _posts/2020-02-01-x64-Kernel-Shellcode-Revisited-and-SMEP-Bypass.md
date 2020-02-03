@@ -259,3 +259,16 @@ ROP 'N Roll!
 ---
 Let's use the an overflow for this. ROP assumes we have control over the stack (as each ROP gadget returns back to the stack). Since SMEP is enabled, our ROP gagdets will need to come from the kernel. Since we are assuming [medium integrity](https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb625957(v=msdn.10)?redirectedfrom=MSDN) here, we can call `EnumDeviceDrivers()` to obtain the kernel base- which bypasses KASLR.
 
+Essentially, here is how our ROP chain will work
+
+```
+-------------------
+pop <reg> ; ret
+-------------------
+VALUE_WANTED_IN_CR4 (0x506f8) - This can be our own user supplied value.
+-------------------
+mov cr4, reg ; ret
+-------------------
+User mode payload address
+-------------------
+```

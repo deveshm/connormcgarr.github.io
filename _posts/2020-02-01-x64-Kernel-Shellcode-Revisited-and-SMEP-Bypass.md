@@ -229,20 +229,31 @@ Before we go ahead and show off our payload, let's develop an exploit that outli
 SMEP Says Hello
 ---
 
-Let's talk about SMEP is. SMEP, or Supervisor Mode Execution Prevention, is a protection that was started as apart of Windows 8. When we talk about executing code for a kernel exploit, the most common technique is to allocate the shellcode is user mode and the call that user mode address in the kernel. This means the user mode code will be called in context of the kernel, giving us the applicable privilege to obtain SYSTEM privileges.
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_SMEP.png" alt="">
+
+Let's talk about SMEP. SMEP, or Supervisor Mode Execution Prevention, is a protection that was started as apart of Windows 8. When we talk about executing code for a kernel exploit, the most common technique is to allocate the shellcode is user mode and the call that user mode address in the kernel. This means the user mode code will be called in context of the kernel, giving us the applicable privilege to obtain SYSTEM privileges.
 
 SMEP is a prevention that does not allow us execute code stored in a ring 3 page from ring 0 (executing code from a higher ring in general). This means we cannot execute user mode code from kernel mode. In order to bypass SMEP, let's understand how it is implemented- as well as two techniques to bypass it.
 
-The SMEP policy is enforced via the CR4 register. The CR4 register is a control register. Each bit in this register is responsible for various protection features being enabled on the OS. The 20th bit of the CR4 register is responsible for SMEP being enabled. Let's take a look at the CR4 register on Windows with SMEP enabled in normal hexadecimla format, as well as binary (so we can really see where that 20th bit resides).
+The SMEP policy is enforced via the CR4 register. The CR4 register is a control register. Each bit in this register is responsible for various protection features being enabled on the OS. The 20th bit of the CR4 register is responsible for SMEP being enabled. If the 20th bit of the CR4 register is set to 1, SMEP is enabled. When the bit is set to 0, SMEP is disabled. Let's take a look at the CR4 register on Windows with SMEP enabled in normal hexadecimal format, as well as binary (so we can really see where that 20th bit resides).
 
 `r cr4`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_17.png" alt="">
 
-The CR4 register has a value of `0x00000000001506f8` in hexadecimal. Let's view that in binary, so we can see where the 20th bit resides.
+The CR4 register has a value of 0x00000000001506f8 in hexadecimal. Let's view that in binary, so we can see where the 20th bit resides.
 
 `.formats cr4`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_18.png" alt="">
 
-As you can see, the 20th bit is outlined in the image above (counting from the right).
+As you can see, the 20th bit is outlined in the image above (counting from the right). Let's use the `.formats` command again to see what the value in the CR4 register needs to be, in order to bypass SMEP.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_19.png" alt="">
+
+As you can see from the above image, when the 20th bit of the CR4 register is flipped, the hexadecimal value would be 0x00000000000506f8.
+
+Let's start with the first way to disable SMEP, with ROP.
+
+ROP 'N Roll!
+---

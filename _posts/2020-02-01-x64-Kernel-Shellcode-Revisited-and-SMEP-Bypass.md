@@ -424,7 +424,7 @@ kernel32.DeviceIoControl(
 )
 ```
 
-Nice! As you can see, we hit the breakpoints, which represent our shellcode!
+Nice! As you can see, after our ROP gadgets are executed - we hit our breakpoints (placeholder for our shellcode to verify SMEP is disabled)!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_23.png" alt="">
 

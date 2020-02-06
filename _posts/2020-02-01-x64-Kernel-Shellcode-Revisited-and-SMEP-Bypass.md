@@ -309,7 +309,7 @@ This means, even though RCX contains 0x00000000000506f8, a `mov cr4, ecx` would 
 
 Now, let's continue on to controlling the RCX register.
 
-So let's find a `pop rcx` value!
+Let's find a `pop rcx` value!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_22.png" alt="">
 

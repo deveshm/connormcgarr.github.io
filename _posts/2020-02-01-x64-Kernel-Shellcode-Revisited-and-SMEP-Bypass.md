@@ -156,7 +156,7 @@ Let's take a loop at a few more elements of the `_EPROCESS` structure.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_15.png" alt="">
 
-Let's take a look at the data type of `ActivePorcessLinks`, `_LIST_ENTRY`
+Let's take a look at the data type of `ActiveProcessLinks`, `_LIST_ENTRY`
 
 `dt nt!_LIST_ENTRY`
 

@@ -107,7 +107,7 @@ Let's take a look at the first instruction `mov rax, qword ptr gs:[188h]`. As yo
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_12.png" alt="">
 
-This shows the GS segment register, at an offset of 0x188, holds an address of `0xffffd500e0c0cc00` (different on your machine because of ASLR/KASLR). This should be the `nt!KiInitialThread`, or the `ETHREAD` structure for the current thread. Let's verify this with WinDbg.
+This shows the GS segment register, at an offset of 0x188, holds an address of `0xffffd500e0c0cc00` (different on your machine because of ASLR/KASLR). This should be the `nt!KiInitialThread`, or the `_ETHREAD` structure for the current thread. Let's verify this with WinDbg.
 
 `!thread -p`
 

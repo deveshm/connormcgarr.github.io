@@ -451,7 +451,7 @@ Now that we are here, stepping through should pop our intended CR4 value into RC
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_04.png" alt="">
 
-Perfect. Stepping through, we should land on our next ROP gadget- which will move RCX (wanted value to disable SMEP) into CR4.
+Perfect. Stepping through, we should land on our next ROP gadget- which will move RCX (desired value to disable SMEP) into CR4.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_05.png" alt="">
 

@@ -277,7 +277,7 @@ Let's go hunting for these ROP gadgets. (__NOTE - ALL OFFSETS TO ROP GADGETS WIL
 
 Let's figure out a way to control the contents of the CR4 register. Although we won't probably won't be able to directly manipulate the contents of the register directly, perhaps we can move the contents of a register that we can control into the CR4 register. Recall that a `pop <reg>` operation will take the contents of the next item on the stack, and store it in the register following the `pop` operation. Let's keep this in mind.
 
-Using rp++, we have found a nice ROP gadget in `ntoskrnl.exe`, that allows us to store the contents of CR4 in the `ecx` register (the "second" 32-bits of the CR4 register.)
+Using rp++, we have found a nice ROP gadget in `ntoskrnl.exe`, that allows us to store the contents of CR4 in the `ecx` register (the "second" 32-bits of the RCX register.)
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_20_a.png" alt="">
 

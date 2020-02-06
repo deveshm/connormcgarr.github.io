@@ -273,7 +273,7 @@ User mode payload address
 -------------------
 ```
 
-Let's go hunting for these ROP gadgets. __NOTE - ALL OFFSETS TO ROP GADGETS WILL VARY DEPENDING ON OS, PATCH LEVEL, ETC)__. Remember, these ROP gadgets need to be kernel mode addresses. We will use [rp++](https://github.com/0vercl0k/rp) to enumerate rop gadgets in `ntoskrnl.exe`. If you take a look at [my post](https://connormcgarr.github.io/ROP/) about ROP, you will see how to use this tool.
+Let's go hunting for these ROP gadgets. (__NOTE - ALL OFFSETS TO ROP GADGETS WILL VARY DEPENDING ON OS, PATCH LEVEL, ETC__.) Remember, these ROP gadgets need to be kernel mode addresses. We will use [rp++](https://github.com/0vercl0k/rp) to enumerate rop gadgets in `ntoskrnl.exe`. If you take a look at [my post](https://connormcgarr.github.io/ROP/) about ROP, you will see how to use this tool.
 
 Let's figure out a way to control the contents of the CR4 register. Although we won't probably won't be able to directly manipulate the contents of the register directly, perhaps we can move the contents of a register that we can control into the CR4 register. Recall that a `pop <reg>` operation will take the contents of the next item on the stack, and store it in the register following the `pop` operation. Let's keep this in mind.
 

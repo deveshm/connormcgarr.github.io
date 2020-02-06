@@ -95,7 +95,7 @@ Anyways, let's develop an assembly program that can dynamically perform the abov
 
 So let's start with this logic- we want to enumerate the current process. The current process during exploitation will be the process that triggers the vulnerability (the process where the exploit code is ran from). We want to get this process, because eventually we want to copy the SYSTEM access token to it. Let's do that
 
-`PsGetCurrentProcessId()` is a Windows API function that identifies current thread and the process the thread resides in. This is identical to `IoGetCurrentProcess()`, and Microsoft recommends users to invoke `PsGetCurrentProgress()` instead. This function returns a pointer to the current PID's thread. Let's unassemble that function in WinDbg.
+`PsGetCurrentProcessId()` is a Windows API function that identifies current thread and the process the thread resides in. This is identical to `IoGetCurrentProcess()`, and Microsoft recommends users invoke `PsGetCurrentProgress()` instead. This function returns a pointer to the current PID's thread. Let's unassemble that function in WinDbg.
 
 `uf nt!PsGetCurrentProcess`
 

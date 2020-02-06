@@ -421,11 +421,47 @@ kernel32.DeviceIoControl(
 )
 ```
 
+Let's take a look in WinDbg.
+
+As you can see, we have hit the `ret` we are going to overwrite.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_01.png" alt="">
+
+Before we step through, let's view the call stack- to see how execution will go in the future
+
+`k`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_02.png" alt="">
+
+To help better understand the output of the call stack, the column `Call Site` is going to be the memory address that is executed. The `RetAddr` column is where the `Call Site` address will return to when it is done completing.
+
+As you can see, the compromised `ret` is located at `HEVD!TriggerStackOverflow+0xc8`. From there we will return to 0xfffff80302c82544, or `AuthzBasepRemoveSecurityAttributeValueFromLists+0x70`. The next value in the `RetAddr` column, is the intended value for our CR4 register, 0x00000000000506f8. 
+
+Recall that a `ret` instruction will load RSP into RIP. Therefore, since our intended CR4 value is located on the stack, technically our first ROP gadget would "return" to 0x00000000000506f8. However, the `pop rcx` will take that value off of the stack, and place it into RCX. Meaning we do not have to worry about returning to that value, which is not a valid memory address.
+
+Upon the `ret` from the `pop rcx` ROP gadget, we will jump into the next ROP gadget, `mov cr4, rcx`, which will load RCX into CR4. That ROP gadget is located at 0xfffff80302d87552, or `KiFlushCurrentTbWorker+0x12`. To finish things out, we have the location of our user mode code, at 0x0000000000b70000.
+
+After stepping through the vulnerable `ret` instruction, we see we have hit our first ROP gadget.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_03.png" alt="">
+
+Now that we are here, stepping through should pop our intended CR4 value into RCX
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_04.png" alt="">
+
+Perfect. Stepping through, we should land on our next ROP gadget- which will move RCX (wanted value to disable SMEP) into CR4.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_05.png" alt="">
+
+Perfect! Let's disable SMEP!
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_06.png" alt="">
+
 Nice! As you can see, after our ROP gadgets are executed - we hit our breakpoints (placeholder for our shellcode to verify SMEP is disabled)!
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/64_23.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/64_07.png" alt="">
 
-This means we have succesfully disabled SMEP, and we can execute usermode shellcode! Let's finalize this exploit with a working POC. Let's update our script with weaponized shellcode!
+This means we have succesfully disabled SMEP, and we can execute usermode shellcode! Let's finalize this exploit with a working POC. We will merge our payload concepts with the exploit now! Let's update our script with weaponized shellcode!
 
 ```python
 ```

@@ -433,6 +433,8 @@ Before we step through, let's view the call stack- to see how execution will go 
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_02.png" alt="">
 
+__Open the image above in a new tab if you are having trouble viewing__.
+
 To help better understand the output of the call stack, the column `Call Site` is going to be the memory address that is executed. The `RetAddr` column is where the `Call Site` address will return to when it is done completing.
 
 As you can see, the compromised `ret` is located at `HEVD!TriggerStackOverflow+0xc8`. From there we will return to 0xfffff80302c82544, or `AuthzBasepRemoveSecurityAttributeValueFromLists+0x70`. The next value in the `RetAddr` column, is the intended value for our CR4 register, 0x00000000000506f8. 

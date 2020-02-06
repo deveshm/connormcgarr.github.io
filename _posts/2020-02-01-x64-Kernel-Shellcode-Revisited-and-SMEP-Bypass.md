@@ -289,7 +289,7 @@ Awesome! rp++ was a bit wrong in its enumeration. rp++ says that we can put ECX 
 
 The same principle applies here. If we can `pop` our intended flag value into ECX, we should have no problem. RCX will contain a value of 0x506f8 (our intended CR4 register value).
 
-Real quick with brevity- let's say rp++ was right, in that we could only control the contents of the ECX register (instead of RCX). How would this affect us?
+Real quick with brevity- let's say rp++ was right in that we could only control the contents of the ECX register (instead of RCX). How would this affect us?
 
 Recall, however, how the registers work here.
 

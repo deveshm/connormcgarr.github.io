@@ -255,7 +255,7 @@ As you can see from the above image, when the 20th bit of the CR4 register is fl
 
 Let's start with the first way to disable SMEP, with ROP.
 
-ROP 'N Roll!
+SMEP Says Goodbye
 ---
 Let's use the an overflow for this. ROP assumes we have control over the stack (as each ROP gadget returns back to the stack). Since SMEP is enabled, our ROP gagdets will need to come from the kernel. Since we are assuming [medium integrity](https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb625957(v=msdn.10)?redirectedfrom=MSDN) here, we can call `EnumDeviceDrivers()` to obtain the kernel base- which bypasses KASLR.
 

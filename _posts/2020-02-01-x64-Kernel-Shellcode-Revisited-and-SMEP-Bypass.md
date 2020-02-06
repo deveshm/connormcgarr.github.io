@@ -313,7 +313,7 @@ Let's find a `pop rcx` value!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_22.png" alt="">
 
-Nice! We have a ROP gadget located at ntoskrnl.exe + 0x3544. Let's update our POC with some breakpoints where our user mode shellcode will reside, top verify we can hit our shellcode. This POC takes care of the semantics such as finding the offset to the `ret` instruction we are overwriting, etc.
+Nice! We have a ROP gadget located at ntoskrnl.exe + 0x3544. Let's update our POC with some breakpoints where our user mode shellcode will reside, to verify we can hit our shellcode. This POC takes care of the semantics such as finding the offset to the `ret` instruction we are overwriting, etc.
 
 ```python
 import struct

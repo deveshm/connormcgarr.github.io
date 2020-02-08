@@ -484,6 +484,6 @@ This means we have succesfully disabled SMEP, and we can execute usermode shellc
 
 SMEP Says Goodbye V2
 ---
-Before we disabled SMEP via ROP, we looked at disabling SMEP through PTEs (page table entries). Let's revisit bypassing SMEP using read and write primitives.
+As you can see, we just successfully disabled SMEP with ROP. Although this is a neat method to disable SMEP- the CR4 register is protected by [Patch Guard](https://blog.tetrane.com/downloads/Tetrane_PatchGuard_Analysis_RS4_v1.00.pdf). Tampering with the CR4 register without restoring the original value value of CR4 will now kill our exploit as of Windows 10 RS4. Instead of restoring CR4 for ourpurposes- let's use this as a perfect opportunity to outline the PTE method of bypassing SMEP mentioned earlier. Let's revisit that notion with a read and write primitive.
 
 TALK ABOUT nt!MiGetPteAddress AFTER LEAKING KERNEL TO IDENTIFY SHELCODE PTE AND FLIP U BIT TO S BIT

@@ -269,8 +269,6 @@ Morten explains the steps as the following, if you are too lazy to read his work
 4. Use PTE base to obtain PTE of any memory page
 5. Change bit (whether it is copying shellcode to page and flipping NX bit or flipping `U/S` bit of a user mode page)
 
-Let's show how to disable SMEP with ROP now.
-
 SMEP Says Goodbye
 ---
 Let's use the an overflow for this. ROP assumes we have control over the stack (as each ROP gadget returns back to the stack). Since SMEP is enabled, our ROP gagdets will need to come from the kernel. Since we are assuming [medium integrity](https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb625957(v=msdn.10)?redirectedfrom=MSDN) here, we can call `EnumDeviceDrivers()` to obtain the kernel base- which bypasses KASLR.
@@ -483,3 +481,9 @@ This means we have succesfully disabled SMEP, and we can execute usermode shellc
 
 ```python
 ```
+
+SMEP Says Goodbye V2
+---
+Before we disabled SMEP via ROP, we looked at disabling SMEP through PTEs (page table entries). Let's revisit bypassing SMEP using read and write primitives.
+
+TALK ABOUT nt!MiGetPteAddress AFTER LEAKING KERNEL TO IDENTIFY SHELCODE PTE AND FLIP U BIT TO S BIT

@@ -95,7 +95,7 @@ Anyways, let's develop an assembly program that can dynamically perform the abov
 
 So let's start with this logic- we want to enumerate the current process. The current process during exploitation will be the process that triggers the vulnerability (the process where the exploit code is ran from). We want to get this process, because eventually we want to copy the SYSTEM access token to it. Let's do that
 
-`PsGetCurrentProcessId()` is a Windows API function that identifies current thread and the process the thread resides in. This is identical to `IoGetCurrentProcess()`, and Microsoft recommends users invoke `PsGetCurrentProgress()` instead. This function returns a pointer to the current PID's thread. Let's unassemble that function in WinDbg.
+If you use the Microsoft Docs (formely known as MSDN) to look into process onjects you will come across [this](https://docs.microsoft.com/en-us/windows-hardware/drivers/kernel/eprocess) article. This article states there is a Windows API function that can identify the current process and return a pointer to it! `PsGetCurrentProcessId()` is that function. This Windows API function identifies current thread and the process the thread resides in. This is identical to `IoGetCurrentProcess()`, and Microsoft recommends users invoke `PsGetCurrentProgress()` instead. This function returns a pointer to the current PID's thread. Let's unassemble that function in WinDbg.
 
 `uf nt!PsGetCurrentProcess`
 

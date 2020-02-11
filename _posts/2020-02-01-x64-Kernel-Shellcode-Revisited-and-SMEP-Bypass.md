@@ -87,13 +87,11 @@ Assembly? Who Needs It. I Will Never Need To Know That- It's iRrElEvAnT
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_MEME1.png" alt="">
 
-Small rant here- isn't it so funny the same ones who say exploit development is a waste of time and irrelevant are the same ones who will use Eternal Blue. ;)
-
-Assembly will always hold a dear place in my heart, and I think everyone should at least know the fundementals and understand how powerful it is.
+'Nuff said.
 
 Anyways, let's develop an assembly program that can dynamically perform the above tasks in x64.
 
-So let's start with this logic- we want to enumerate the current process. The current process during exploitation will be the process that triggers the vulnerability (the process where the exploit code is ran from). We want to get this process, because eventually we want to copy the SYSTEM access token to it. Let's do that
+So let's start with this logic- instead of spawning a `cmd.exe` session and copying the SYSTEM process access token to it- why don't we just copy the access token to the current process when exploitation occurs. The current process during exploitation will be the process that triggers the vulnerability (the process where the exploit code is ran from). Let's look into how we can obtain information about the current process.
 
 If you use the Microsoft Docs (formely known as MSDN) to look into process data structures you will come across [this](https://docs.microsoft.com/en-us/windows-hardware/drivers/kernel/eprocess) article. This article states there is a Windows API function that can identify the current process and return a pointer to it! `PsGetCurrentProcessId()` is that function. This Windows API function identifies current thread and the process the thread resides in. This is identical to `IoGetCurrentProcess()`, and Microsoft recommends users invoke `PsGetCurrentProgress()` instead. This function returns a pointer to the current PID's thread. Let's unassemble that function in WinDbg.
 

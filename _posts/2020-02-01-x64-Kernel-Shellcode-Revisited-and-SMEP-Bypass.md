@@ -22,7 +22,7 @@ Once that is setup, execute the following command, to dump the active processes:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_1.png" alt="">
 
-This returns a few elements of each process. We are most interested in the "process address", which has been outlined in the image above at address `0xffffe60284651040`. This is the address of the `_EPROCESS` structure for a specified process (the SYSTEM process in this case). After enumerating the "process address", we can enumerate much more detailed information about process using the `_EPROCESS` structure.
+This returns a few elements of each process. We are most interested in the "process address", which has been outlined in the image above at address `0xffffe60284651040`. This is the address of the `_EPROCESS` structure for a specified process (the SYSTEM process in this case). After enumerating the process address, we can enumerate much more detailed information about process using the `_EPROCESS` structure.
 
 `dt nt!_EPROCESS <Process address>`
 
@@ -32,7 +32,7 @@ This returns a few elements of each process. We are most interested in the "proc
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_3.png" alt="">
 
-What does this mean? That means for each process on Windows, the access token is located at an offset of 0x358. We will for sure be using this information later. Before moving on though, let's take a look at how the `Token` element is stored.
+What does this mean? That means for each process on Windows, the access token is located at an offset of 0x358 from the process address. We will for sure be using this information later. Before moving on though, let's take a look at how the `Token` element is stored.
 
 As you can see from the above image, there is something called `_EX_FAST_REF`, or an Executive Fast Reference union. The difference between a union and a structure, is that a union stores data types at the same memory location (notice there is no difference in offset of the elements of `_EX_FAST_REF` in the image below). This is what the access token of a process is stored in. Let's take a closer look.
 

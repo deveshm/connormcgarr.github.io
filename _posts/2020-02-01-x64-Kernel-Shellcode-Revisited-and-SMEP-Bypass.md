@@ -14,7 +14,7 @@ As apart of Windows, there is something known as the SYSTEM process. The SYSTEM 
 
 Identifying the SYSTEM Process Access Token
 ---
-We will use Windows 10 x64 to outline this overall process. First, boot up WinDbg on your debugger machine and start kernel debugging you debuggee machine (see my [post](https://connormcgarr.github.io/Part-1-Kernel-Exploitation/) on setting up a debugging enviornment). In addition, I noticed on Windows 10, I had to execute the following command on my debugger machine after completing the `bcdedit.exe` commands: `bcdedit.exe /dbgsettings serial debugport:1 baudrate:115200`)
+We will use Windows 10 x64 to outline this overall process. First, boot up WinDbg on your debugger machine and start a kernel debugging session with your debugee machine (see my [post](https://connormcgarr.github.io/Part-1-Kernel-Exploitation/) on setting up a debugging enviornment). In addition, I noticed on Windows 10, I had to execute the following command on my debugger machine after completing the `bcdedit.exe` commands: `bcdedit.exe /dbgsettings serial debugport:1 baudrate:115200`)
 
 Once that is setup, execute the following command, to dump the process list:
 

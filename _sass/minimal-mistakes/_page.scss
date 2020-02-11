@@ -19,12 +19,6 @@
   }
 }
 
-.page {
-  @include breakpoint($large) {
-    float: right;
-    width: calc(100% - #{$right-sidebar-width-narrow});
-  }
-
   .page__inner-wrap {
     float: left;
     margin-top: 1em;

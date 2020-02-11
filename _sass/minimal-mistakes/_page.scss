@@ -20,13 +20,13 @@
 }
 
 .page {
-  @include breakpoint($large) {
+  @include breakpoint($medium) {
     float: right;
     width: calc(100% - #{$right-sidebar-width-narrow});
     padding-right: $right-sidebar-width-narrow;
   }
 
-  @include breakpoint($x-large) {
+  @include breakpoint($large) {
     width: calc(100% - #{$right-sidebar-width});
     padding-right: $right-sidebar-width;
   }

@@ -162,11 +162,11 @@ Let's take a look at the data type of `ActiveProcessLinks`, `_LIST_ENTRY`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_16.png" alt="">
 
-This data type is a doubly linked list. This means that each element in the linked list not only points to the next element, but it also points to the previous one. Essentially, the elements point in each direction. This linked list is responsible for keeping track of all active processes.
+`ActiveProcessLinks` is what keeps track of the list of current processes. How does it keep track of these processes you may be wondering? Its data type is `_LIST_ENTRY`, a doubly linked list. This means that each element in the linked list not only points to the next element, but it also points to the previous one. Essentially, the elements point in each direction. As mentioned earlier and just as a point of reiteration, this linked list is responsible for keeping track of all active processes.
 
-There are two elements of `_EPROCESS` we need to keep track of. On Windows 10 x64, located at an offset of 0x2e0, `UniqueProcessId`. `ActiveProcessLinks` also needs to be kept track of, which is located at an offset 0x2e8.
+There are two elements of `_EPROCESS` we need to keep track of. The first element, located at an offset of 0x2e0 on Windows 10 x64, is `UniqueProcessId`. This is the PID of the process. The other element is`ActiveProcessLinks`, which is located at an offset 0x2e8.
 
-So essentially what we can do in x64 assembly, is locate the current process. From there, we can iterate and loop through the `_EPROCESS` structure's `ActiveLinkProcess` element. After reading in the current `ActiveProcessLinks` element, we can compare the current `UniqueProcessId` (PID) to the constant 4, which is the PID of the SYSTEM process. Let's continue our already started assembly program.
+So essentially what we can do in x64 assembly, is locate the current process from the aforementioned method of `PsGetCurrentProcess()`. From there, we can iterate and loop through the `_EPROCESS` structure's `ActiveLinkProcess` element (which keeps track of every process via a doubly linked list). After reading in the current `ActiveProcessLinks` element, we can compare the current `UniqueProcessId` (PID) to the constant 4, which is the PID of the SYSTEM process. Let's continue our already started assembly program.
 
 ```nasm
 ; Windows 10 x64 Token Stealing Payload
@@ -187,7 +187,7 @@ __loop:
 	jnz __loop			; Loop until SYSTEM PID is found
 ```
 
-Once that SYSTEM `_EPROCESS` structure has been found, we can now go ahead and retrieve the token and copy it to our current process. This will unleash God mode on our current process. God, please have mercy on the soul of our poor little process.
+Once that SYSTEM `_EPROCESS` process object has been found, we can now go ahead and retrieve the token and copy it to our current process. This will unleash God mode on our current process. God, please have mercy on the soul of our poor little process.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Picture1.png" alt="">
 

@@ -150,7 +150,7 @@ Notice that I copied the current process, stored in RAX, into RBX as well. You w
 Take Me For A Loop!
 ---
 
-Let's take a loop at a few more elements of the `_EPROCESS` structure.
+Let's take a look at a few more elements of the `_EPROCESS` structure.
 
 `dt nt!_EPROCESS`
 

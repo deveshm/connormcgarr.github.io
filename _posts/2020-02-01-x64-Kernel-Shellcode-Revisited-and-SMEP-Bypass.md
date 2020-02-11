@@ -28,7 +28,7 @@ This returns a few elements of each process. We are most interested in the "proc
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_2.png" alt="">
 
-`dt` will display information about various variables, data types, etc. As you can see from the image above, various information about the SYSTEM process has been displayed. If you continue down the kd windows in WinDbg, you will see the `Token` element, at an offset of `_EPROCESS + 0x358`.
+`dt` will display information about various variables, data types, etc. As you can see from the image above, various information about the SYSTEM process has been displayed. If you continue down the kd window in WinDbg, you will see the `Token` element, at an offset of `_EPROCESS + 0x358`.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_3.png" alt="">
 

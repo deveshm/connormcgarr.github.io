@@ -20,16 +20,8 @@
 }
 
 .page {
-  @include breakpoint($large) {
-    float: right;
-    width: calc(100% - #{$right-sidebar-width-narrow});
-    padding-right: $right-sidebar-width-narrow;
-  }
-
-  @include breakpoint($x-large) {
-    width: calc(100% - #{$right-sidebar-width});
-    padding-right: $right-sidebar-width;
-  }
+  width: calc(100% - #{$right-sidebar-width-narrow});
+}
 
   .page__inner-wrap {
     float: left;
@@ -499,21 +491,21 @@
 
 .wide {
   .page {
-    @include breakpoint($large) {
+    @include breakpoint($medium) {
       padding-right: 0;
     }
 
-    @include breakpoint($x-large) {
+    @include breakpoint($large) {
       padding-right: 0;
     }
   }
 
   .page__related {
-    @include breakpoint($large) {
+    @include breakpoint($medium) {
       padding-right: 0;
     }
 
-    @include breakpoint($x-large) {
+    @include breakpoint($large) {
       padding-right: 0;
     }
   }

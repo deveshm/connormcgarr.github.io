@@ -91,7 +91,9 @@ Assembly? Who Needs It. I Will Never Need To Know That- It's iRrElEvAnT
 
 Anyways, let's develop an assembly program that can dynamically perform the above tasks in x64.
 
-So let's start with this logic- instead of spawning a `cmd.exe` session and copying the SYSTEM process access token to it- why don't we just copy the access token to the current process when exploitation occurs. The current process during exploitation will be the process that triggers the vulnerability (the process where the exploit code is ran from). Let's look into how we can obtain information about the current process.
+So let's start with this logic- instead of spawning a `cmd.exe` process and then copying the SYSTEM process access token to it- why don't we just copy the access token to the current process when exploitation occurs? The current process during exploitation should be the process that triggers the vulnerability (the process where the exploit code is ran from).From there, we could spawn `cmd.exe` from (and in context) of our current process after our exploit has finished. That `cmd.exe` process would then have administrative privilege.
+
+Before we can get there though, let's look into how we can obtain information about the current process.
 
 If you use the Microsoft Docs (formely known as MSDN) to look into process data structures you will come across [this](https://docs.microsoft.com/en-us/windows-hardware/drivers/kernel/eprocess) article. This article states there is a Windows API function that can identify the current process and return a pointer to it! `PsGetCurrentProcessId()` is that function. This Windows API function identifies current thread and the process the thread resides in. This is identical to `IoGetCurrentProcess()`, and Microsoft recommends users invoke `PsGetCurrentProgress()` instead. This function returns a pointer to the current PID's thread. Let's unassemble that function in WinDbg.
 

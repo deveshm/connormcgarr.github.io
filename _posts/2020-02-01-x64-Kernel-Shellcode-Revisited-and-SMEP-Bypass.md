@@ -1,5 +1,5 @@
 ---
-title: "Exploit Development: Panic! At The Kernel - Token Stealing Payloads Revisited on Windows 10 x64 and Bypassing SMEP (UNDER CONSTRUCTION)"
+title: "Exploit Development: Panic! At The Kernel | Token Stealing Payloads Revisited on Windows 10 x64 and Bypassing SMEP (UNDER CONSTRUCTION)"
 date:  2020-02-01
 tags: [posts]
 excerpt: "Revisiting token stealing payloads on Windows 10 x64 and diving into bypassing SMEP"

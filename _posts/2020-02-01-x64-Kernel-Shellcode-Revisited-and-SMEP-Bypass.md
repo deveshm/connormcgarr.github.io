@@ -22,7 +22,7 @@ Once that is setup, execute the following command, to dump the active processes:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_1.png" alt="">
 
-This returns a few elements of each process. We are most interested in the "Process address", which has been outlined in the image above at address `0xffffe60284651040`. Since we have enumerated that address, we can enumerate much more detailed information about the `_EPROCESS` structure of the SYSTEM process.
+This returns a few elements of each process. We are most interested in the "process address", which has been outlined in the image above at address `0xffffe60284651040`. This is the address of the `_EPROCESS` structure for a specified process (the SYSTEM process in this case). After enumerating the "process address", we can enumerate much more detailed information about the `_EPROCESS` structure of the SYSTEM process.
 
 `dt nt!_EPROCESS <Process address>`
 

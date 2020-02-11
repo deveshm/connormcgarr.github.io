@@ -82,7 +82,7 @@ Now, let's take a look back at our previous `cmd.exe` process.
 
 As you can see, `cmd.exe` has become a privileged process! Now the only question remains- how do we do this dynamically with a piece of shellcode?
 
-Assembly? Who Needs It. I Will Never Need To Know That- It's Irrelevant
+Assembly? Who Needs It. I Will Never Need To Know That- It's iRrElEvAnT
 ---
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_MEME1.png" alt="">

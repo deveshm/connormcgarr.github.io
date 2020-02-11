@@ -164,7 +164,7 @@ Let's take a look at the data type of `ActiveProcessLinks`, `_LIST_ENTRY`
 
 `ActiveProcessLinks` is what keeps track of the list of current processes. How does it keep track of these processes you may be wondering? Its data type is `_LIST_ENTRY`, a doubly linked list. This means that each element in the linked list not only points to the next element, but it also points to the previous one. Essentially, the elements point in each direction. As mentioned earlier and just as a point of reiteration, this linked list is responsible for keeping track of all active processes.
 
-There are two elements of `_EPROCESS` we need to keep track of. The first element, located at an offset of 0x2e0 on Windows 10 x64, is `UniqueProcessId`. This is the PID of the process. The other element is`ActiveProcessLinks`, which is located at an offset 0x2e8.
+There are two elements of `_EPROCESS` we need to keep track of. The first element, located at an offset of 0x2e0 on Windows 10 x64, is `UniqueProcessId`. This is the PID of the process. The other element is `ActiveProcessLinks`, which is located at an offset 0x2e8.
 
 So essentially what we can do in x64 assembly, is locate the current process from the aforementioned method of `PsGetCurrentProcess()`. From there, we can iterate and loop through the `_EPROCESS` structure's `ActiveLinkProcess` element (which keeps track of every process via a doubly linked list). After reading in the current `ActiveProcessLinks` element, we can compare the current `UniqueProcessId` (PID) to the constant 4, which is the PID of the SYSTEM process. Let's continue our already started assembly program.
 

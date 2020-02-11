@@ -72,7 +72,7 @@ After spawning a `cmd.exe` process on the debuggee, let's identify the process a
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_8.png" alt="">
 
-Now that we have the process address located at `0xffffe6028694d580` for `cmd.exe`. We also know, based on our research earlier, that the `Token` of a process is located at an offset of 0x358 from the process. Let's Use WinDbg to overwrite the `cmd.exe` access token with the access token of the SYSTEM process.
+As you can see, the process address for our `cmd.exe` process is located at `0xffffe6028694d580`. We also know, based on our research earlier, that the `Token` of a process is located at an offset of 0x358 from the process. Let's Use WinDbg to overwrite the `cmd.exe` access token with the access token of the SYSTEM process.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_9.png" alt="">
 

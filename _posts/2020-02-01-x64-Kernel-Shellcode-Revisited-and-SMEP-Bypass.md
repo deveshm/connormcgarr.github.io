@@ -95,7 +95,7 @@ So let's start with this logic- instead of spawning a `cmd.exe` process and then
 
 Before we can get there though, let's look into how we can obtain information about the current process.
 
-If you use the Microsoft Docs (formely known as MSDN) to look into process data structures you will come across [this](https://docs.microsoft.com/en-us/windows-hardware/drivers/kernel/eprocess) article. This article states there is a Windows API function that can identify the current process and return a pointer to it! `PsGetCurrentProcessId()` is that function. This Windows API function identifies current thread and the process the thread resides in. This is identical to `IoGetCurrentProcess()`, and Microsoft recommends users invoke `PsGetCurrentProgress()` instead. This function returns a pointer to the current PID's thread. Let's unassemble that function in WinDbg.
+If you use the Microsoft Docs (formely known as MSDN) to look into process data structures you will come across [this](https://docs.microsoft.com/en-us/windows-hardware/drivers/kernel/eprocess) article. This article states there is a Windows API function that can identify the current process and return a pointer to it! `PsGetCurrentProcessId()` is that function. This Windows API function identifies current thread and then returns a pointer to the process in which that thread is found. This is identical to `IoGetCurrentProcess()`, and Microsoft recommends users invoke `PsGetCurrentProgress()` instead. Let's unassemble that function in WinDbg.
 
 `uf nt!PsGetCurrentProcess`
 

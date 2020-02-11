@@ -101,7 +101,7 @@ If you use the Microsoft Docs (formerly known as MSDN) to look into process data
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_11.png" alt="">
 
-Let's take a look at the first instruction `mov rax, qword ptr gs:[188h]`. As you can see, the GS segment register is in use here. This register points to a data segment, used to access different types of data structures. If you take a closer look at this segment, at an offset of 0x188 bytes, you will see `KiInitialThread`. This is a pointer to the `_KTHREAD` in the current threads `_ETHREAD` structure. The `_ETHREAD` structure is the thread object for a thread. `nt!KiInitialThread` is the address of this structure. Let's take a closer look
+Let's take a look at the first instruction `mov rax, qword ptr gs:[188h]`. As you can see, the GS segment register is in use here. This register points to a data segment, used to access different types of data structures. If you take a closer look at this segment, at an offset of 0x188 bytes, you will see `KiInitialThread`. This is a pointer to the `_KTHREAD` in the current threads `_ETHREAD` structure. `_KTHREAD` is the first entry in `_ETHREAD`. The `_ETHREAD` structure is the thread object for a thread (similar to how `_EPROCESS` is the process object for a process) and will display more granular information about a thread. `nt!KiInitialThread` is the address of that `_ETHREAD` structure. Let's take a closer look.
 
 `dqs gs:[188h]`
 

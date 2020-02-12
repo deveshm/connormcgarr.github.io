@@ -265,9 +265,7 @@ Morten explains the steps as the following, if you are too lazy to read his work
 
 1. Obtain read/write primitive
 2. Leak ntoskrnl.exe (kernel base)
-3. Locate MiGetPteAddress() (can be done dynamically instead of static offsets)​
-260
-Why bring this up? Athough we will first be outlining 
+3. Locate MiGetPteAddress() (can be done dynamically instead of static offsets)
 4. Use PTE base to obtain PTE of any memory page
 5. Change bit (whether it is copying shellcode to page and flipping NX bit or flipping `U/S` bit of a user mode page)
 

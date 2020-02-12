@@ -231,7 +231,7 @@ SMEP Says Hello
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_SMEP.png" alt="">
 
-Let's talk about SMEP. SMEP, or Supervisor Mode Execution Prevention, is a protection that was started as apart of Windows 8. When we talk about executing code for a kernel exploit, the most common technique is to allocate the shellcode is user mode and the call that user mode address in the kernel. This means the user mode code will be called in context of the kernel, giving us the applicable privilege to obtain SYSTEM privileges.
+What is SMEP? SMEP, or Supervisor Mode Execution Prevention, is a protection that was first implemented in Windows 8 (in context of Windows). When we talk about executing code for a kernel exploit, the most common technique is to allocate the shellcode is user mode and the call that user mode address in the kernel. This means the user mode code will be called in context of the kernel, giving us the applicable privilege to obtain SYSTEM privileges.
 
 SMEP is a prevention that does not allow us execute code stored in a ring 3 page from ring 0 (executing code from a higher ring in general). This means we cannot execute user mode code from kernel mode. In order to bypass SMEP, let's understand how it is implemented- as well as two techniques to bypass it.
 

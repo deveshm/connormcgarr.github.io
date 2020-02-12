@@ -599,7 +599,7 @@ kernel32.DeviceIoControl(
 os.system("cmd.exe /k cd C:\\")
 ```
 
-This shellcode adds 0x40 to RSP as you can see from above. This is specific to the process I was exploiting, to resume execution. Also i nthis case, RAX was set to 0. Therefore, there was no need to `xor rax, rax`.
+This shellcode adds 0x40 to RSP as you can see from above. This is specific to the process I was exploiting, to resume execution. Also in this case, RAX was already set to 0. Therefore, there was no need to `xor rax, rax`.
 
 As you can see, SMEP has been bypassed!
 

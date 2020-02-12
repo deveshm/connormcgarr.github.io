@@ -235,7 +235,7 @@ What is SMEP? SMEP, or Supervisor Mode Execution Prevention, is a protection tha
 
 SMEP is a prevention that does not allow us execute code stored in a ring 3 page from ring 0 (executing code from a higher ring in general). This means we cannot execute user mode code from kernel mode. In order to bypass SMEP, let's understand how it is implemented- as well as two techniques to bypass it.
 
-The SMEP policy is enforced via the CR4 register. The CR4 register is a control register. Each bit in this register is responsible for various protection features being enabled on the OS. The 20th bit of the CR4 register is responsible for SMEP being enabled. If the 20th bit of the CR4 register is set to 1, SMEP is enabled. When the bit is set to 0, SMEP is disabled. Let's take a look at the CR4 register on Windows with SMEP enabled in normal hexadecimal format, as well as binary (so we can really see where that 20th bit resides).
+The SMEP policy is enforced via the CR4 register. The CR4 register is a control register. Each bit in this register is responsible for various features being enabled on the OS. The 20th bit of the CR4 register is responsible for SMEP being enabled. If the 20th bit of the CR4 register is set to 1, SMEP is enabled. When the bit is set to 0, SMEP is disabled. Let's take a look at the CR4 register on Windows with SMEP enabled in normal hexadecimal format, as well as binary (so we can really see where that 20th bit resides).
 
 `r cr4`
 

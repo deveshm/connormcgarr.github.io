@@ -453,7 +453,7 @@ To help better understand the output of the call stack, the column `Call Site` i
 
 As you can see, the compromised `ret` is located at `HEVD!TriggerStackOverflow+0xc8`. From there we will return to 0xfffff80302c82544, or `AuthzBasepRemoveSecurityAttributeValueFromLists+0x70`. The next value in the `RetAddr` column, is the intended value for our CR4 register, 0x00000000000506f8. 
 
-Recall that a `ret` instruction will load RSP into RIP. Therefore, since our intended CR4 value is located on the stack, technically our first ROP gadget would "return" to 0x00000000000506f8. However, the `pop rcx` will take that value off of the stack, and place it into RCX. Meaning we do not have to worry about returning to that value, which is not a valid memory address.
+Recall that a `ret` instruction will load RSP into RIP. Therefore, since our intended CR4 value is located on the stack, technically our first ROP gadget would "return" to 0x00000000000506f8. However, the `pop rcx` will take that value off of the stack and place it into RCX. Meaning we do not have to worry about returning to that value, which is not a valid memory address.
 
 Upon the `ret` from the `pop rcx` ROP gadget, we will jump into the next ROP gadget, `mov cr4, rcx`, which will load RCX into CR4. That ROP gadget is located at 0xfffff80302d87552, or `KiFlushCurrentTbWorker+0x12`. To finish things out, we have the location of our user mode code, at 0x0000000000b70000.
 

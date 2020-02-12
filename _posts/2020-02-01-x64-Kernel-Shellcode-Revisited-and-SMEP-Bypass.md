@@ -301,7 +301,7 @@ As you can see, this ROP gadget is "located" at 0x140108552. However, since this
 
 Awesome! rp++ was a bit wrong in its enumeration. rp++ says that we can put ECX into the CR4 register. Howerver, upon further inspection, we can see this ROP gadget ACTUALLY points to a `mov cr4, rcx` instruction. This is perfect for our use case! We have a way to move the contents of the RCX register into the CR4 register. You may be asking "Okay, we can control the CR4 register via the RCX register- but how does this help us?" Recall one of the properties of ROP from my previous post. Whenever we had a nice ROP gadget that allowed a desired intruction, but there was an unecessary `pop` in the gadget, we used filler data of NOPs. This is because we are just simply placing data in a register- we are not executing it.
 
-The same principle applies here. If we can `pop` our intended flag value into ECX (or RCX), we should have no problem. As we saw before, our intended CR4 register value should be 0x506f8.
+The same principle applies here. If we can `pop` our intended flag value into RCX, we should have no problem. As we saw before, our intended CR4 register value should be 0x506f8.
 
 Real quick with brevity- let's say rp++ was right in that we could only control the contents of the ECX register (instead of RCX). How would this affect us?
 
@@ -319,7 +319,7 @@ Recall, however, how the registers work here.
 -----------------------------------
 ```
 
-This means, even though RCX contains 0x00000000000506f8, a `mov cr4, ecx` would take the lower 32-bits of RCX (which is ECX) and place it into the CR4 register. This would mean ECX would equal 0x000506f8- and that value would end up in CR4. So even though we would theoretically using both RCX and ECX, due to lack of `pop rcx` ROP gadgets, we will be unaffected!
+This means, even though RCX contains 0x00000000000506f8, a `mov cr4, ecx` would take the lower 32-bits of RCX (which is ECX) and place it into the CR4 register. This would mean ECX would equal 0x000506f8- and that value would end up in CR4. So even though we would theoretically using both RCX and ECX, due to lack of `pop ecx` ROP gadgets, we will be unaffected!
 
 Now, let's continue on to controlling the RCX register.
 

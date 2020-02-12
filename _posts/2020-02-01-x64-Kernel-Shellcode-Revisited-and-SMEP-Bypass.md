@@ -271,7 +271,7 @@ Morten explains the steps as the following, if you are too lazy to read his work
 
 SMEP Says Goodbye
 ---
-Let's use the an [overflow](https://github.com/hacksysteam/HackSysExtremeVulnerableDriver) for this. ROP assumes we have control over the stack (as each ROP gadget returns back to the stack). Since SMEP is enabled, our ROP gagdets will need to come from the kernel. Since we are assuming [medium integrity](https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb625957(v=msdn.10)?redirectedfrom=MSDN) here, we can call `EnumDeviceDrivers()` to obtain the kernel base- which bypasses KASLR.
+Let's use the an [overflow](https://github.com/hacksysteam/HackSysExtremeVulnerableDriver) to outline bypasssing SMEP with ROP. ROP assumes we have control over the stack (as each ROP gadget returns back to the stack). Since SMEP is enabled, our ROP gagdets will need to come from kernel pages. Since we are assuming [medium integrity](https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb625957(v=msdn.10)?redirectedfrom=MSDN) here, we can call `EnumDeviceDrivers()` to obtain the kernel base- which bypasses KASLR.
 
 Essentially, here is how our ROP chain will work
 

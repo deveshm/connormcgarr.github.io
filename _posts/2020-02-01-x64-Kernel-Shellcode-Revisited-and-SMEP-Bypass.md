@@ -441,7 +441,7 @@ As you can see, we have hit the `ret` we are going to overwrite.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_01.png" alt="">
 
-Before we step through, let's view the call stack- to see how execution will go in the future
+Before we step through, let's view the call stack- to see how execution will proceed.
 
 `k`
 

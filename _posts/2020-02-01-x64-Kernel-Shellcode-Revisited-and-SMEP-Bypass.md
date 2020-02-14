@@ -253,11 +253,11 @@ As you can see, the 20th bit is outlined in the image above (counting from the r
 
 As you can see from the above image, when the 20th bit of the CR4 register is flipped, the hexadecimal value would be 0x00000000000506f8.
 
-We will talk about how to bypass SMEP via ROP using the above information. Before we do, let's talk a bit more about SMEP implementation.
+This post will cover how to bypass SMEP via ROP using the above information. Before we do, let's talk a bit more about SMEP implementation and other potential bypasses.
 
-SMEP is also implemented via the page table entry (PTE) of a memory page through the form of "flags". Recall that a page table is what contains information about which part of physical memory maps to virtual memory. The PTE for a piece of memory has various flags that are associated with it. Two of those flags are `U`, for user mode or `S`, for supervisor mode (kernel mode). This flag is checked when said memory is accessed by the memory management unit (MMU). Before we move on, lets talk about CPU modes for a second. Ring 3 is responsible for user mode application code. Ring 0 is responsible for operating system level code (kernel mode). The CPU can transition its current privilege level (CPL) based on what is executing. I will not get into the lower level details of `syscalls`, `sysrets`, `irets`, or other various routines that occur when the CPU changes the CPL. This is also not a blog on how paging works. If you are interested in learning more, I ___HIGHLY___ suggest the book [What Makes It Page: The Windows 7 (x64) Virtual Memory Manager](https://www.amazon.com/What-Makes-Page-Windows-Virtual/dp/1479114294) by Enrico Martignetti. Although this is specific to Windows 7, I believe these same concepts apply today. I give this background information, because SMEP is looking at these types of behaviors. If the CPL of the CPU is currently at ring 0, it does not need to be calling ring 3 (user mode application code).
+SMEP is also implemented via the page table entry (PTE) of a memory page through the form of "flags". Recall that a page table is what contains information about which part of physical memory maps to virtual memory. The PTE for a piece of memory has various flags that are associated with it. Two of those flags are `U`, for user mode or `S`, for supervisor mode (kernel mode). This flag is checked when said memory is accessed by the memory management unit (MMU). Before we move on, lets talk about CPU modes for a second. Ring 3 is responsible for user mode application code. Ring 0 is responsible for operating system level code (kernel mode). The CPU can transition its current privilege level (CPL) based on what is executing. I will not get into the lower level details of `syscalls`, `sysrets`, or other various routines that occur when the CPU changes the CPL. This is also not a blog on how paging works. If you are interested in learning more, I ___HIGHLY___ suggest the book [What Makes It Page: The Windows 7 (x64) Virtual Memory Manager](https://www.amazon.com/What-Makes-Page-Windows-Virtual/dp/1479114294) by Enrico Martignetti. Although this is specific to Windows 7, I believe these same concepts apply today. I give this background information, because SMEP bypassses could potentially abuse this functionality.
 
-Why bring this up? Athough we will first be outlining a SMEP bypass via ROP, let's consider another scenario. Let's say we have an arbitrary read and write primitive. Put aside the fact that PTEs are randomized for now. What if you had a read primitive to know where the PTE for the memory page of your shellcode was? Another potential (and interesting) way to bypass SMEP would be not to "disable SMEP" at all. Let's think outside the box! Instead of "going to the mountain"- why not "bring the mountain to us"? We could potentially use our read primitive to locate our user mode shellcode page, and then use our write primitive to overwrite the PTE for our shellcode and flip the `U` (usermode) flag into an `S` (supervisor mode) flag! That way, when that particular address is executed although it is a "user mode address", it is still executed because now the permissions of that page are that of a kernel mode page.
+Why bring this up? Athough we will be outlining a SMEP bypass via ROP, let's consider another scenario. Let's say we have an arbitrary read and write primitive. Put aside the fact that PTEs are randomized for now. What if you had a read primitive to know where the PTE for the memory page of your shellcode was? Another potential (and interesting) way to bypass SMEP would be not to "disable SMEP" at all. Let's think outside the box! Instead of "going to the mountain"- why not "bring the mountain to us"? We could potentially use our read primitive to locate our user mode shellcode page, and then use our write primitive to overwrite the PTE for our shellcode and flip the `U` (usermode) flag into an `S` (supervisor mode) flag! That way, when that particular address is executed although it is a "user mode address", it is still executed because now the permissions of that page are that of a kernel mode page.
 
 Although page table entries are randomized now, [this](https://www.blackhat.com/docs/us-17/wednesday/us-17-Schenk-Taking-Windows-10-Kernel-Exploitation-To-The-Next-Level%E2%80%93Leveraging-Write-What-Where-Vulnerabilities-In-Creators-Update.pdf) presentation by Morten Schenk of Offensive Security talks about derandomizing page table entries.
 
@@ -268,6 +268,8 @@ Morten explains the steps as the following, if you are too lazy to read his work
 3. Locate MiGetPteAddress() (can be done dynamically instead of static offsets)
 4. Use PTE base to obtain PTE of any memory page
 5. Change bit (whether it is copying shellcode to page and flipping NX bit or flipping `U/S` bit of a user mode page)
+
+Again, I will not be covering this method of bypassing SMEP until I have done more research on memory paging in Windows. See the end of this blog for my thoughts on other SMEP bypasses going forward.
 
 SMEP Says Goodbye
 ---
@@ -605,8 +607,10 @@ As you can see, SMEP has been bypassed!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/SMEP.png" alt="">
 
-SMEP Says Goodbye V2
+SMEP Bypass via PTE Overwrite
 ---
-Currently we successfully disabled SMEP with ROP. Although this is a neat method to disable SMEP- the CR4 register is protected by [Patch Guard](https://blog.tetrane.com/downloads/Tetrane_PatchGuard_Analysis_RS4_v1.00.pdf). Tampering with the CR4 register without restoring the original value value of CR4 will now kill our exploit as of Windows 10 RS4. Instead of restoring CR4 for our purposes- let's use this as a perfect opportunity to outline the PTE method of bypassing SMEP mentioned earlier. Let's revisit that notion with a read and write primitive.
+Perhaps in another blog I will come back to this. I am going to go back and do some more research on the memory manger unit and memory paging in Windows. When that research has concluded, I will get into the low level details of overwriting page table entries to turn user mode pages into kernel mode pages. In addition, I will go and do more research on pool memory in kernel mode and look into how pool overflows and use-after-free kernel exploits function and behave.
 
-TALK ABOUT nt!MiGetPteAddress AFTER LEAKING KERNEL TO IDENTIFY SHELCODE PTE AND FLIP U BIT TO S BIT
+Thank you for joining me along this journey!
+
+Peace, love, and positivity :-)

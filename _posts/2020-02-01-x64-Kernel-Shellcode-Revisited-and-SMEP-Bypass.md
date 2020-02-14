@@ -14,7 +14,7 @@ As apart of Windows, there is something known as the SYSTEM process. The SYSTEM 
 
 Identifying the SYSTEM Process Access Token
 ---
-We will use Windows 10 x64 to outline this overall process. First, boot up WinDbg on your debugger machine and start a kernel debugging session with your debugee machine (see my [post](https://connormcgarr.github.io/Part-1-Kernel-Exploitation/) on setting up a debugging enviornment). In addition, I noticed on Windows 10, I had to execute the following command on my debugger machine after completing the `bcdedit.exe` commands: `bcdedit.exe /dbgsettings serial debugport:1 baudrate:115200`)
+We will use Windows 10 x64 to outline this overall process. First, boot up WinDbg on your debugger machine and start a kernel debugging session with your debugee machine (see my [post](https://connormcgarr.github.io/Part-1-Kernel-Exploitation/) on setting up a debugging enviornment). In addition, I noticed on Windows 10, I had to execute the following command on my debugger machine after completing the `bcdedit.exe` commands from my previous post: `bcdedit.exe /dbgsettings serial debugport:1 baudrate:115200`)
 
 Once that is setup, execute the following command, to dump the active processes:
 
@@ -22,19 +22,19 @@ Once that is setup, execute the following command, to dump the active processes:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_1.png" alt="">
 
-This returns a few elements of each process. We are most interested in the "process address", which has been outlined in the image above at address `0xffffe60284651040`. This is the address of the `_EPROCESS` structure for a specified process (the SYSTEM process in this case). After enumerating the process address, we can enumerate much more detailed information about process using the `_EPROCESS` structure.
+This returns a few fields of each process. We are most interested in the "process address", which has been outlined in the image above at address `0xffffe60284651040`. This is the address of the `_EPROCESS` structure for a specified process (the SYSTEM process in this case). After enumerating the process address, we can enumerate much more detailed information about process using the `_EPROCESS` structure.
 
 `dt nt!_EPROCESS <Process address>`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_2.png" alt="">
 
-`dt` will display information about various variables, data types, etc. As you can see from the image above, various information about the SYSTEM process has been displayed. If you continue down the kd window in WinDbg, you will see the `Token` element, at an offset of `_EPROCESS + 0x358`.
+`dt` will display information about various variables, data types, etc. As you can see from the image above, various data types of the SYSTEM process's `_EPROCESS` structure have been displayed. If you continue down the `kd` window in WinDbg, you will see the `Token` field, at an offset of `_EPROCESS + 0x358`.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_3.png" alt="">
 
-What does this mean? That means for each process on Windows, the access token is located at an offset of 0x358 from the process address. We will for sure be using this information later. Before moving on though, let's take a look at how the `Token` element is stored.
+What does this mean? That means for each process on Windows, the access token is located at an offset of 0x358 from the process address. We will for sure be using this information later. Before moving on, however, let's take a look at how a `Token` is stored.
 
-As you can see from the above image, there is something called `_EX_FAST_REF`, or an Executive Fast Reference union. The difference between a union and a structure, is that a union stores data types at the same memory location (notice there is no difference in offset of the elements of `_EX_FAST_REF` in the image below). This is what the access token of a process is stored in. Let's take a closer look.
+As you can see from the above image, there is something called `_EX_FAST_REF`, or an Executive Fast Reference union. The difference between a union and a structure, is that a union stores data types at the same memory location (notice there is no difference in the offset of the various fields to the base of an `_EX_FAST_REF` union as shown in the image below. All of them are at an offset of 0x000). This is what the access token of a process is stored in. Let's take a closer look.
 
 `dt nt!_EX_FAST_REF`
 
@@ -115,7 +115,7 @@ This shows the GS segment register, at an offset of 0x188, holds an address of `
 
 As you can see, we have verified that `nt!KiInitialThread` represents the address of the current thread.
 
-Recall what was mentioned about threads and processes earlier. Threads are the part of a process that actually perform execution of code (for our purposes, these are kernel threads). Now that we have identified the current thread, let's identify the process associated with that thread (which would be the current process). Let's go back to the image above where we unassembled the `PSGetCurrentProcess()` function.
+Recall what was mentioned about threads and processes earlier. Threads are the part of a process that actually perform execution of code (for our purposes, these are kernel threads). Now that we have identified the current thread, let's identify the process associated with that thread (which would be the current process). Let's go back to the image above where we unassembled the `PsGetCurrentProcess()` function.
 
 `mov rax, qword ptr [rax,0B8h]`
 
@@ -156,13 +156,13 @@ Let's take a look at a few more elements of the `_EPROCESS` structure.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_15.png" alt="">
 
-Let's take a look at the data type of `ActiveProcessLinks`, `_LIST_ENTRY`
+Let's take a look at the data structure of `ActiveProcessLinks`, `_LIST_ENTRY`
 
 `dt nt!_LIST_ENTRY`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_16.png" alt="">
 
-`ActiveProcessLinks` is what keeps track of the list of current processes. How does it keep track of these processes you may be wondering? Its data type is `_LIST_ENTRY`, a doubly linked list. This means that each element in the linked list not only points to the next element, but it also points to the previous one. Essentially, the elements point in each direction. As mentioned earlier and just as a point of reiteration, this linked list is responsible for keeping track of all active processes.
+`ActiveProcessLinks` is what keeps track of the list of current processes. How does it keep track of these processes you may be wondering? Its data structure is `_LIST_ENTRY`, a doubly linked list. This means that each element in the linked list not only points to the next element, but it also points to the previous one. Essentially, the elements point in each direction. As mentioned earlier and just as a point of reiteration, this linked list is responsible for keeping track of all active processes.
 
 There are two elements of `_EPROCESS` we need to keep track of. The first element, located at an offset of 0x2e0 on Windows 10 x64, is `UniqueProcessId`. This is the PID of the process. The other element is `ActiveProcessLinks`, which is located at an offset 0x2e8.
 
@@ -187,7 +187,7 @@ __loop:
 	jnz __loop			; Loop until SYSTEM PID is found
 ```
 
-Once that SYSTEM `_EPROCESS` process structure has been found, we can now go ahead and retrieve the token and copy it to our current process. This will unleash God mode on our current process. God, please have mercy on the soul of our poor little process.
+Once the SYSTEM process's `_EPROCESS` structure has been found, we can now go ahead and retrieve the token and copy it to our current process. This will unleash God mode on our current process. God, please have mercy on the soul of our poor little process.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Picture1.png" alt="">
 
@@ -220,7 +220,7 @@ __loop:
 	ret				; Done!
 ```
 
-Notice our use of logical AND. We are clearing out the last 4 bits of the RCX register, via the CL register. If you have read my [post](https://connormcgarr.github.io/WS32_recv()-Reuse/) about a socket reuse exploit, you will know I talk about using the lower byte registers of the x86 or x64 registers (RCX, ECX, CX, CH, CL, etc).
+Notice our use of logical AND. We are clearing out the last 4 bits of the RCX register, via the CL register. If you have read my [post](https://connormcgarr.github.io/WS32_recv()-Reuse/) about a socket reuse exploit, you will know I talk about using the lower byte registers of the x86 or x64 registers (RCX, ECX, CX, CH, CL, etc). The last 4 bits we need to clear out , in an x64 architecture, are located in the low or `L` 8-bit register (`CL`, `AL`, `BL`, etc).
 
 As you can see also, we ended our shellcode by using logical XOR to clear out RAX. NTSTATUS uses RAX as the regsiter for the error code. NTSTATUS, when a value of 0 is returned, means the operations successfully performed.
 
@@ -231,11 +231,11 @@ SMEP Says Hello
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_SMEP.png" alt="">
 
-What is SMEP? SMEP, or Supervisor Mode Execution Prevention, is a protection that was first implemented in Windows 8 (in context of Windows). When we talk about executing code for a kernel exploit, the most common technique is to allocate the shellcode in user mode and the call it from the kernel. This means the user mode code will be called in context of the kernel, giving us the applicable privilege to obtain SYSTEM privileges.
+What is SMEP? SMEP, or Supervisor Mode Execution Prevention, is a protection that was first implemented in Windows 8 (in context of Windows). When we talk about executing code for a kernel exploit, the most common technique is to allocate the shellcode in user mode and the call it from the kernel. This means the user mode code will be called in context of the kernel, giving us the applicable permissions to obtain SYSTEM privileges.
 
-SMEP is a prevention that does not allow us execute code stored in a ring 3 page from ring 0 (executing code from a higher ring in general). This means we cannot execute user mode code from kernel mode. In order to bypass SMEP, let's understand how it is implemented- as well as two techniques to bypass it.
+SMEP is a prevention that does not allow us execute code stored in a ring 3 page from ring 0 (executing code from a higher ring in general). This means we cannot execute user mode code from kernel mode. In order to bypass SMEP, let's understand how it is implemented.
 
-The SMEP policy is enforced via the CR4 register. The CR4 register is a control register. Each bit in this register is responsible for various features being enabled on the OS. The 20th bit of the CR4 register is responsible for SMEP being enabled. If the 20th bit of the CR4 register is set to 1, SMEP is enabled. When the bit is set to 0, SMEP is disabled. Let's take a look at the CR4 register on Windows with SMEP enabled in normal hexadecimal format, as well as binary (so we can really see where that 20th bit resides).
+The SMEP policy is enforced via the CR4 register. According to [Intel](https://software.intel.com/sites/default/files/managed/39/c5/325462-sdm-vol-1-2abcd-3abcd.pdf), the CR4 register is a control register. Each bit in this register is responsible for various features being enabled on the OS. The 20th bit of the CR4 register is responsible for SMEP being enabled. If the 20th bit of the CR4 register is set to 1, SMEP is enabled. When the bit is set to 0, SMEP is disabled. Let's take a look at the CR4 register on Windows with SMEP enabled in normal hexadecimal format, as well as binary (so we can really see where that 20th bit resides).
 
 `r cr4`
 
@@ -255,7 +255,7 @@ As you can see from the above image, when the 20th bit of the CR4 register is fl
 
 This post will cover how to bypass SMEP via ROP using the above information. Before we do, let's talk a bit more about SMEP implementation and other potential bypasses.
 
-SMEP is also implemented via the page table entry (PTE) of a memory page through the form of "flags". Recall that a page table is what contains information about which part of physical memory maps to virtual memory. The PTE for a piece of memory has various flags that are associated with it. Two of those flags are `U`, for user mode or `S`, for supervisor mode (kernel mode). This flag is checked when said memory is accessed by the memory management unit (MMU). Before we move on, lets talk about CPU modes for a second. Ring 3 is responsible for user mode application code. Ring 0 is responsible for operating system level code (kernel mode). The CPU can transition its current privilege level (CPL) based on what is executing. I will not get into the lower level details of `syscalls`, `sysrets`, or other various routines that occur when the CPU changes the CPL. This is also not a blog on how paging works. If you are interested in learning more, I ___HIGHLY___ suggest the book [What Makes It Page: The Windows 7 (x64) Virtual Memory Manager](https://www.amazon.com/What-Makes-Page-Windows-Virtual/dp/1479114294) by Enrico Martignetti. Although this is specific to Windows 7, I believe these same concepts apply today. I give this background information, because SMEP bypassses could potentially abuse this functionality.
+SMEP is also implemented via the page table entry (PTE) of a memory page through the form of "flags". Recall that a page table is what contains information about which part of physical memory maps to virtual memory. The PTE for a memory page has various flags that are associated with it. Two of those flags are `U`, for user mode or `S`, for supervisor mode (kernel mode). This flag is checked when said memory is accessed by the memory management unit (MMU). Before we move on, lets talk about CPU modes for a second. Ring 3 is responsible for user mode application code. Ring 0 is responsible for operating system level code (kernel mode). The CPU can transition its current privilege level (CPL) based on what is executing. I will not get into the lower level details of `syscalls`, `sysrets`, or other various routines that occur when the CPU changes the CPL. This is also not a blog on how paging works. If you are interested in learning more, I ___HIGHLY___ suggest the book [What Makes It Page: The Windows 7 (x64) Virtual Memory Manager](https://www.amazon.com/What-Makes-Page-Windows-Virtual/dp/1479114294) by Enrico Martignetti. Although this is specific to Windows 7, I believe these same concepts apply today. I give this background information, because SMEP bypassses could potentially abuse this functionality.
 
 Why bring this up? Athough we will be outlining a SMEP bypass via ROP, let's consider another scenario. Let's say we have an arbitrary read and write primitive. Put aside the fact that PTEs are randomized for now. What if you had a read primitive to know where the PTE for the memory page of your shellcode was? Another potential (and interesting) way to bypass SMEP would be not to "disable SMEP" at all. Let's think outside the box! Instead of "going to the mountain"- why not "bring the mountain to us"? We could potentially use our read primitive to locate our user mode shellcode page, and then use our write primitive to overwrite the PTE for our shellcode and flip the `U` (usermode) flag into an `S` (supervisor mode) flag! That way, when that particular address is executed although it is a "user mode address", it is still executed because now the permissions of that page are that of a kernel mode page.
 
@@ -305,7 +305,7 @@ Awesome! rp++ was a bit wrong in its enumeration. rp++ says that we can put ECX 
 
 The same principle applies here. If we can `pop` our intended flag value into RCX, we should have no problem. As we saw before, our intended CR4 register value should be 0x506f8.
 
-Real quick with brevity- let's say rp++ was right in that we could only control the contents of the ECX register (instead of RCX). How would this affect us?
+Real quick with brevity- let's say rp++ was right in that we could only control the contents of the ECX register (instead of RCX). Would this affect us?
 
 Recall, however, how the registers work here.
 

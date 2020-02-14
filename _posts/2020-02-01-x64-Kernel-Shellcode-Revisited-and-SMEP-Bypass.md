@@ -611,6 +611,8 @@ SMEP Bypass via PTE Overwrite
 ---
 Perhaps in another blog I will come back to this. I am going to go back and do some more research on the memory manger unit and memory paging in Windows. When that research has concluded, I will get into the low level details of overwriting page table entries to turn user mode pages into kernel mode pages. In addition, I will go and do more research on pool memory in kernel mode and look into how pool overflows and use-after-free kernel exploits function and behave.
 
-Thank you for joining me along this journey!
+Thank you for joining me along this journey! And thank you to Morten Schenk, Alex Ionescu, and Intel. You all have aided me greatly.
+
+Please feel free to contact me with any suggestions, comments, or corrections! I am open to it all.
 
 Peace, love, and positivity :-)

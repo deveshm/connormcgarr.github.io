@@ -42,7 +42,7 @@ As you can see from the above image, there is something called `_EX_FAST_REF`, o
 
 Take a look at the `RefCnt` element. This is a value, appended to the access token, that keeps track of references of the access token. On x86, this is 3 bits. On x64 (which is our current architecture) this is 4 bits, as shown above. We want to clear these bits out, using logical AND. That way, we just extract the actual value of the `Token`, and not other unnecessary metadata.
 
-To extract the value of the token, we simply need to view the `EX_FAST_REF` union of the SYSTEM process at an offset of 0x358 (which is where our token resides). From there, we can figure out how to go about clearing out `RefCnt`.
+To extract the value of the token, we simply need to view the `_EX_FAST_REF` union of the SYSTEM process at an offset of 0x358 (which is where our token resides). From there, we can figure out how to go about clearing out `RefCnt`.
 
 `dt nt!_EX_FAST_REF <Process address>+0x358`
 

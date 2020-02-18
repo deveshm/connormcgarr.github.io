@@ -135,7 +135,7 @@ Let's start building out an assembly program that tracks what we are doing.
 
 ```nasm
 ; Windows 10 x64 Token Stealing Payload
-; Author Connor McGarr
+; Author: Connor McGarr
 
 [BITS 64]
 
@@ -170,7 +170,7 @@ So essentially what we can do in x64 assembly, is locate the current process fro
 
 ```nasm
 ; Windows 10 x64 Token Stealing Payload
-; Author Connor McGarr
+; Author: Connor McGarr
 
 [BITS 64]
 
@@ -197,7 +197,7 @@ Let's finish out the rest of our token stealing payload for Windows 10 x64.
 
 ```nasm
 ; Windows 10 x64 Token Stealing Payload
-; Author Connor McGarr
+; Author: Connor McGarr
 
 [BITS 64]
 
@@ -265,7 +265,7 @@ Morten explains the steps as the following, if you are too lazy to read his work
 
 1. Obtain read/write primitive
 2. Leak ntoskrnl.exe (kernel base)
-3. Locate MiGetPteAddress() (can be done dynamically instead of static offsets)
+3. Locate `MiGetPteAddress()` (can be done dynamically instead of static offsets)
 4. Use PTE base to obtain PTE of any memory page
 5. Change bit (whether it is copying shellcode to page and flipping NX bit or flipping `U/S` bit of a user mode page)
 

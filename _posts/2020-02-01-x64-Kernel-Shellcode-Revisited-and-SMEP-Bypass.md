@@ -283,7 +283,7 @@ pop <reg> ; ret
 -------------------
 VALUE_WANTED_IN_CR4 (0x506f8) - This can be our own user supplied value.
 -------------------
-mov cr4, reg ; ret
+mov cr4, <reg> ; ret
 -------------------
 User mode payload address
 -------------------

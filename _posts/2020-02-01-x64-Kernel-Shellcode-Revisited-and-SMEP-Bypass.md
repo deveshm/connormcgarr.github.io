@@ -40,7 +40,7 @@ As you can see from the above image, there is something called `_EX_FAST_REF`, o
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_4.png" alt="">
 
-Take a look at the `RefCnt` element. This is a value, appended to the access token, that keeps track of references of the access token. On x86, this is 3 bits. On x64 (which is our current architecture) this is 4 bits, as shown above. We want to clear these bits out, using logical AND. That way, we just extract the actual value of the `Token`, and not other unnecessary metadata.
+Take a look at the `RefCnt` element. This is a value, appended to the access token, that keeps track of references of the access token. On x86, this is 3 bits. On x64 (which is our current architecture) this is 4 bits, as shown above. We want to clear these bits out, using bitwise AND. That way, we just extract the actual value of the `Token`, and not other unnecessary metadata.
 
 To extract the value of the token, we simply need to view the `_EX_FAST_REF` union of the SYSTEM process at an offset of 0x358 (which is where our token resides). From there, we can figure out how to go about clearing out `RefCnt`.
 
@@ -50,7 +50,7 @@ To extract the value of the token, we simply need to view the `_EX_FAST_REF` uni
 
 As you can see, `RefCnt` is equal to 0y0111. 0y denotes a binary value. So this means `RefCnt` in this instance equals 7 in decimal.
 
-So, let's use logical AND to try to clear out those last few bits.
+So, let's use bitwise AND to try to clear out those last few bits.
 
 `? TOKEN & 0xf`
 
@@ -220,9 +220,9 @@ __loop:
 	ret				; Done!
 ```
 
-Notice our use of logical AND. We are clearing out the last 4 bits of the RCX register, via the CL register. If you have read my [post](https://connormcgarr.github.io/WS32_recv()-Reuse/) about a socket reuse exploit, you will know I talk about using the lower byte registers of the x86 or x64 registers (RCX, ECX, CX, CH, CL, etc). The last 4 bits we need to clear out , in an x64 architecture, are located in the low or `L` 8-bit register (`CL`, `AL`, `BL`, etc).
+Notice our use of bitwise AND. We are clearing out the last 4 bits of the RCX register, via the CL register. If you have read my [post](https://connormcgarr.github.io/WS32_recv()-Reuse/) about a socket reuse exploit, you will know I talk about using the lower byte registers of the x86 or x64 registers (RCX, ECX, CX, CH, CL, etc). The last 4 bits we need to clear out , in an x64 architecture, are located in the low or `L` 8-bit register (`CL`, `AL`, `BL`, etc).
 
-As you can see also, we ended our shellcode by using logical XOR to clear out RAX. NTSTATUS uses RAX as the regsiter for the error code. NTSTATUS, when a value of 0 is returned, means the operations successfully performed.
+As you can see also, we ended our shellcode by using bitwise XOR to clear out RAX. NTSTATUS uses RAX as the regsiter for the error code. NTSTATUS, when a value of 0 is returned, means the operations successfully performed.
 
 Before we go ahead and show off our payload, let's develop an exploit that outlines bypassing SMEP. We will use a stack overflow as an example, in the kernel, to outline using [ROP](https://connormcgarr.github.io/ROP/) to bypass SMEP.
 

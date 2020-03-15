@@ -509,7 +509,7 @@ But what if our shellcode was this:
 
 We would have to add three NOPs, to fill out the four bytes needed in the register. But remember something here- NOPs are in our restricted character set! We can actually use `A`'s, `B`'s, or `C`'s to accomplish the same thing. Just remember that each of those three letters actual increment some of the general-purpose registers. Don't forget that if your shellcode is relying on some of those same registers to do some calculations!
 
-To get our shellcode on the stack, you would do the exact same method as above, but you would first zero out the EAX register. Then, the three lines of SUB statements would be executed after the AND statement, and then pushed onto the stack. We keep hearing me say "zero out the register". How exactly do we do this? Generally, you would use the logical [`XOR`](https://accu.org/index.php/journals/1915) function. If you `XOR` a register with itself, the value of the register turns to all `0`'s. You can achieve the same thing with logical [`AND`](https://processing.org/reference/logicalAND.html). Instead of using the register itself, you can use a string of `0`'s and `1`'s, and then perform another `AND` operation, with the inverse of those bits. This will be reflected in the updated PoC shortly. One other thing to note is that the opcode of `and eax` is `\x25`.
+To get our shellcode on the stack, you would do the exact same method as above, but you would first zero out the EAX register. Then, the three lines of SUB statements would be executed after the AND statement, and then pushed onto the stack. We keep hearing me say "zero out the register". How exactly do we do this? Generally, you would use bitwise `XOR`. If you `XOR` a register with itself, the value of the register turns to all `0`'s. You can achieve the same thing with bitwise `AND`. Instead of using the register itself, you can use a string of `0`'s and `1`'s, and then perform another `AND` operation, with the inverse of those bits. This will be reflected in the updated PoC shortly. One other thing to note is that the opcode of `and eax` is `\x25`.
 
 Since we are writing to the stack towards upward addresses, you will need to start with the last line of shellcode for your payload (`calc.exe` in my case), and end with your first line. Here is a visual of what will be happening when we write to the stack:
 
@@ -702,11 +702,11 @@ Our stack is now aligned! Let us begin by making EAX zero. We step through our f
 
 Our register is zeroed out. We can now load whatever we want into EAX now. 
 
-Now we execute the logical `AND` instructions and the `push eax` instruction, to get the value on the stack. Our stack, as you remember, is aligned so that the top points to where our shellcode will execute! Scrolling down, we see that we have got our instruction on the stack, in little endian format (compare this value to the last line of the `calc.exe` shellcode):
+Now we execute the bitwise `AND` instructions and the `push eax` instruction, to get the value on the stack. Our stack, as you remember, is aligned so that the top points to where our shellcode will execute! Scrolling down, we see that we have got our instruction on the stack, in little endian format (compare this value to the last line of the `calc.exe` shellcode):
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/28.png" alt="">
 
-We step through the rest of the instructions. After doing that, you can scroll down to see our shellcode has successfully been stored on top of our aligned stack (`0012F3F0` is the aligned stack pointer we used.) and we will be able to execute our shellcode if we step through until we hit our first  logical `XOR` instruction! 
+We step through the rest of the instructions. After doing that, you can scroll down to see our shellcode has successfully been stored on top of our aligned stack (`0012F3F0` is the aligned stack pointer we used.) and we will be able to execute our shellcode if we step through until we hit our first bitwise `XOR` instruction! 
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/xor.png" alt="">
 
@@ -738,9 +738,9 @@ Here is the final exploit visually:
 # 05 was a bad character for us, which is an add eax opcode. We could use (in hex) 1-4,6,10-7E. This was an odd character set.
 
 # Can replace with a shell, if you are willing to do the encoding and decoding math Too preoccupied for now, so here is calc.exe
-# You would need to use logical AND plus the sub eax opcodes to get a value on the stack that could jump back to the A buffer, where there is
+# You would need to use bitwise AND plus the sub eax opcodes to get a value on the stack that could jump back to the A buffer, where there is
 # much more room. Then you would need to align the stack with the stack pointer value you need (not 0x012F3F4 as used below) and write to the stack upwards.
-# You should have enough room for all of the logical AND plus sub eax commands to get a full-sized shell payload on the stack.
+# You should have enough room for all of the bitwise AND plus sub eax commands to get a full-sized shell payload on the stack.
 
 # calc.exe shellcode:
 # "\x31\xc9\x51\x68"

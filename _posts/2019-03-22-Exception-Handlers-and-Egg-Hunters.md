@@ -34,6 +34,7 @@ We will be taking crack at the [Vulnserver](https://github.com/stephenbradshaw/v
 Initial Crash
 ---
 When starting the application, we notice it starts listening on TCP port `9999`. We will take note of this for the future. After starting the server, we connect to it via `nc` on port 9999, and execute the command `HELP` to view a list of commands we can issue:
+
 <img src="{{ site.url }}{{ site.baseurl }}/images/net9999.png" alt="">
 
 After we view the list of commands, we learn there is a vulnerability within the `GMON` command. This was found through fuzzing. Fuzzing, at a very high level, means that we threw a bunch of junk characters at the vulnerable command to create a crash. Here is the PoC Python script we are going to execute to see if we can crash the application:
@@ -57,6 +58,7 @@ s.recv(1024)
 s.close()
 ```
 The application, which is attached to [Immunity Debugger](https://www.immunityinc.com/products/debugger/), crashes on the Windows machine where Vulnserver is running. We take note of something interesting. Although the application crashed, EIP was not overwritten with our user supplied data:
+
 <img src="{{ site.url }}{{ site.baseurl }}/images/crash.png" alt="">
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/crash1.png" alt="">
@@ -137,6 +139,7 @@ A `pop` instruction will move whatever is on top of the stack (the stack pointer
 If we fill SEH with a `pop <register> pop <register> ret` chain we can move our current stack pointer (ESP) 8 bytes upward in memory (4 bytes for each `pop` instruction). If nSEH is located at the current ESP value plus 8 bytes, a `pop pop` sequence will take our current stack pointer and fill it with nSEH's value (which is `esp+8`). The last `ret` instruction, as explained above, will take our ESP (which now contains our nSEH value) and place it into EIP. Henceforth, we can control what gets loaded into the instruction pointer (EIP)! 
 
 We don't actually mind that registers will be manipulated from our `pop pop ret` chain- we only care that ESP increases when a `pop` instruction is executed. Mona has a nice feature to search for `pop pop ret` chain. Here is the command used in Immunity: `!mona seh`(Again, I know it is hard to see, so i zoomed in on the addresses in the second image):
+
 <img src="{{ site.url }}{{ site.baseurl }}/images/poppopret.png" alt="">
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/again.png" alt="">
@@ -177,6 +180,7 @@ Notice where we are!!!! Look at the 3 values below our current instruction, in t
 <img src="{{ site.url }}{{ site.baseurl }}/images/stack.png" alt="">
 
 The address `00C0FFDC` is the "Pointer to next SEH record", which is nSEH. That address, as shown in image after we stepped through the `pop pop ret` chain, is the address of where our B's (42 hex) start. Awesome! Now what could we do from here? We could do a typical jump to ESP to execute shellcode! But we have a slight issue. ESP now only has the capacity to hold less than 30 bytes:
+
 <img src="{{ site.url }}{{ site.baseurl }}/images/ugh.png" alt="">
 
 Take the Jump!
@@ -210,15 +214,18 @@ s.close()
 Before we execute, take note of the `\x90` instructions, next to the jump opcode. These two added instructions are called no operations. "NOPS", as they are commonly characterised, are instructions that literally do not do anything (hence the name). The opcode is first recognized by the CPU. The CPU then disregards the NOP, and reads the next sequential instruction to be executed. We are using two "NOPs" here as place holders, because registers need four bytes loaded in them- and our jump opcode only provided two. Carrying on...
 
 We restart the application in Immunity and we throw our PoC at it. Our Vulnserver application crashes, and we view the SEH chain. We set a breakpoint on SEH, as shown previously, and use `Shift + F9` to pass the exception to the application. We then step through our `pop pop ret` chain, and we land on our jump!!:
+
 <img src="{{ site.url }}{{ site.baseurl }}/images/NOP.png" alt="">
 
 We step though the jump withh `F7` and we land back in our A's:
+
 <img src="{{ site.url }}{{ site.baseurl }}/images/validate.png" alt="">
 
 Let's Go Huntin', Boys!
 ---
 Now it is time to generate our egg hunter. We will do this with mona. This is the command I issued:
 `!mona egg -t w00t`:
+
 <img src="{{ site.url }}{{ site.baseurl }}/images/eggsy.png" alt="">
 
 We now are going to update our PoC with the egg hunter, and I will explain the changes after I show them. Here is the new PoC:
@@ -255,6 +262,7 @@ Some questions you may have are probably: "Why did your initial `A` value go fro
 We take our original offset of `3495` and we add two bytes (for our `EB D8` instruction). We now have a value of `3497`. Then, we went backwards 40 bytes. We now need to subtract that value. `3497 - 40` gives us `3457`. That is the offset to our egg hunter. There is a slight issue present now. We can reach our offset to the egg hunter- but there is still a gap between where our egg hunter resides in memory, and where our exception handlers are. If we add 32 bytes (the size of our egg hunter) to our current `3457` (where our egg hunter is located), we get `3489`. Thus, we are still six bytes short of our `3495` byte offset to nSEH and SEH. If we cannot reach nSEH or SEH- we cannot commence our execution of the SEH chain. Bearing this in mind, we must add these six bytes in before we can use our exception handlers to execute instructions on the stack. To compensate for this, we add those six bytes back in the form of a [NOP Sled](https://en.wikipedia.org/wiki/NOP_slide). This will give us a bit more reliability in our exploit, instead of just using A's. 
 
 We then restart our application in Immunity, and chuck our PoC at the application. Business as usual- application crashes, open the SEH chain, put a breakpoint on SEH. `Shift + F9` to pass our exception to the program, step through our `pop pop ret` chain. We land at our jump. Step through the jump and voila! We have landed on our egg hunter:
+
 <img src="{{ site.url }}{{ site.baseurl }}/images/voila.png" alt="">
 
 Country Roads, Take Me Home

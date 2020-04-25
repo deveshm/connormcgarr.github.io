@@ -48,9 +48,9 @@ int recv(
 );
 ```
 
-The first parameter, `SOCKET s`, is the file descriptor that references the socket connection. A file descriptor is a piece of data that the Operating System uses to reference a certain resource (file, socket connection, I/O resource, etc.). Since we will be working within the x86 architecture, this will look something like this- __`0x00000090`__ (this number will vary). 
+The first parameter, `SOCKET s`, is the file descriptor that references the socket connection. A file descriptor is a piece of data that the Operating System uses to reference a certain resource (file, socket connection, I/O resource, etc.). Since we will be working within the x86 architecture, this will look something like this- `0x00000090` (this number will vary). 
 
-Also, one thing to remember, a file descriptor is utilized by the OS. The file descriptor is not actually a raw value of __`0x00000090`__ (or whatever value the OS is using). The OS would not know what to do with this value, as it is not a coherent memory address- just an arbitrary value. The OS needs to utilize a memory address that points to the file descriptor value (a pointer).
+Also, one thing to remember, a file descriptor is utilized by the OS. The file descriptor is not actually a raw value of `0x00000090` (or whatever value the OS is using). The OS would not know what to do with this value, as it is not a coherent memory address- just an arbitrary value. The OS needs to utilize a memory address that points to the file descriptor value (a pointer).
 
 The second parameter, `char *buf`, is a pointer to the memory location the buffer is received at. Essentially, when developing our second stage payload, we will want to specify a memory location our execution will eventually reach.
 
@@ -142,7 +142,7 @@ Generating the File Descriptor
 ---
 Although we will need to push our parameters on the stack in reverse order, we will start by generating the file descriptor. 
 
-From the observations above- it seems that our file descriptor is the value __`0x00000088`__. Knowing this, we will create a piece of shellcode to reflect this. Here are the instructions generated, using [nasm_shell](https://github.com/fishstiqz/nasmshell):
+From the observations above- it seems that our file descriptor is the value `0x00000088`. Knowing this, we will create a piece of shellcode to reflect this. Here are the instructions generated, using [nasm_shell](https://github.com/fishstiqz/nasmshell):
 
 ```console
 nasm > xor ecx, ecx
@@ -179,7 +179,7 @@ A Word About Data Sizes
 --
 Remember, a 32-bit register when referencing the data inside of it is known as a [__DWORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/262627d8-3418-4627-9218-4ffe110850b2), or a double word. A 16-bit register when referencing the data in it, is known as a [__WORD__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/f8573df3-a44a-4a50-b070-ac4c3aa78e3c). An 8-bit register's data is known as a [__byte__](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/d7edc080-e499-4219-a837-1bc40b64bb04). 
 
-The 32-bit register is comprised of 4 bytes: __`0x11223344`__. The numbers __44__ represents the most significant byte (since we are working with a little endian architecture). The CL register is located at the most significant byte (again, because we are using little endian) of the ECX register (the same location as __44__). This means, if we add `0x88` to the CL register, ECX will look like this:
+The 32-bit register is comprised of 4 bytes: `0x11223344`. The numbers __44__ represents the most significant byte (since we are working with a little endian architecture). The CL register is located at the most significant byte (again, because we are using little endian) of the ECX register (the same location as __44__). This means, if we add `0x88` to the CL register, ECX will look like this:
 
 ```console
 0x00000088
@@ -195,7 +195,7 @@ The third instruction:
 ```console
 push ecx
 ```
-This gets the value onto the top of the stack. In other words, the value of __`0x00000088`__ is being stored in ESP- as ESP contains the value of the item on top of the stack.
+This gets the value onto the top of the stack. In other words, the value of `0x00000088` is being stored in ESP- as ESP contains the value of the item on top of the stack.
 
 The last instruction:
 
@@ -203,9 +203,9 @@ The last instruction:
 mov edi, esp
 ```
 
-This will move the contents of ESP, into EDI. The reason we do this, is because this will create a memory address (ESP's address, which contains a pointer to the value __`0x00000088`__). EDI now is a memory address that points to the value of the file descriptor. 
+This will move the contents of ESP, into EDI. The reason we do this, is because this will create a memory address (ESP's address, which contains a pointer to the value `0x00000088`). EDI now is a memory address that points to the value of the file descriptor. 
 
-Although we did not find the ACTUAL file descriptor the OS generated, we are essentially "tricking" the OS into thinking this is the file descriptor. The OS is only looking for a pointer that references the value __`0x00000088`__, not a specific memory address.
+Although we did not find the ACTUAL file descriptor the OS generated, we are essentially "tricking" the OS into thinking this is the file descriptor. The OS is only looking for a pointer that references the value `0x00000088`, not a specific memory address.
 
 Before executing the POC, make sure to add a couple of software breakpoints (`\xCC`) BEFORE the shellcode! This is to pause execution, to allow for accurate calculations.
 
@@ -336,7 +336,7 @@ Flags
 ---
 Now that the file descriptor is out of the way- we will start with the last parameter, the flags. 
 
-The flags are the most painless of the parameters. All that is needed is a value of __`0x00000000`__ on the stack. Here is the shellcode for this:
+The flags are the most painless of the parameters. All that is needed is a value of `0x00000000` on the stack. Here is the shellcode for this:
 
 ```console
 nasm > xor edx, edx
@@ -417,7 +417,7 @@ A glimpse of the stack, with a value of zero
 
 BufSize
 ---
-Here is where we will determine our buffer size. Since we are working with hexadecimal, we will choose an easy number that is equivalent to a decimal amount enough for a shell (more than 350 bytes). We will choose 512 decimal, or __`0x00000200`__ in __DWORD__ hexadecimal.
+Here is where we will determine our buffer size. Since we are working with hexadecimal, we will choose an easy number that is equivalent to a decimal amount enough for a shell (more than 350 bytes). We will choose 512 decimal, or `0x00000200` in __DWORD__ hexadecimal.
 
 We will deploy a technique referenced above- (when we added to cl). Since EDX is already equal to zero from our flags parameter, let's use this register to do our calculations.
 
@@ -541,7 +541,7 @@ Subtract the current ESP value from the wanted value:
 
 We will need to add `0x4C` to our current ESP value to get our buffer to land where we want.
 
-To do our calculations, we will need to push the current stack pointer onto the stack and pop it into EBX. Then, we will need to perform a calculation on EBX to get it equal to __`00C0F9F0`__. Then we will push the value onto the stack.
+To do our calculations, we will need to push the current stack pointer onto the stack and pop it into EBX. Then, we will need to perform a calculation on EBX to get it equal to `00C0F9F0`. Then we will push the value onto the stack.
 
 Shellcode instructions:
 
@@ -628,7 +628,7 @@ File Descriptor, We Meet Again.
 ---
 It is time to push our file descriptor onto the stack. Remember- our file descriptor is located in EDI. However, we cannot just execute a `push edi` instruction. Right now, EDI contains an actual value of __`00C0F9FC`__. Executing a `push edi` would literally put the value __`00C0F9FC`__ onto the stack.
 
-We would like the value of __`0x00000088`__ to be on the stack. Recall that the value of __`0x00000088`__ is pointed to by EDI! That means if we can push the data that EDI references (or points to), we could get the file descriptor onto the stack.
+We would like the value of `0x00000088` to be on the stack. Recall that the value of `0x00000088` is pointed to by EDI! That means if we can push the data that EDI references (or points to), we could get the file descriptor onto the stack.
 
 We will need to execute this instruction:
 
@@ -736,7 +736,7 @@ to
 0040252C
 ```
 
-Each value of a 32-bit register (__`0x12345678`__) is representative of 4 bits. (`8 x 4 = 32`). 
+Each value of a 32-bit register (`0x12345678`) is representative of 4 bits. (`8 x 4 = 32`). 
 
 Shifting the bits by 8 bits should accomplish this!
 

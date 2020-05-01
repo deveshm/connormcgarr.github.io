@@ -35,7 +35,7 @@ Let's start with some psuedo code!
 # Allocating user mode code
 payload = kernel32.VirtualAlloc(
     c_int(0),                         # lpAddress
-    c_int(len(payload)),              # dwSize
+    c_int(len(shellcode)),            # dwSize
     c_int(0x3000),                    # flAllocationType
     c_int(0x40)                       # flProtect
 )
@@ -57,3 +57,42 @@ os.system("cmd.exe /K cd C:\\")
 ```
 
 Note, the above code is syntactically incorrect, but it is there nonetheless to help us understand what is going on.
+
+Also, before moving on, write-what-where = arbitrary memory overwrite = arbitrary write primitive.
+
+Carrying on, the above psuedo code snippet is allocating virtual memory in user mode, via [VirtualAlloc()](https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc). Then, utilizing the write-what-where vulnerability in the kernel mode driver, the shellcode's virtual address (which is in user mode), get's written to `nt!HalDispatchTable+0x8`, which is a very common technique to abuse in an arbitrary memory overwrite vulnerability. 
+
+Please refer to my [last post](https://connormcgarr.github.io/Kernel-Exploitation-2/) on how this technique works.
+
+As the code stands now, execution of this code will result in an `ATTEMPTED_EXECUTE_OF_NOEXECUTE_MEMORY` bugcheck. This bugcheck is indicative of SMEP kicking in.
+
+Letting the code execute, we can see this is the case.
+
+Here, we can clearly see our shellcode has been allocated at `0x2620000`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_2.png" alt="">
+
+When SMEP kicks in, this is the offending virtual address.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_1.png" alt="">
+
+Recall, from a [previosu blog](https://connormcgarr.github.io/x64-Kernel-Shellcode-Revisited-and-SMEP-Bypass/) of mine that SMEP kicks in whenever code that resides in current privilege level (CPL 3) of the CPU (user mode code) is executed in contect of CPL 0 (kernel mode).
+
+But _HOW_ did SMEP know to take over? Recall that SMEP is enforced in two ways. Globally, SMEP is controlled by the 20th bit of the CR4 register.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_4.png" alt="">
+
+As we can see, SMEP is enabled globally on the system. However, there is a second way SMEP is enforced- and that is on a per memory page basis, via the U/S PTE control bit. This is what we are going to be taking a look at in this post.
+
+Take a look again at the Bug Check image. We can see the offending virtual address, and we can also see `Argument 3` contains the `PTE contents` value. Let's see what this looks like in WinDbg.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_3.png" alt="">
+
+Let's break this above image down. Our user mode shellcode was stored in an allocation at the address `0x2620000` and was configured with the following attributes (via the PTE control bits)
+
+1. D- 
+2. A- 
+3. U- 
+4. W- 
+5. E- 
+6. V- 

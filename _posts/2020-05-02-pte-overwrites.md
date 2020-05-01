@@ -64,7 +64,7 @@ Carrying on, the above psuedo code snippet is allocating virtual memory in user 
 
 Please refer to my [last post](https://connormcgarr.github.io/Kernel-Exploitation-2/) on how this technique works.
 
-As the code stands now, execution of this code will result in an `ATTEMPTED_EXECUTE_OF_NOEXECUTE_MEMORY` bugcheck. This bugcheck is indicative of SMEP kicking in.
+As it stands now, execution of this code will result in an `ATTEMPTED_EXECUTE_OF_NOEXECUTE_MEMORY` bugcheck. This bugcheck is indicative of SMEP kicking in.
 
 Letting the code execute, we can see this is the case.
 

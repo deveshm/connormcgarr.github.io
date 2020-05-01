@@ -76,9 +76,9 @@ When SMEP kicks in, we can see the offending address is that of our user mode sh
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_1.png" alt="">
 
-Recall, from a [previous blog](https://connormcgarr.github.io/x64-Kernel-Shellcode-Revisited-and-SMEP-Bypass/) of mine that SMEP kicks in whenever code that resides in current privilege level (CPL 3) of the CPU (user mode code) is executed in contect of CPL 0 (kernel mode).
+Recall, from a [previous blog](https://connormcgarr.github.io/x64-Kernel-Shellcode-Revisited-and-SMEP-Bypass/) of mine, that SMEP kicks in whenever code that resides in current privilege level (CPL 3) of the CPU (CPL 3 code = user mode code) is executed in context of CPL 0 (kernel mode).
 
-But _HOW_ did SMEP know to take over? Recall that SMEP is enforced in two ways. Globally, SMEP is controlled by the 20th bit of the CR4 register.
+But _HOW_ does SMEP know to take over? Recall that SMEP is enforced in two ways. Globally, SMEP is controlled by the 20th bit of the CR4 register.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_4.png" alt="">
 

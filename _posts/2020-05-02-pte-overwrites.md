@@ -94,9 +94,15 @@ Take a look again at the Bug Check image two images ago. We can see the offendin
 
 Let's break this above image down. Our user mode shellcode was stored in an allocation at the address `0x2620000` and was configured with the following attributes (via the PTE control bits)
 
-1. D- 
-2. A- 
-3. U- 
-4. W- 
-5. E- 
-6. V- 
+1. `D`- The "dirty" bit has been set, meaning a write to this address has occured (`KERNELBASE!VirtualAlloc()`)
+2. `A`- The "access" bit has been set, meaning this address has been referenced at some point
+3. `U`- The "user" bit has been set here. When the memory manager unit reads in this address, it recognizes is as a user mode address
+4. `W`- The "write" bit has been set here, meaning this memory page is writeable
+5. `E`- The "executable" bit has been set here, meaning this memory page is executable
+6. `V`- The "valid" bit is set here, meaning that the PTE is a valid PTE.
+
+Notice that most of these control bits were set with our call earlier to `KERNELBASE!VirtualProtect()` in the psuedo code snippet.
+
+Now that we know how our shellcode allocation looks from a memory perspective, let's talk about the `U/S` bit.
+
+As we can see, our memory page where our shellcode resides is that of a "user mode" page. However, it is possible to turn this page into a kernel mode page, and "trick" the memory manager unit into executing this page in context of the kernel!

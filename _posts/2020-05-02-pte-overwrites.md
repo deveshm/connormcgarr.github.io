@@ -88,7 +88,7 @@ Carrying on, as we can see, SMEP is enabled globally on the system.
 
 However, there is a second way SMEP is enforced- and that is on a per memory page basis, via the U/S PTE control bit. This is what we are going to be taking a look at in this post.
 
-Take a look again at the Bug Check image. We can see the offending virtual address, and we can also see `Argument 3` contains the `PTE contents` value. Let's see what this looks like in WinDbg.
+Take a look again at the Bug Check image two images ago. We can see the offending virtual address, and we can also see `Argument 3` contains the `PTE contents` value. Let's see what this looks like in WinDbg.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_3.png" alt="">
 

@@ -72,7 +72,7 @@ Here, we can clearly see our shellcode has been allocated at `0x2620000`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_2.png" alt="">
 
-When SMEP kicks in, this is the offending virtual address.
+When SMEP kicks in, we can see the offending address is that of our user mode shellcode.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_1.png" alt="">
 

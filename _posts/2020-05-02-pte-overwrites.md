@@ -14,4 +14,6 @@ Before We Begin
 
 [Morten Schenk](https://twitter.com/blomster81?lang=en) of Offensive Security has done the majority of leg work for the public research on this topic. Although Morten has done amazing research on this, I have not seen much in the way of practical examples showcasing this technique in the wild (that is, showing an exploit start to finish leveraging this technique). This blog post is going to utilize the [HackSysExtreme](https://github.com/hacksysteam/HackSysExtremeVulnerableDriver/tree/v2.0.0/Driver) vulnerable kernel driver to outline the actual steps taken to utilize the content that will be outlined in this post. The vulnerability class will be a simple arbitrary read/write primitive, which can write one QWORD to kernel mode memory.
 
+Thank you to Ashfaq of the HackSysTeam for this driver!
+
 In addition to said information, these techniques will be utilized on Windows 10 64-bit RS1 build. This is because Windows 10 RS2 has kernel Control Flow Guard (kCFG) enabled by default, which is beyond the scope of this post. This post simply aims to show the techniques used in today's modern exploitaiton era to bypass SMEP or NX in kernel mode memory.

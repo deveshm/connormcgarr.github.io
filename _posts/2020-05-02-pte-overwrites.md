@@ -24,3 +24,6 @@ In addition to said information, these techniques will be utilized on a Windows 
 
 Why Go to the Mountain, If You Can Bring the Mountain to You?
 ---
+
+The adage for the title of this section, comes from Spencer Pratt's [WriteProcessMemory() whitepaper](https://www.exploit-db.com/papers/13660) about bypassing DEP. This saying, or adage, is extremely applicable to the method of bypassing SMEP through PTEs.
+

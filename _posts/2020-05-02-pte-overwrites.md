@@ -60,7 +60,7 @@ Note, the above code is syntactically incorrect, but it is there nonetheless to 
 
 Also, before moving on, write-what-where = arbitrary memory overwrite = arbitrary write primitive.
 
-Carrying on, the above psuedo code snippet is allocating virtual memory in user mode, via [VirtualAlloc()](https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc). Then, utilizing the write-what-where vulnerability in the kernel mode driver, the shellcode's virtual address (which is in user mode), get's written to `nt!HalDispatchTable+0x8`, which is a very common technique to abuse in an arbitrary memory overwrite vulnerability. 
+Carrying on, the above psuedo code snippet is allocating virtual memory in user mode, via [VirtualAlloc()](https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc). Then, utilizing the write-what-where vulnerability in the kernel mode driver, the shellcode's virtual address (which is in user mode), get's written to `nt!HalDispatchTable+0x8`, which is a very common technique to use in an arbitrary memory overwrite situation. 
 
 Please refer to my [last post](https://connormcgarr.github.io/Kernel-Exploitation-2/) on how this technique works.
 

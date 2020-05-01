@@ -22,7 +22,7 @@ This blog post is going to utilize the [HackSysExtreme](https://github.com/hacks
 
 Thank you to Ashfaq of HackSysTeam for this driver!
 
-In addition to said information, these techniques will be utilized on a Windows 10 64-bit RS1 build. This is because Windows 10 RS2 has kernel Control Flow Guard (kCFG) enabled by default, which is beyond the scope of this post. This post simply aims to show the techniques used in today's modern exploitaiton era to bypass SMEP or NX in kernel mode memory.
+In addition to said information, these techniques will be utilized on a Windows 10 64-bit RS1 build. This is because Windows 10 RS2 has kernel Control Flow Guard (kCFG) enabled by default, which is beyond the scope of this post. This post simply aims to show the techniques used in today's "modern exploitaiton era" to bypass SMEP or NX in kernel mode memory.
 
 Why Go to the Mountain, If You Can Bring the Mountain to You?
 ---

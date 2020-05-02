@@ -150,9 +150,11 @@ Exeucting the shellcode, results in manual bypass of SMEP!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_9a.png" alt="">
 
-Refer back to the phraseology of the title of the section _Why Go to the Mountain, If You Can Bring the Mountain to You?_ that was mentioned earlier in this post.
+Let's refer back to the phraseology earlier in the post that said:
 
-Notice how we didn't "disable" SMEP- we just played by SMEP's rules! We didn't go to SMEP and try to disable it, instead, we brought our shellcode to SMEP and said "treat this as you normally treat kernel mode memory."
+? Why go to the mountain, if you can bring the mountain to you?
+
+Notice how we didn't "disable" SMEP like we did a few blog posts ago with ROP. All we did this time was just play by SMEP's rules! We didn't go to SMEP and try to disable it, instead, we brought our shellcode to SMEP and said "treat this as you normally treat kernel mode memory."
 
 This is great, we know we can bypass SMEP through this method! But the quesiton remains, how can we achieve this dynamically?
 

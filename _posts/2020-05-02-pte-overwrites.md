@@ -1344,4 +1344,16 @@ print "[+] Enjoy the NT AUTHORITY\SYSTEM shell!"
 os.system("cmd.exe /K cd C:\\")
 ```
 
+NT AUTHORITY\SYSTEM x 2!
+---
 
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_2.gif" alt="">
+
+Final Thoughts
+---
+
+I really enjoyed this method of SMEP bypass! I am always looking for new challenges and decided this would be a fun one!
+
+As always, feel free to reach out to me with any questions, comments, or corrections! Until then!
+
+Peace, love, and positivity! :-)

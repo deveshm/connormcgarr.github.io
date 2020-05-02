@@ -801,7 +801,7 @@ We can see that dynamically, we can set `KUSER_SHARED_DATA+0x800` to executable 
 
 All that is left to do now, is overwrite the `nt!HalDispatchTable+0x8` with the address of `KUSER_SHARED_DATA+0x800` and `nt!KeQueryIntervalProfile()` will take care of the rest!
 
-This exploit can also be found on my GitHub, but here it is if you do not feel like heading over there:
+This exploit can also be found on [my GitHub](https://github.com/connormcgarr/AWE-OSEE-Prep/blob/master/Kernel/Arbitrary%20Memory%20Overwrites/x64_HEVD_Windows_10_SMEP_Bypass_KUSER_SHARED_DATA_Arbitrary_Overwrite.py), but here it is if you do not feel like heading over there:
 
 ```python
 # HackSysExtreme Vulnerable Driver Kernel Exploit (x64 Arbitrary Overwrite/SMEP Enabled)

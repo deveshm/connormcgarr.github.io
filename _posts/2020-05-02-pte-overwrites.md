@@ -163,7 +163,7 @@ After all, we cannot just arbitrarily use WinDbg when exploiting other systems.
 Calculating PTEs
 ---
 
-The previously shown method of bypassing SMEP manually in WinDbg revolved around the fact we could grab the PTE of our shellcode page in memory. The question now remains, can we do this dynamlically?
+The previously shown method of bypassing SMEP manually in WinDbg revolved around the fact we could dereference the PTE address of our shellcode page in memory and extract the control bits. The question now remains, can we do this dynamically without a debugger?
 
 Our exploit not only gives us the ability to arbitrarily write, but it gives us the ability to arbitrarily read in data as well! We will be using this read primitive to our advantage.
 

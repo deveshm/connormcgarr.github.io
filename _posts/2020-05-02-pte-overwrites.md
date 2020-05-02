@@ -162,3 +162,62 @@ After all, we cannot just arbitrarily use WinDbg when exploiting other systems.
 
 Calculating PTEs
 ---
+
+The previously shown method of bypassing SMEP manually in WinDbg revolved around the fact we could grab the PTE of our shellcode page in memory. The question now remains, can we do this dynamlically?
+
+Our exploit not only gives us the ability to arbitrarily write, but it gives us the ability to arbitrarily read in data as well! We will be using this read primitive to our advantage.
+
+Windows has an API for just about anything! Fetching the PTE for an associated virtual address is no different. Windows has an API called `nt!MiGetPteAddress` that performs a specific formula to retrieve the associated PTE of a memory page.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_10.png" alt="">
+
+The above function performs the following instructions:
+
+1. Bitwise shifts the contents of the RCX register to the right by 9 bits
+2. Moves the value of `0x7FFFFFFFF8` into RAX
+3. Bitwise AND's the values of RCX and RAx together
+4. Moves the value of `0xFFFFFE0000000000` into RAX
+5. Adds the values of RAx and RCX
+6. Performs a return out of the function
+
+Let's take a second to break this down by importance. First things first, the number `0xFFFFFE0000000000` looks like it could potentially be important.
+
+Turns out, this is important. This number is actually a memory address, and it is the base address of all of the PTEs! Let's talk about the base PTE for a second.
+
+Rebooting my machine and disassembling the function again, we notice something.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_11.png" alt="">
+
+`0xFFFFFE0000000000` has now changed to `0xFFFF800000000000`. The base of the PTEs has changed, it seems.
+
+This is due to page table randomization, a mitigation of Windows 10. Microsoft defintley had the right idea to implement this mitigation, but it is not much of a use to be honest. An attacker needs an arbitrary read primtive in the first place to extract the contents of the PTE control bits by dereferencing the PTE of a given memory page.
+
+If an attacker has an arbitrary read primitive, you could just use the same primitive to read in `nt!MiGetPteAddress+0x13`, which, when dereferenced, contains the base of the PTEs.
+
+Said method is actually what we are going to do here! But before we do, let's talk about the PTE formula one last time.
+
+As we saw, a bitwise shift right operation is performed on the contents of the RCX register. That is because, when this function is called, the virtual address for the PTE you would like to fetch gets loaded into RCX.
+
+We can mimic this same behavior in Python also!
+
+```python
+# Bitwise shift shellcode virtual address to the right 9 bits
+shellcode_pte = shellcode_virtual_address >> 9
+
+# Bitwise AND the bitwise shifted right shellcode virtual address with 0x7ffffffff8
+shellcode_pte &= 0x7ffffffff8
+
+# Add the base of the PTEs to the above value (which will need to be previously extracted with an arbitrary read)
+shellcode_pte += base_of_ptes
+```
+
+The variable `shellcode_pte` will now contain the PTE for our shellcode page! We can demonstrate this behavior in WinDbg.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_12.png" alt="">
+
+Sorry for the poor screenshot above in advance.
+
+But as we can see, or formula is correct- and we know how to dynamically fetch a PTE address! The only question remains, how do we dynamically dereference `nt!MiGetPteAddress+0x13`?
+
+Read, Read, Read!
+---

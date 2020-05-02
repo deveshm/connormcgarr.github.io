@@ -56,7 +56,7 @@ print "[+] Enjoy the NT AUTHORITY\SYSTEM shell!!!!"
 os.system("cmd.exe /K cd C:\\")
 ```
 
-Note, the above code is syntactically incorrect, but it is there nonetheless to help us understand what is going on.
+> Note, the above code is syntactically incorrect, but it is there nonetheless to help us understand what is going on.
 
 Also, before moving on, write-what-where = arbitrary memory overwrite = arbitrary write primitive.
 
@@ -132,7 +132,8 @@ The above image performs the following actions:
 1. Shows our shellcode in a user mode allocation at the virtual address `0xc60000`
 2. Shows the current PTE and control bits for our shellcode memory page
 3. Uses `ep` in WinDbg to overwrite the pointer at `0xFFFFF98000006300` (this is the address of our PTE. When dereferenced, it contains the actual PTE control bits)
-4. Clears the PTE control bit for `U/S` by subtracting `4` from the PTE control bit contents. (Note, I found this to be the correct value after trial and error).
+4. Clears the PTE control bit for `U/S` by subtracting `4` from the PTE control bit contents.
+> Note, I found this to be the correct value through trial and error.
 
 After the `U/S` bit is cleared out, our exploit continues by overwriting `nt!HalDispatchTable+0x8` with the pointer to our shellcode.
 
@@ -250,7 +251,8 @@ class WriteWhatWhere_PTE_Base(Structure):
     ]
 ```
 
-Secondly, we fetch the memory address of `nt!MiGetPteAddress+0x13` (_Note_- your offset from the kernel base to this function may be different!)
+Secondly, we fetch the memory address of `nt!MiGetPteAddress+0x13`
+> Note- your offset from the kernel base to this function may be different!
 
 ```python
 # Retrieving nt!MiGetPteAddress (Windows 10 RS1 offset)

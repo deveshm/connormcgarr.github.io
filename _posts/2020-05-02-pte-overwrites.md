@@ -84,7 +84,7 @@ But _HOW_ is SMEP implemented is the real question.
 
 SMEP is enforced in two ways.
 
-The first is globally, SMEP is mandated on the OS through the 20th bit of the CR4 control register.
+The first is globally. SMEP is mandated through the OS via the 20th bit of the CR4 control register.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_4.png" alt="">
 

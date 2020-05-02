@@ -102,7 +102,7 @@ Let's take a look at the output of `!pte` in WinDbg of our user mode shellcode p
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_3.png" alt="">
 
-What Intel means, by the their statement in Alex's talk, is that only ONE of the paging structure's table entry's is needed to be set to kernel, in order for SMEP to no tkick in. We do not need all 4 entries to be supervisor (kernel) mode!
+What Intel means, by the their statement in Alex's talk, is that only ONE of the paging structure table entry (a page table entry) is needed to be set to kernel, in order for SMEP to not bat an eye at the address. We do not need all 4 entries to be supervisor (kernel) mode!
 
 This is great for us, from a exploit development standpoint- as this _GREATLY_ reduces our workload (we will see why shortly)!
 

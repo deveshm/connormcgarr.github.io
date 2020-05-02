@@ -191,9 +191,9 @@ Rebooting the machine and disassembling the function again, we notice something.
 
 `0xFFFFFE0000000000` has now changed to `0xFFFF800000000000`. The base of the PTEs has changed, it seems.
 
-This is due to page table randomization, a mitigation of Windows 10. Microsoft _definitely_ had the right idea to implement this mitigation, but it is not much of a use to be honest if the attacker already has an abitrary read primtive.
+This is due to page table randomization, a mitigation of Windows 10. Microsoft _definitely_ had the right idea to implement this mitigation, but it is not much of a use to be honest if the attacker already has an abitrary read primitive.
 
-An attacker needs an arbitrary read primtive in the first place to extract the contents of the PTE control bits by dereferencing the PTE of a given memory page.
+An attacker needs an arbitrary read primitive in the first place to extract the contents of the PTE control bits by dereferencing the PTE of a given memory page.
 
 If an attacker already has this ability, the adversary could just use the same primitive to read in `nt!MiGetPteAddress+0x13`, which, when dereferenced, contains the base of the PTEs.
 
@@ -282,7 +282,7 @@ www_pte_pointer = pointer(www_pte_base)
 
 Notice the where is the address of the pointer `addressof(base_of_ptes_pointer)`. This is because we don't want to overwrite the `c_void_p`'s address with anything- we want to store the value inside of the pointer.
 
-This will store the value inside of the pointer because our write-what-where primtive writes a "what" value to a pointer.
+This will store the value inside of the pointer because our write-what-where primitive writes a "what" value to a pointer.
 
 Next, we make an IOCTL call to the routine that jumps to the arbitrary write in the driver.
 
@@ -320,7 +320,7 @@ Read, Read, Read... Again!
 
 Now that we have dynamically resolved the PTE address for our shellcode, we need to use our arbitrary read again to dereference the shellcode's PTE and extract the PTE control bits so we can modify the page table entry to be kernel mode.
 
-Using the same primtive as above, we can use Python again to dynamically retrieve all of this!
+Using the same primitive as above, we can use Python again to dynamically retrieve all of this!
 
 Firstly, we need to create another structure (again, one member for "what" and one member for "where").
 

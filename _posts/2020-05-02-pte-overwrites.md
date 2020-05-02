@@ -60,7 +60,7 @@ os.system("cmd.exe /K cd C:\\")
 
 Also, before moving on, write-what-where = arbitrary memory overwrite = arbitrary write primitive.
 
-Carrying on, the above psuedo code snippet is allocating virtual memory in user mode, via [VirtualAlloc()](https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc). Then, utilizing the write-what-where vulnerability in the kernel mode driver, the shellcode's virtual address (resides in user mode), get's written to `nt!HalDispatchTable+0x8` (resides in kernel mode), which is a very common technique to use in an arbitrary memory overwrite situation.
+Carrying on, the above psuedo code snippet is allocating virtual memory in user mode, via [VirtualAlloc()](https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc). Then, utilizing the write-what-where vulnerability in the kernel mode driver, the shellcode's virtual address (residing in user mode), get's written to `nt!HalDispatchTable+0x8` (residing in kernel mode), which is a very common technique to use in an arbitrary memory overwrite situation.
 
 Please refer to my [last post](https://connormcgarr.github.io/Kernel-Exploitation-2/) on how this technique works.
 

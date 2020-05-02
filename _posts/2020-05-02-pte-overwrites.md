@@ -1352,7 +1352,9 @@ NT AUTHORITY\SYSTEM x 2!
 Final Thoughts
 ---
 
-I really enjoyed this method of SMEP bypass! I am always looking for new challenges and decided this would be a fun one!
+I really enjoyed this method of SMEP bypass! I also loved circumventing SMEP all together and bypassing NonPagedPoolNx via  `KUSER_SHARED_DATA+0x800` without the need for user mode memory!
+
+I am always looking for new challenges and decided this would be a fun one!
 
 As always, feel free to reach out to me with any questions, comments, or corrections! Until then!
 

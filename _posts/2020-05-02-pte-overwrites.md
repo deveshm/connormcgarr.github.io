@@ -78,21 +78,29 @@ SMEP kicks in, and we can see the offending address is that of our user mode she
 
 Recall, from a [previous blog](https://connormcgarr.github.io/x64-Kernel-Shellcode-Revisited-and-SMEP-Bypass/) of mine, that SMEP kicks in whenever code that resides in current privilege level (CPL 3) of the CPU (CPL 3 code = user mode code) is executed in context of CPL 0 (kernel mode).
 
-But _HOW_ does SMEP know to take over? Recall that SMEP is enforced in two ways. Globally, SMEP is controlled by the 20th bit of the CR4 register.
+SMEP kicks in this case, as we are attempting to access the shellcode's virtual address in user mode from `nt!HalDispatchTable+0x8`.
+
+But _HOW_ is SMEP implemented is the real question. 
+
+SMEP is enforced in two ways.
+
+The first is globally, SMEP is mandated on the OS through the 20th bit of the CR4 control register.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_4.png" alt="">
 
-The 20th bit in the above image refers to the `1` in the beginning of `0x170678`
+The 20th bit in the above image refers to the `1` in the beginning of `0x170678`, meaning SMEP is enabled on this system globally.
 
-Carrying on, as we can see, SMEP is enabled globally on the system. 
+However, there is a second way SMEP is enforced- and that is on a per memory page basis, via the `U/S` PTE control bit. This is what we are going to our focus to in this post.
 
-However, there is a second way SMEP is enforced- and that is on a per memory page basis, via the `U/S` PTE control bit. This is what we are going to be taking a look at in this post.
+Take a look again at the Bug Check image two images ago. In addition to the offending virtual address, we can also see `Arg 2` contains a `PTE contents` value.
 
-Take a look again at the Bug Check image two images ago. We can see the offending virtual address, and we can also see `Argument 3` contains the `PTE contents` value. Let's see what this looks like in WinDbg.
+Let's see what this looks like in WinDbg.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_3.png" alt="">
 
-Let's break this above image down. Our user mode shellcode was stored in an allocation at the address `0x2620000` and was configured with the following attributes (via the PTE control bits)
+Let's break this above image down.
+
+Our shellcode was stored in a user mode allocation at the address `0x2620000` and was configured with the following attributes (via the PTE control bits)
 
 1. `D`- The "dirty" bit has been set, meaning a write to this address has occured (`KERNELBASE!VirtualAlloc()`)
 2. `A`- The "access" bit has been set, meaning this address has been referenced at some point
@@ -101,8 +109,10 @@ Let's break this above image down. Our user mode shellcode was stored in an allo
 5. `E`- The "executable" bit has been set here, meaning this memory page is executable
 6. `V`- The "valid" bit is set here, meaning that the PTE is a valid PTE.
 
-Notice that most of these control bits were set with our call earlier to `KERNELBASE!VirtualProtect()` in the psuedo code snippet.
+Notice that most of these control bits were set with our call earlier to `KERNELBASE!VirtualProtect()` in the psuedo code snippet via the function's arguments of `flAllocationType` and `flProtect`.
 
 Now that we know how our shellcode allocation looks from a memory perspective, let's talk about the `U/S` bit.
 
-As we can see, our memory page where our shellcode resides is that of a "user mode" page. However, it is possible to turn this page into a kernel mode page, and "trick" the memory manager unit into executing this page in context of the kernel!
+As we can see, our memory page where our shellcode resides is that of a "user mode" page.
+
+But what is we wanted to "trick" the memory manager unit into thinking our user mode page resided in kernel mode. Would this beat SMEP? Remember, SMEP is also globally enforced through the CR4 register.

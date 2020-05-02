@@ -270,7 +270,7 @@ Thirdly, we declare a `c_void_p()` to store the value pointed to by `nt!MiGetPte
 base_of_ptes_pointer = c_void_p()
 ```
 
-Fourthly, we create our structure with our "what" value and our "where" value which writes the actual address of `nt!MiGetPteAddress+0x13` into our declared pointer.
+Fourthly, we create our structure with our "what" value and our "where" value which writes what the actual address of `nt!MiGetPteAddress+0x13` points to (the base of the PTEs) into our declared pointer.
 
 ```python
 # Write-what-where structure #1

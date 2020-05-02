@@ -221,7 +221,7 @@ The variable `shellcode_pte` will now contain the PTE for our shellcode page! We
 
 Sorry for the poor screenshot above in advance.
 
-But as we can see, or formula is correct- and we know how to dynamically fetch a PTE address! The only question remains, how do we dynamically dereference `nt!MiGetPteAddress+0x13`?
+But as we can see, our version of the formula works- and we know can now dynamically fetch a PTE address! The only question remains, how do we dynamically dereference `nt!MiGetPteAddress+0x13` with an arbitrary rea?
 
 Read, Read, Read!
 ---

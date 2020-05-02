@@ -72,7 +72,7 @@ Here, we can clearly see our shellcode has been allocated at `0x2620000`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_2.png" alt="">
 
-SMEP kicks in, and we can see the offending address is that of our user mode shellcode.
+SMEP kicks in, and we can see the offending address is that of our user mode shellcode (`Arg2` of `PTE contents` is highlighted as well. We will circle back to this in a moment).
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_1.png" alt="">
 
@@ -92,27 +92,33 @@ The 20th bit in the above image refers to the `1` in the beginning of `0x170678`
 
 However, there is a second way SMEP is enforced- and that is on a per memory page basis, via the `U/S` PTE control bit. This is what we are going to our focus to in this post.
 
-Take a look again at the Bug Check image two images ago. In addition to the offending virtual address, we can also see `Arg 2` contains a `PTE contents` value.
+[Alex Ionescu](https://twitter.com/aionescu) gave a [talk](https://web.archive.org/web/20180417030210/http://www.alex-ionescu.com/infiltrate2015.pdf) at Infiltrate 2015 about the implementation of SMEP on a per page basis.
 
-Let's see what this looks like in WinDbg.
+Citing his slides, he explains that Intel has the following to say about SMEP enforcement on a per page basis.
+
+> "Any page level marked as supervisor (U/S=0) will result in treatment as supervisor for SMEP enforcement."
+
+Let's take a look at the output of `!pte` in WinDbg of our user mode shellcode page to make sense of all of this!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_3.png" alt="">
 
-Let's break this above image down.
+What Intel means, by the their statement in Alex's talk, is that only ONE of the paging structure's table entry's is needed to be set to kernel, in order for SMEP to no tkick in. We do not need all 4 entries to be supervisor (kernel) mode!
 
-Our shellcode was stored in a user mode allocation at the address `0x2620000` and was configured with the following attributes (via the PTE control bits)
+This is great for us, from a exploit development standpoint- as this _GREATLY_ reduces our workload (we will see why shortly)!
 
-1. `D`- The "dirty" bit has been set, meaning a write to this address has occured (`KERNELBASE!VirtualAlloc()`)
-2. `A`- The "access" bit has been set, meaning this address has been referenced at some point
-3. `U`- The "user" bit has been set here. When the memory manager unit reads in this address, it recognizes is as a user mode address
-4. `W`- The "write" bit has been set here, meaning this memory page is writeable
-5. `E`- The "executable" bit has been set here, meaning this memory page is executable
+Let's learn how we can leverage this new knowledge, by first examining the current PTE control bits of our shellcode page:
+
+1. `D`- The "dirty" bit has been set, meaning a write to this address has occured (`KERNELBASE!VirtualAlloc()`).
+2. `A`- The "access" bit has been set, meaning this address has been referenced at some point.
+3. `U`- The "user" bit has been set here. When the memory manager unit reads in this address, it recognizes is as a user mode address. When this bit is 1, the page is user mode. When this bit is clear, the page is kernel mode.
+4. `W`- The "write" bit has been set here, meaning this memory page is writeable.
+5. `E`- The "executable" bit has been set here, meaning this memory page is executable.
 6. `V`- The "valid" bit is set here, meaning that the PTE is a valid PTE.
 
 Notice that most of these control bits were set with our call earlier to `KERNELBASE!VirtualProtect()` in the psuedo code snippet via the function's arguments of `flAllocationType` and `flProtect`.
 
-Now that we know how our shellcode allocation looks from a memory perspective, let's talk about the `U/S` bit.
+Where Do We Go From Here?
+---
+Let's shift our focus to the PTE entry from the `!pte` command output in the last screenshot. We can see that our entry is that of a user mode page, from the `U/S` bit being set. However, what if we cleared this bit out? The entry should then flip to kernel mode. Let's investigate this in WinDbg.
 
-As we can see, our memory page where our shellcode resides is that of a "user mode" page.
-
-But what is we wanted to "trick" the memory manager unit into thinking our user mode page resided in kernel mode. Would this beat SMEP? Remember, SMEP is also globally enforced through the CR4 register.
+Rebooting our machine, we clear out the `U/S` bit manually of our allocated shellcode.

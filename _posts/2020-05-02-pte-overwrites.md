@@ -133,7 +133,7 @@ The above image performs the following actions:
 2. Shows the current PTE and control bits for our shellcode memory page
 3. Uses `ep` in WinDbg to overwrite the pointer at `0xFFFFF98000006300` (this is the address of our PTE. When dereferenced, it contains the actual PTE control bits)
 4. Clears the PTE control bit for `U/S` by subtracting `4` from the PTE control bit contents.
-> Note, I found this to be the correct value through trial and error.
+> Note, I found this to be the correct value to clear the `U/S` bit through trial and error.
 
 After the `U/S` bit is cleared out, our exploit continues by overwriting `nt!HalDispatchTable+0x8` with the pointer to our shellcode.
 

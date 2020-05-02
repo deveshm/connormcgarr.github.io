@@ -742,7 +742,7 @@ Our arbitrary write primitive only allows us to write one QWORD of data at a tim
 1. Break up the 67 byte shellcode into 8 byte pieces and compensate any odd numbering with NULL bytes.
 2. Write each line of shellcode to `KUSER_SHARED_DATA+0x800`, `KUSER_SHARED_DATA+0x808`,`KUSER_SHARED_DATA+0x810`, etc.
 3. Use the same read primitive to bypass page table randomization and obtain PTE control bits of `KUSER_SHARED_DATA+0x800`.
-4. Make `KUSER_SHARED_DATA+0x800` executable.
+4. Make `KUSER_SHARED_DATA+0x800` executable by overwriting the PTE.
 5. `NT AUTHORITY\SYSTEM`
 
 Before we begin, the steps about obtaining the contents of `nt!MiGetPteAddress+0x13` and extracting the PTE control bits will be left out in this portion of the blog, as they have already been explained!

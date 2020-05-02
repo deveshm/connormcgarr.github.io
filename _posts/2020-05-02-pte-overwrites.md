@@ -175,7 +175,7 @@ The above function performs the following instructions:
 
 1. Bitwise shifts the contents of the RCX register to the right by 9 bits
 2. Moves the value of `0x7FFFFFFFF8` into RAX
-3. Bitwise AND's the values of RCX and RAx together
+3. Bitwise AND's the values of RCX and RAX together
 4. Moves the value of `0xFFFFFE0000000000` into RAX
 5. Adds the values of RAx and RCX
 6. Performs a return out of the function

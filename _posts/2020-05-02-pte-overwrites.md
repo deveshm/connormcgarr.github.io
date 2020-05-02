@@ -190,11 +190,15 @@ Rebooting the machine and disassembling the function again, we notice something.
 
 `0xFFFFFE0000000000` has now changed to `0xFFFF800000000000`. The base of the PTEs has changed, it seems.
 
-This is due to page table randomization, a mitigation of Windows 10. Microsoft defintley had the right idea to implement this mitigation, but it is not much of a use to be honest. An attacker needs an arbitrary read primtive in the first place to extract the contents of the PTE control bits by dereferencing the PTE of a given memory page.
+This is due to page table randomization, a mitigation of Windows 10. Microsoft _definitely_ had the right idea to implement this mitigation, but it is not much of a use to be honest if the attacker already has an abitrary read primtive.
 
-If an attacker has an arbitrary read primitive, you could just use the same primitive to read in `nt!MiGetPteAddress+0x13`, which, when dereferenced, contains the base of the PTEs.
+An attacker needs an arbitrary read primtive in the first place to extract the contents of the PTE control bits by dereferencing the PTE of a given memory page.
 
-Said method is actually what we are going to do here! But before we do, let's talk about the PTE formula one last time.
+If an attacker already has this ability, the adversary could just use the same primitive to read in `nt!MiGetPteAddress+0x13`, which, when dereferenced, contains the base of the PTEs.
+
+Again, not ripping on Microsoft- I think they honestly have some of the best default OS exploit mitigations in the business. Just something I thought of.
+
+The method of reusing an arbitrary read primitive is actually what we are going to do here! But before we do, let's talk about the PTE formula one last time.
 
 As we saw, a bitwise shift right operation is performed on the contents of the RCX register. That is because, when this function is called, the virtual address for the PTE you would like to fetch gets loaded into RCX.
 

@@ -233,7 +233,7 @@ Our write-what-where primitive allows us to write a pointer (the what) to a poin
 What will happen here is the following:
 
 1. Since the write portion of the write-what-where writes a POINTER (a.k.a the write will take a memory address and dereference it- which results in extracting the contents of a pointer), we will write the value of `nt!MiGetPteAddress+0x13` somewhere we control. The write primitive will extract what `nt!MiGetPteAddress+0x13` points to, which is the base of the PTEs, and write it somewhere we can fetch the result!
-2. The "where" value in the write-what-were vulnerability will write the value to a pointer (a.k.a if the value gets written to `0xFFFFFFFFFFFFFFFF`, that means `0xFFFFFFFFFFFFFFFF` will now POINT to the what). The thought process here is, if we write the base of the PTEs to OUR OWN pointer that we create- we can then dereference the pointer and extract the contents ourselves!
+2. The "where" value in the write-what-were vulnerability will write the "what" value (base of the PTEs) to a pointer (a.k.a if the value gets written to `0xFFFFFFFFFFFFFFFF`, that means `0xFFFFFFFFFFFFFFFF` will now POINT to the what). The thought process here is, if we write the base of the PTEs to OUR OWN pointer that we create- we can then dereference the pointer and extract the contents ourselves!
 
 
 Here is how this all looks in Python!

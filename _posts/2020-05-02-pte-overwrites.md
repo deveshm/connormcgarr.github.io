@@ -200,7 +200,7 @@ Again, not ripping on Microsoft- I think they honestly have some of the best def
 
 The method of reusing an arbitrary read primitive is actually what we are going to do here! But before we do, let's talk about the PTE formula one last time.
 
-As we saw, a bitwise shift right operation is performed on the contents of the RCX register. That is because, when this function is called, the virtual address for the PTE you would like to fetch gets loaded into RCX.
+As we saw, a bitwise shift right operation is performed on the contents of the RCX register. That is because when this function is called, the virtual address for the PTE you would like to fetch gets loaded into RCX.
 
 We can mimic this same behavior in Python also!
 

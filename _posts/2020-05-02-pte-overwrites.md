@@ -318,7 +318,7 @@ Utilizing the base of the PTEs, we can now dynamically retrieve the location of 
 Read, Read, Read... Again!
 ---
 
-Now that we have dynamically resolved the PTE for our shellcode, we need to use our arbitrary read again to dereference the shellcode's PTE and extract the PTE control bits so we can modify the page table entry to be kernel mode.
+Now that we have dynamically resolved the PTE address for our shellcode, we need to use our arbitrary read again to dereference the shellcode's PTE and extract the PTE control bits so we can modify the page table entry to be kernel mode.
 
 Using the same primtive as above, we can use Python again to dynamically retrieve all of this!
 

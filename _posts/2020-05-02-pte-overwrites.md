@@ -307,6 +307,9 @@ The above snippet of code will read in the `c_void_p()` (which contains the base
 
 Utilizing the base of the PTEs, we can now dynamically retrieve the location of our shellcode's PTE by putting all of the code together!.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_13.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_13a.png" alt="">
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_LEAK.png" alt="">
+
+Read, Read, Read... Again!
+---

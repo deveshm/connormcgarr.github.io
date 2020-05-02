@@ -732,7 +732,7 @@ The issue is, this structure is static at the address `0xFFFFF78000000000`!
 
 What is even more interesting, is that `KUSER_SHARED_DATA+0x800` seems to just be a code cave of non-executable kernel mode memory which is writeable!
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_17.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE-17.png" alt="">
 
 How Do We Leverage This?
 ---

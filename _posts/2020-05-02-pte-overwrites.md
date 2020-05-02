@@ -180,11 +180,11 @@ The above function performs the following instructions:
 5. Adds the values of RAx and RCX
 6. Performs a return out of the function
 
-Let's take a second to break this down by importance. First things first, the number `0xFFFFFE0000000000` looks like it could potentially be important.
+Let's take a second to break this down by importance. First things first, the number `0xFFFFFE0000000000` looks like it could potentially be important- as it resembles a 64-bit virtual memory address.
 
-Turns out, this is important. This number is actually a memory address, and it is the base address of all of the PTEs! Let's talk about the base PTE for a second.
+Turns out, this is important. This number is actually a memory address, and it is the base address of all of the PTEs! Let's talk about the base of the PTEs for a second and its significance.
 
-Rebooting my machine and disassembling the function again, we notice something.
+Rebooting the machine and disassembling the function again, we notice something.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_11.png" alt="">
 

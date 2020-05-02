@@ -357,8 +357,6 @@ Before executing our updated exploit, let's restart the computer to prove everyt
 
 Our combined code executes- resulting in the extraction of the PTE control bits!
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_14.png" alt="">
-
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_15.png" alt="">
 
 Awesome! All that is left now that is to modify the `U/S` bit of the PTE control bits and then execute our shellcode!

@@ -151,9 +151,9 @@ Exeucting the shellcode, results in manual bypass of SMEP!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_9a.png" alt="">
 
-Let's refer back to the phraseology earlier in the post that said:
+Let's refer back to the phraseology earlier in the post that uttered:
 
-? Why go to the mountain, if you can bring the mountain to you?
+> Why go to the mountain, if you can bring the mountain to you?
 
 Notice how we didn't "disable" SMEP like we did a few blog posts ago with ROP. All we did this time was just play by SMEP's rules! We didn't go to SMEP and try to disable it, instead, we brought our shellcode to SMEP and said "treat this as you normally treat kernel mode memory."
 

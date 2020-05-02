@@ -121,6 +121,40 @@ Where Do We Go From Here?
 ---
 Let's shift our focus to the PTE entry from the `!pte` command output in the last screenshot. We can see that our entry is that of a user mode page, from the `U/S` bit being set. However, what if we cleared this bit out? 
 
-When the `U/S` bit is set to 0, the page should become a kernel mode page, based on the aforementioned information. Let's investigate this in WinDbg.
+If the `U/S` bit is set to 0, the page should become a kernel mode page, based on the aforementioned information. Let's investigate this in WinDbg.
 
-Rebooting our machine, we clear out the `U/S` bit manually of our allocated shellcode.
+Rebooting our machine, we reallocate our shellcode in user mode.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_5.png" alt="">
+
+The above image performs the following actions:
+
+1. Shows our shellcode in a user mode allocation at the virtual address `0xc60000`
+2. Shows the current PTE and control bits for our shellcode memory page
+3. Using `ep` in WinDbg to overwrite the pointer at `0xFFFFF98000006300` (this address, when dereferenced, contains the actual PTE control bits)
+4. Changes the PTE control bit for `U/S` to 0 by subtracting `4` from the PTE control bits. (Note, I found this to be the correct value after trial and error).
+
+After the `U/S` bit is cleared out, our exploit continues by overwriting `nt!HalDispatchTable+0x8` with the pointer to our shellcode in user mode.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_6.png" alt="">
+
+The exploit continues, with a call to `nt!KeQueryIntervalProfile`, which in turn, calls `nt!HalDispatchTable+0x8`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_7.png" alt="">
+
+Stepping into the `call qword ptr[nt!HalDispatchTable+0x8]` instruction, we have hit our shellcode address and it has been loaded into RIP!
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_8.png" alt="">
+
+Exeucting the shellcode, results in manual bypass of SMEP!
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_9.png" alt="">
+
+Refer back to the phraseology of the title of the section _Why Go to the Mountain, If You Can Bring the Mountain to You?_ that was mentioned earlier in this post.
+
+Notice how we didn't "disable" SMEP- we just played by SMEP's rules! We didn't go to SMEP and try to disable it, instead, we brought our shellcode to SMEP and said "treat this as you normally treat kernel mode memory."
+
+This is great, we know we can bypass SMEP through this method! But the quesiton remains, how can we achieve this dynamically?
+
+After all, we cannot just arbitrarily use WinDbg when exploiting other systems.
+

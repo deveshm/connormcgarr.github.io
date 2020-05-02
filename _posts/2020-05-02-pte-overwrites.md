@@ -148,7 +148,7 @@ Stepping into the `call qword ptr [nt!HalDispatchTable+0x8]` instruction, we hav
 
 Exeucting the shellcode, results in manual bypass of SMEP!
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_9.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_9a.png" alt="">
 
 Refer back to the phraseology of the title of the section _Why Go to the Mountain, If You Can Bring the Mountain to You?_ that was mentioned earlier in this post.
 

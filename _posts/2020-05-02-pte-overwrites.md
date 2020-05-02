@@ -305,11 +305,13 @@ base_of_ptes = struct.unpack('<Q', base_of_ptes_pointer)[0]
 
 The above snippet of code will read in the `c_void_p()` (which contains the base of the PTEs) and store it in the variable `base_of_ptes`.
 
-Utilizing the base of the PTEs, we can now dynamically retrieve the location of our shellcode's PTE by putting all of the code together!.
+Utilizing the base of the PTEs, we can now dynamically retrieve the location of our shellcode's PTE by putting all of the code together! We have successfully defeated page table randomization!
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_13a.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_13aaaaa.png" alt="">
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_LEAK.png" alt="">
 
 Read, Read, Read... Again!
 ---
+
+Now that we have dynamically resolved 

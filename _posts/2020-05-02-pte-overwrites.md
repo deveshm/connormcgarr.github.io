@@ -142,7 +142,7 @@ The exploit continues, with a call to `nt!KeQueryIntervalProfile`, which in turn
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_7.png" alt="">
 
-Stepping into the `call qword ptr[nt!HalDispatchTable+0x8]` instruction, we have hit our shellcode address and it has been loaded into RIP!
+Stepping into the `call qword ptr [nt!HalDispatchTable+0x8]` instruction, we have hit our shellcode address and it has been loaded into RIP!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_8.png" alt="">
 

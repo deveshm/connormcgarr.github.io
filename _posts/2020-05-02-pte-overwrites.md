@@ -412,7 +412,7 @@ Goodbye, SMEP (v2 ft. PTE Overwrite)!
 
 All that is left to do now is execute our shellcode via `nt!HalDispatchTable+0x8` and `nt!KeQueryIntervalProfile()`. Since I have already done a post outlining how this works, I will [link](https://connormcgarr.github.io/Kernel-Exploitation-2/) you to it so you can see how this actually executes our shellcode. This blog post assumes the reader has minimal knowledge of arbitrary memory overwrites to begin with.
 
-Here is the final exploit, which can also be found on [my GitHub](https://github.com/connormcgarr/AWE-OSEE-Prep/blob/master/Kernel/Arbitrary%20Memory%20Overwrites/x64_HEVD_Windows_10_SMEP_Bypass_Arbitrary_Overwrite.py)
+Here is the final exploit, which can also be found on [my GitHub](https://github.com/connormcgarr/AWE-OSEE-Prep/blob/master/Kernel/Arbitrary%20Memory%20Overwrites/x64_HEVD_Windows_10_SMEP_Bypass_Arbitrary_Overwrite.py).
 
 ```python
 # HackSysExtreme Vulnerable Driver Kernel Exploit (x64 Arbitrary Overwrite/SMEP Enabled)

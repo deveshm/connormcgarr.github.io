@@ -225,3 +225,46 @@ But as we can see, our version of the formula works- and we know can now dynamic
 
 Read, Read, Read!
 ---
+
+To use our arbitrary read, we are actually going to use our arbitrary write!
+
+Our write-what-where primitive allows us to write a pointer (the what) to a pointer (the where). The school of thought here, is to write the address of `nt!MiGetPteAddress+0x13` (the what) to a [c_void_p](https://docs.python.org/3/library/ctypes.html#ctypes.c_void_p) data type, which is Python's representation of a C void pointer.
+
+What will happen here is the following:
+
+1. Since the write portion of the write-what-where writes a POINTER (a.k.a the write will take a memory address and dereference it- which results in extracting the contents of a pointer), we will write the value of `nt!MiGetPteAddress`. The write primitive will extract what `nt!MiGetPteAddress+0x13` points to, which is the base of the PTEs!
+2. The "where" value in the write-what-were vulnerability will write the value to a pointer (a.k.a if the value gets written to `0xFFFFFFFFFFFFFFFF`, that means `0xFFFFFFFFFFFFFFFF` will now POINT to the what). The thought process here is, if we write the base of the PTEs to OUR OWN pointer that we create- we can then dereference the pointer and extract the contents ourselves!
+
+
+Here is how this all looks in Python!
+
+First, we declare a structure (one member for the what value, one member for the where value)
+
+```python
+# Fist structure, for obtaining nt!MiGetPteAddress+0x13 value
+class WriteWhatWhere_PTE_Base(Structure):
+    _fields_ = [
+        ("What_PTE_Base", c_void_p),
+        ("Where_PTE_Base", c_void_p)
+    ]
+```
+
+Secondly, we fetch the memory address of `nt!MiGetPteAddress+0x13` (_Note_- your offset from the kernel base to this function may be different!)
+
+```python
+# Retrieving nt!MiGetPteAddress (Windows 10 RS1 offset)
+nt_mi_get_pte_address = kernel_address + 0x51214
+
+# Base of PTEs is located at nt!MiGetPteAddress + 0x13
+pte_base = nt_mi_get_pte_address + 0x13
+```
+
+Thirdly, we declare a `c_void_p()` to store the value pointed to by `nt!MiGetPteAddress+0x13`
+
+```python
+# Creating a pointer in which the contents of nt!MiGetPteAddress+0x13 will be stored in to
+# Base of the PTEs are stored here
+base_of_ptes_pointer = c_void_p()
+```
+
+Fourthly,

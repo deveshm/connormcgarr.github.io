@@ -78,7 +78,7 @@ SMEP kicks in, and we can see the offending address is that of our user mode she
 
 Recall, from a [previous blog](https://connormcgarr.github.io/x64-Kernel-Shellcode-Revisited-and-SMEP-Bypass/) of mine, that SMEP kicks in whenever code that resides in current privilege level (CPL 3) of the CPU (CPL 3 code = user mode code) is executed in context of CPL 0 (kernel mode).
 
-SMEP kicks in this case, as we are attempting to access the shellcode's virtual address in user mode from `nt!HalDispatchTable+0x8`, which is in kernel mode.
+SMEP is triggered in this case, as we are attempting to access the shellcode's virtual address in user mode from `nt!HalDispatchTable+0x8`, which is in kernel mode.
 
 But _HOW_ is SMEP implemented is the real question. 
 

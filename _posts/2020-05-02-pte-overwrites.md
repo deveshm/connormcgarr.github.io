@@ -229,7 +229,7 @@ Read, Read, Read!
 
 To use our arbitrary read, we are actually going to use our arbitrary write!
 
-Our write-what-where primitive allows us to write a pointer (the what) to a pointer (the where). The school of thought here, is to write the address of `nt!MiGetPteAddress+0x13` (the what) to a [c_void_p](https://docs.python.org/3/library/ctypes.html#ctypes.c_void_p) data type, which is Python's representation of a C void pointer.
+Our write-what-where primitive allows us to write a pointer (the what) to a pointer (the where). The school of thought here, is to write the address of `nt!MiGetPteAddress+0x13` (the what) to a [c_void_p()](https://docs.python.org/3/library/ctypes.html#ctypes.c_void_p) data type, which is Python's representation of a C void pointer.
 
 What will happen here is the following:
 

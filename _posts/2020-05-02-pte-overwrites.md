@@ -90,7 +90,7 @@ The first is globally. SMEP is mandated through the OS via the 20th bit of the C
 
 The 20th bit in the above image refers to the `1` in the beginning of CR4 register's value of `0x170678`, meaning SMEP is enabled on this system globally.
 
-However, there is a second way SMEP is enforced- and that is on a per memory page basis, via the `U/S` PTE control bit. This is what we are going shit our focus to in this post.
+However, there is a second way SMEP is enforced- and that is on a per memory page basis, via the `U/S` PTE control bit. This is what we are going shift our focus to in this post.
 
 [Alex Ionescu](https://twitter.com/aionescu) gave a [talk](https://web.archive.org/web/20180417030210/http://www.alex-ionescu.com/infiltrate2015.pdf) at Infiltrate 2015 about the implementation of SMEP on a per page basis.
 

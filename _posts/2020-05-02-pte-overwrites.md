@@ -158,3 +158,5 @@ This is great, we know we can bypass SMEP through this method! But the quesiton 
 
 After all, we cannot just arbitrarily use WinDbg when exploiting other systems.
 
+Calculating PTEs
+---

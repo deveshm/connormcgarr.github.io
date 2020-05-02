@@ -132,7 +132,7 @@ The above image performs the following actions:
 1. Shows our shellcode in a user mode allocation at the virtual address `0xc60000`
 2. Shows the current PTE and control bits for our shellcode memory page
 3. Uses `ep` in WinDbg to overwrite the pointer at `0xFFFFF98000006300` (this is the address of our PTE. When dereferenced, it contains the actual PTE control bits)
-4. Changes the PTE control bit for `U/S` to 0 by subtracting `4` from the PTE control bits. (Note, I found this to be the correct value after trial and error).
+4. Clears the PTE control bit for `U/S` by subtracting `4` from the PTE control bit contents. (Note, I found this to be the correct value after trial and error).
 
 After the `U/S` bit is cleared out, our exploit continues by overwriting `nt!HalDispatchTable+0x8` with the pointer to our shellcode in user mode.
 

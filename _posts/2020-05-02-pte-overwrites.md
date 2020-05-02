@@ -78,7 +78,7 @@ SMEP kicks in, and we can see the offending address is that of our user mode she
 
 Recall, from a [previous blog](https://connormcgarr.github.io/x64-Kernel-Shellcode-Revisited-and-SMEP-Bypass/) of mine, that SMEP kicks in whenever code that resides in current privilege level (CPL 3) of the CPU (CPL 3 code = user mode code) is executed in context of CPL 0 (kernel mode).
 
-SMEP kicks in this case, as we are attempting to access the shellcode's virtual address in user mode from `nt!HalDispatchTable+0x8`.
+SMEP kicks in this case, as we are attempting to access the shellcode's virtual address in user mode from `nt!HalDispatchTable+0x8`, which is in kernel mode.
 
 But _HOW_ is SMEP implemented is the real question. 
 
@@ -88,9 +88,9 @@ The first is globally, SMEP is mandated on the OS through the 20th bit of the CR
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_4.png" alt="">
 
-The 20th bit in the above image refers to the `1` in the beginning of `0x170678`, meaning SMEP is enabled on this system globally.
+The 20th bit in the above image refers to the `1` in the beginning of CR4 register's value of `0x170678`, meaning SMEP is enabled on this system globally.
 
-However, there is a second way SMEP is enforced- and that is on a per memory page basis, via the `U/S` PTE control bit. This is what we are going to our focus to in this post.
+However, there is a second way SMEP is enforced- and that is on a per memory page basis, via the `U/S` PTE control bit. This is what we are going shit our focus to in this post.
 
 [Alex Ionescu](https://twitter.com/aionescu) gave a [talk](https://web.archive.org/web/20180417030210/http://www.alex-ionescu.com/infiltrate2015.pdf) at Infiltrate 2015 about the implementation of SMEP on a per page basis.
 
@@ -102,9 +102,9 @@ Let's take a look at the output of `!pte` in WinDbg of our user mode shellcode p
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_3.png" alt="">
 
-What Intel means, by the their statement in Alex's talk, is that only ONE of the paging structure table entry (a page table entry) is needed to be set to kernel, in order for SMEP to not bat an eye at the address. We do not need all 4 entries to be supervisor (kernel) mode!
+What Intel means by the their statement in Alex's talk, is that only ONE of the paging structure table entry (a page table entry) is needed to be set to kernel, in order for SMEP to not trigger. We do not need all 4 entries to be supervisor (kernel) mode!
 
-This is great for us, from a exploit development standpoint- as this _GREATLY_ reduces our workload (we will see why shortly)!
+This is wonderful for us, from an exploit development standpoint- as this _GREATLY_ reduces our workload (we will see why shortly)!
 
 Let's learn how we can leverage this new knowledge, by first examining the current PTE control bits of our shellcode page:
 
@@ -119,6 +119,8 @@ Notice that most of these control bits were set with our call earlier to `KERNEL
 
 Where Do We Go From Here?
 ---
-Let's shift our focus to the PTE entry from the `!pte` command output in the last screenshot. We can see that our entry is that of a user mode page, from the `U/S` bit being set. However, what if we cleared this bit out? The entry should then flip to kernel mode. Let's investigate this in WinDbg.
+Let's shift our focus to the PTE entry from the `!pte` command output in the last screenshot. We can see that our entry is that of a user mode page, from the `U/S` bit being set. However, what if we cleared this bit out? 
+
+When the `U/S` bit is set to 0, the page should become a kernel mode page, based on the aforementioned information. Let's investigate this in WinDbg.
 
 Rebooting our machine, we clear out the `U/S` bit manually of our allocated shellcode.

@@ -745,7 +745,7 @@ Our arbitrary write primitive only allows us to write one QWORD of data at a tim
 4. Make `KUSER_SHARED_DATA+0x800` executable by overwriting the PTE.
 5. `NT AUTHORITY\SYSTEM`
 
-Before we begin, the steps about obtaining the contents of `nt!MiGetPteAddress+0x13` and extracting the PTE control bits will be left out in this portion of the blog, as they have already been explained!
+Before we begin, the steps about obtaining the contents of `nt!MiGetPteAddress+0x13` and extracting the PTE control bits will be left out in this portion of the blog, as they have already been explained in the beginning of this post!
 
 Moving on, let's start with each line of shellcode.
 

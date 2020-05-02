@@ -707,7 +707,7 @@ Let's say you want to take advantage of various defensive tools and their lack o
 Okay, This Time We Are Going To The Mountain! `KUSER_SHARED_DATA` Time!
 ---
 
-Morten in his research [suggests](https://www.blackhat.com/docs/us-17/wednesday/us-17-Schenk-Taking-Windows-10-Kernel-Exploitation-To-The-Next-Level%E2%80%93Leveraging-Write-What-Where-Vulnerabilities-In-Creators-Update.pdf) that another suitable method may be to utilize the [KUSER_SHARED_DATA]() structure in the kernel directly, similarily to who ROP works in user mode.
+Morten in his research [suggests](https://www.blackhat.com/docs/us-17/wednesday/us-17-Schenk-Taking-Windows-10-Kernel-Exploitation-To-The-Next-Level%E2%80%93Leveraging-Write-What-Where-Vulnerabilities-In-Creators-Update.pdf) that another suitable method may be to utilize the [KUSER_SHARED_DATA]() structure in the kernel directly, similarily to how ROP works in user mode.
 
 The concept of ROP in user mode is the idea that we have the ability to write shellcode to the stack, we just don't have the ability to execute it. Using ROP, we can change the permissions of the stack to that of executable, and execute our shellcode from there.
 

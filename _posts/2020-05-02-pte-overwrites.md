@@ -82,15 +82,13 @@ SMEP is triggered in this case, as we are attempting to access the shellcode's v
 
 But _HOW_ is SMEP implemented is the real question. 
 
-SMEP is enforced in two ways.
-
-The first is globally. SMEP is mandated through the OS via the 20th bit of the CR4 control register.
+SMEP is mandated/enabled through the OS via the 20th bit of the CR4 control register.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_4.png" alt="">
 
 The 20th bit in the above image refers to the `1` in the beginning of CR4 register's value of `0x170678`, meaning SMEP is enabled on this system globally.
 
-However, there is a second way SMEP is enforced- and that is on a per memory page basis, via the `U/S` PTE control bit. This is what we are going shift our focus to in this post.
+However, SMEP is _ENFORCED_ on a per memory page basis, via the `U/S` PTE control bit. This is what we are going shift our focus to in this post.
 
 [Alex Ionescu](https://twitter.com/aionescu) gave a [talk](https://web.archive.org/web/20180417030210/http://www.alex-ionescu.com/infiltrate2015.pdf) at Infiltrate 2015 about the implementation of SMEP on a per page basis.
 

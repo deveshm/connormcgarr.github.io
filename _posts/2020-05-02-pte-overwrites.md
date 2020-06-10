@@ -176,7 +176,7 @@ The above function performs the following instructions:
 2. Moves the value of `0x7FFFFFFFF8` into RAX
 3. Bitwise AND's the values of RCX and RAX together
 4. Moves the value of `0xFFFFFE0000000000` into RAX
-5. Adds the values of RAx and RCX
+5. Adds the values of RAX and RCX
 6. Performs a return out of the function
 
 Let's take a second to break this down by importance. First things first, the number `0xFFFFFE0000000000` looks like it could potentially be important- as it resembles a 64-bit virtual memory address.

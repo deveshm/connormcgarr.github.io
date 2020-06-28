@@ -1354,6 +1354,8 @@ I really enjoyed this method of SMEP bypass! I also loved circumventing SMEP all
 
 I am always looking for new challenges and decided this would be a fun one!
 
+If you would like to take a look at how SMEP can be bypassed via `U/S` bit corruption in C, [here](https://github.com/connormcgarr/Kernel-Exploits/blob/master/HEVD/Write-What-Where/Windows10_WriteWhatWhere.c) is this same exploit written in C (note- some offsets may be different).
+
 As always, feel free to reach out to me with any questions, comments, or corrections! Until then!
 
 Peace, love, and positivity! :-)

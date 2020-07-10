@@ -145,7 +145,7 @@ Stepping into the `call qword ptr [nt!HalDispatchTable+0x8]` instruction, we hav
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_8.png" alt="">
 
-Exeucting the shellcode, results in manual bypass of SMEP!
+Executing the shellcode, results in manual bypass of SMEP!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_9a.png" alt="">
 

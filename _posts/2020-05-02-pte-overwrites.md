@@ -718,7 +718,7 @@ The questions still remains, why `KUSER_SHARED_DATA`?
 Static Electricity
 ---
 
-Windows has slowly but surely dried up all of the static addresses used by exploit developers over the years. One of the last structures that many people used for kASLR bypasses, was the randomization of the HAL heap. The HAL heap used to contain a pointer to the kernel, but no longer does.
+Windows has slowly but surely dried up all of the static addresses used by exploit developers over the years. One of the last structures that many people used for kASLR bypasses, was the lack of randomization of the HAL heap. The HAL heap used to contain a pointer to the kernel AND be static, but no longer is static.
 
 Although everything is dynamically based, there is still a structure that remains which is static, `KUSER_SHARED_DATA`.
 

@@ -113,7 +113,7 @@ Let's learn how we can leverage this new knowledge, by first examining the curre
 5. `E`- The "executable" bit has been set here, meaning this memory page is executable.
 6. `V`- The "valid" bit is set here, meaning that the PTE is a valid PTE.
 
-Notice that most of these control bits were set with our call earlier to `KERNELBASE!VirtualProtect()` in the psuedo code snippet via the function's arguments of `flAllocationType` and `flProtect`.
+Notice that most of these control bits were set with our call earlier to `KERNELBASE!VirtualAlloc()` in the psuedo code snippet via the function's arguments of `flAllocationType` and `flProtect`.
 
 Where Do We Go From Here?
 ---

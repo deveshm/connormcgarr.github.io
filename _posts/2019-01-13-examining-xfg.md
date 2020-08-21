@@ -35,9 +35,9 @@ Let's take a look at a very simple program that performs a control flow transfer
 
 > Note that you will need Microsoft Visual Studio 2019 Preview 16.5 or greater in order to follow along
 
-The above program essentially has a `main()` function that calls a user-defined function called `noCFG()`. However, instead of being directly invoked in `main()`, the `noCFG()` function is firstly assigned to a function pointer called `void (*functionPointer)`. This function pointer is what will be technically invoked in `main()`. However, since this function pointer points to `noCFG()`, `noCFG()` will execute eventually. In the end, this whole program will simply just print "You don't have CFG enabled! Shame on you. Here is a random number: 10".
+The above program essentially has a `main()` function that calls a user-defined function called `noCFG()`. However, instead of being directly invoked in `main()`, the `noCFG()` function is firstly assigned to a function pointer called `void (*functionPointer)`. In the end, this whole program will simply just print "You don't have CFG enabled! Shame on you. Here is a random number: 10".
 
-However, that is not what is important. What is important is that this will create a control flow transfer, as the main function will perform a `call` to the function pointer `void (*functionPointer)`. Since this function pointer points to the`noCFG()` function, the `noCFG()` function is going to be executed. Let's compile this program, so we can view it in IDA.
+However, that is not what is important. What is important is that this will create a control flow transfer, as the main function will perform a `call` to the function pointer `void (*functionPointer)`. Since this function pointer points to the `noCFG()` function, the `noCFG()` function is going to be executed. Let's compile this program, so we can view it in IDA.
 
 To compile with the command line tool `cl`, type in "x64 Native Tools Command Prompt for VS 2019 Preview" in the Start menu and run the program as an administrator.
 

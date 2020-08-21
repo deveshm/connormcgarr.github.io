@@ -27,7 +27,9 @@ Firstly, to enable CFG, a program is compiled and linked with the `/guard:cf` fl
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG1.png" alt="">
 
-CFG at this point would now be enabled for the program- or in the case of Microsoft binaries, they would already be CFG enabled (most of them). This causes a bitmap to be created, which essentially is made up of all functions within the process space that are "protected by CFG". Since this is a post about XFG, not CFG, we will skip over the technical details of CFG. However, if you are interested to see how CFG works at a lower level, Morten Schenk has an excellent [post](https://improsec.com/tech-blog/bypassing-control-flow-guard-in-windows-10) about its implementation in user mode (the Windows kernel has been compiled with CFG, known as kCFG, since Windows 10 1703). On any indirect function call (e.g. `call [rax]` where RAX contains a function address or a function pointer), which is a call to a function that initiates a control flow transfer to a different part of an application, the call is firsly checked by CFG.
+CFG at this point would now be enabled for the program- or in the case of Microsoft binaries, they would already be CFG enabled (most of them). This causes a bitmap to be created, which essentially is made up of all functions within the process space that are "protected by CFG". Since this is a post about XFG, not CFG, we will skip over the technical details of CFG. However, if you are interested to see how CFG works at a lower level, Morten Schenk has an excellent [post](https://improsec.com/tech-blog/bypassing-control-flow-guard-in-windows-10) about its implementation in user mode (the Windows kernel has been compiled with CFG, known as kCFG, since Windows 10 1703).
+
+Moving on, before any indirect function call (e.g. `call [rax]` where RAX contains a function address or a function pointer), which iinitiate a control flow transfer to a different part of an application, the call is firsly checked by CFG.
 
 Let's take a look at a very simple program that performs a control flow transfer.
 

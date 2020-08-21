@@ -67,7 +67,7 @@ Moving on now, essentially what is happening here, is that the program is perfor
 
 Nice! We know that our program will redirect execution from `main()` to `noCFG()`! Let's say as an attacker, we have an arbitrary write primitive and we were able to overwrite a pointer. Since the function `noCFG()` will be pointed to by something else (`[rsp+38h+var_18]` in this case), we know that if we were able to overwrite that pointer on the stack for instance, we could change what the final `call [rsp+38h+var_18]` actually ends up calling! This is not good from a defensive perspective.
 
-Let's go back and recompile our application with CFG this time.
+Can we mitigate this issue? Let's go back and recompile our application with CFG this time and find out.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG8.png" alt="">
 

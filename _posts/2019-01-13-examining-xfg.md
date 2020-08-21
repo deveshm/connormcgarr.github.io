@@ -31,7 +31,7 @@ CFG at this point would now be enabled for the program- or in the case of Micros
 
 Let's take a look at a very simple program that performs a control flow transfer.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFG2.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG2a.png" alt="">
 
 > Note that you will need Microsoft Visual Studio 2019 Preview 16.5 or greater in order to follow along
 

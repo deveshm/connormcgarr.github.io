@@ -14,7 +14,7 @@ After a few years, and a few bypasses along the way, Microsoft decided they need
 2. Don't expect any bypasses from this post- this mitigation is still very new and not very explored.
 3. We will spend a bit of time understanding what indirect function calls are via function pointers, what CFG is, and why XFG doesn't mean the end of CFG.
 
-This post is just going to be a brain dump of what I have learned about XFG after messing with it for a while now. This is simply an "organized brain dump" and isn't meant to be a "learn everything you need to know about XFG in one sitting" post.
+This is simply going to be an "organized brain dump" and isn't meant to be a "learn everything you need to know about XFG in one sitting" post. This is just simply documenting what I have learned after messing around with XFG for a while now.
 
 The Blueprint for XFG: CFG
 ---

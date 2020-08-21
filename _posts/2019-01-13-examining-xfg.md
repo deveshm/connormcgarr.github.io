@@ -39,17 +39,23 @@ This will drop you into a special Command Prompt. From here, you will need to na
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG4.png" alt="">
 
-The above command essentially compiles the program and the `/Zi` and /`Gz` flags, per [Microsoft Docs](https://docs.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically?view=vs-2019), are used to create a .pdb file for symbols and to utilize the `__stdcall` calling convention respectively.
-
-This will place the output file, named `Source.exe` in this case, into the current directory along with a symbol file (.pdb). Now, we can open this application in IDA (you'll need to run IDA as an administrator, as the application is in a privileged directory). Let's take a look at the `main()` funciton.
+Let's compile our program now!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG5.png" alt="">
+
+The above command essentially compiles the program and the `/Zi` and /`Gz` flags, per [Microsoft Docs](https://docs.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically?view=vs-2019), are used to create a .pdb file for symbols and to utilize the `__stdcall` calling convention respectively.
+
+This will place the output file, named `Source.exe` in this case, into the current directory along with a symbol file (.pdb). Now, we can open this application in IDA (you'll need to run IDA as an administrator, as the application is in a privileged directory). Let's take a look at the `main()` function.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG6.png" alt="">
 
 The `main()` function, as seen above, performs a `call` to a `j_noCFG`, which is technically a "jump thunk", or a compiler optimization that makes control flow transfer more efficient (this is besides the point, it is just an explanation of the `j_` prefix to the function). Just visualize this as a simple `call noCFG()`.
 
 The `noCFG()` function is then invoked.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFG5.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG7.png" alt="">
+
+Nice! We know that our program will redirect execution from `main()` to `noCFG()`! Let's say as an attacker, we have an arbitrary write primitive and we were able to overwrite a function pointer, such as `noCFG()`. Currently, as it stands, there is nothing in place in order to  
 
 
 

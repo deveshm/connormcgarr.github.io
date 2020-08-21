@@ -51,13 +51,14 @@ This will place the output file, named `Source.exe` in this case, into the curre
 
 Let's examine the assembly above. The above function loads `loc_140002144` into RAX. RAX is then moved to `[rsp+38h+var_18]` and since `var_18` is assinged to negative 0x18, we can assume that this will place RAX at `[rsp+0x20]` (a.k.a cause RSP + 0x20 to point to `loc_140002144`. Eventually, a call to `[rsp+38h+var_18]` is made. So, we can make a determination that whatever is being placed into RAX will be called, via a pointer. So the question remains, what is `loc_140002144`?
 
-According to IDA, it is a jump to the `noCFG()` function
+According to IDA, it is the `noCFG()` function
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFG6aa.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG7.png" alt="">
 
 Essentially what is happening here, is that the program is performing a control flow transfer to the `noCFG()` function from the `main()` function
 
-Nice! We know that our program will redirect execution from `main()` to `noCFG()`! Let's say as an attacker, we have an arbitrary write primitive and we were able to overwrite a function pointer, such as `noCFG()`. Let's simulate this in WinDbg. 
+Nice! We know that our program will redirect execution from `main()` to `noCFG()`! Let's say as an attacker, we have an arbitrary write primitive and we were able to overwrite a function pointer, such as `noCFG()`. Let's simulate this in WinDbg (remember if you are following along, you'll need to run WinDbg as an administrator because our .exe is in a privileged directory). 
+
 
 
 

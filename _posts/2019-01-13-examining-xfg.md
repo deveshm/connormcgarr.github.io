@@ -57,11 +57,13 @@ The result of the compilation command will place the output file, named `Source.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFGbb.png" alt="">
 
-Let's examine the assembly above. The above function loads `noCFG()` into RAX. RAX is then moved to `[rsp+38h+var_18]` and since `var_18` is assinged to negative 0x18, we can assume that this will place RAX at `[rsp+0x20]` (a.k.a cause RSP + 0x20 to point to `noCFG()`. Eventually, a call to `[rsp+38h+var_18]` is made. So, we can make a determination that this will call `noCFG()` via a pointer.
+Let's examine the assembly above. The above function loads `noCFG()` into RAX. RAX is then moved to `[rsp+38h+var_18]` and since `var_18` is assinged to negative 0x18, we can assume that this will place RAX at `[rsp+0x20]` (a.k.a cause RSP + 0x20 to point to `noCFG()`). Eventually, a call to `[rsp+38h+var_18]` is made. So, we can make a determination that this will call `noCFG()` via a pointer. 
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG7.png" alt="">
 
-Essentially what is happening here, is that the program is performing a control flow transfer to the `noCFG()` function from the `main()` function
+Why does it call the pointer, instead of just performing a direct call to `noCFG()`? Remember we assigned `noCFG()` to a function pointer. This is why a call to an address which points to the function is made.
+
+Moving on now, essentially what is happening here, is that the program is performing a control flow transfer to the `noCFG()` function from the `main()` function
 
 Nice! We know that our program will redirect execution from `main()` to `noCFG()`! Let's say as an attacker, we have an arbitrary write primitive and we were able to overwrite a pointer. Since the function `noCFG()` will be pointed to by something else (`[rsp+38h+var_18]` in this case), we know that if we were able to overwrite that pointer on the stack for instance, we could change what the final `call [rsp+38h+var_18]` actually ends up calling! This is not good from a defensive perspective.
 

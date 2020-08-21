@@ -35,6 +35,6 @@ To compile with the command line tool `cl`, type in "x64 Native Tools Command Pr
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG3.png" alt="">
 
-This will drop you into a special Command Prompt. From here, you will need to navigate to the installation path of Visual Studio
+This will drop you into a special Command Prompt. From here, you will need to navigate to the installation path of Visual Studio, and you will be able to use the `cl` tool for compilation.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG4.png" alt="">

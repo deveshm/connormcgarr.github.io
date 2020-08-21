@@ -47,7 +47,7 @@ The above command essentially compiles the program with the `/Zi` flags and the 
 
 The result of the compilation command will place the output file, named `Source.exe` in this case, into the current directory along with a symbol file (.pdb). Now, we can open this application in IDA (you'll need to run IDA as an administrator, as the application is in a privileged directory). Let's take a look at the `main()` function.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFG6a.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG6b.png" alt="">
 
 Let's examine the assembly above. The above function loads `noCFG()` into RAX. RAX is then moved to `[rsp+38h+var_18]` and since `var_18` is assinged to negative 0x18, we can assume that this will place RAX at `[rsp+0x20]` (a.k.a cause RSP + 0x20 to point to `noCFG()`. Eventually, a call to `[rsp+38h+var_18]` is made. So, we can make a determination that this will call `noCFG()` via a pointer.
 

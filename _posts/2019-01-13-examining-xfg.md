@@ -11,7 +11,7 @@ Previously, I have [blogged](https://connormcgarr.github.io/ROP2) about ROP and 
 After a few years, and a few bypasses along the way, Microsoft decided they needed a new Control Flow Integrity (CFI) solution- hence XFG, or Xtended Flow Guard. David Weston gave an overview of XFG at his [talk](https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE37dMC) at BlueHat Shanghai 2019. This "finer-grained" CFI solution will be the subject of this blog post. A few things before we start about what this post _is_ and what it _isn't_:
 
 1. This post is not an "XFG internals" post. I don't know every single low level detail about it.
-2. Don't expect any crazy bypasses- this mitigation is still very new and not very explored.
+2. Don't expect any bypasses from this post- this mitigation is still very new and not very explored.
 3. We will spend a bit of time understanding what indirect function calls are via function pointers + what CFG is why it needs XFG in addition to itself.
 
 This post is just going to be a brain dump of what I have learned about XFG after messing with it for a while now. This is simply an "organized brain dump" and isn't meant to be a "learn everything you need to know about XFG in one sitting" post.

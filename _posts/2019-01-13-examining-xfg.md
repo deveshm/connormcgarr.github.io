@@ -77,7 +77,7 @@ Disassembling the `main()` function in IDA again, we notice things look a bit di
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG9.png" alt="">
 
-Very interesting! Instead of making a call directly to `noCFG()` this time, it seems as though the function `__guard_disaptch_icall_fptr` will be invoked. Let's set a breakpoint in WinDbg on the main function and see how this looks after invoking the CFG dispatch function.
+Very interesting! Instead of making a call directly to `noCFG()` this time, it seems as though the function `__guard_disaptch_icall_fptr` will be invoked. Let's set a breakpoint in WinDbg on `main()` and see how this looks after invoking the CFG dispatch function.
 
 After setting a breakpoint on the `main()` function, code execution hits the CFG dispatch function.
 

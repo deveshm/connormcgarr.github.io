@@ -91,6 +91,6 @@ We won't get into the technical details about what happens here, as this post is
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG12.png" alt="">
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFG13.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG13a.png" alt="">
 
 Execution has returned back to the `noCFG()` function.

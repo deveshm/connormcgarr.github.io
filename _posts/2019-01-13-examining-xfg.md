@@ -31,7 +31,7 @@ CFG at this point would now be enabled for the program- or in the case of Micros
 
 Since this is a post about XFG, not CFG, we will skip over the technical details of CFG. However, if you are interested to see how CFG works at a lower level, Morten Schenk has an excellent [post](https://improsec.com/tech-blog/bypassing-control-flow-guard-in-windows-10) about its implementation in user mode (the Windows kernel has been compiled with CFG, known as kCFG, since Windows 10 1703).
 
-Moving on, let's examine how an indirect function call (e.g. `call [rax]` where RAX contains a function address or a function pointer), which iinitiate a control flow transfer to a different part of an application, looks without CFG or XFG. To do this, let's take a look at a very simple program that performs a control flow transfer.
+Moving on, let's examine how an indirect function call (e.g. `call [rax]` where RAX contains a function address or a function pointer), which initiate a control flow transfer to a different part of an application, looks without CFG or XFG. To do this, let's take a look at a very simple program that performs a control flow transfer.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG2a.png" alt="">
 

@@ -17,6 +17,8 @@ CFG is a pretty well documented exploit mitigation, and I have done [my fair sha
 
 Firstly, A program is compiled and linked with the `/guard:cf` flag. This can be done through the Microsoft Visual Studio tool `cl` (which we will look at later). However, more easily, this can be done by opening Visual Studio and navigating to `Project -> Properties -> C/C++ -> Code Generation` and setting `Control Flow Guard` to `Yes (/guard:cf)`
 
+
+
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG1.png" alt="">
 
 CFG is now enabled on the program- or in the case of Microsoft binaries, already compiled with CFG (most of them). This causes a bitmap to be created, which essentially takes is made up of all functions that are "protected by CFG". SInce this is a post about XFG, not CFG, we will skip over the technical details of CFG. However, if you are interested to see how CFG works at a lower level, Morten Schenk has an excellent [post](https://improsec.com/tech-blog/bypassing-control-flow-guard-in-windows-10) about its implmenetation in user mode (the Windows kernel has been compiled with CFG, known as kCFG, since Windows 10 1703). On any indirect function call (e.g. `call [rax]`), which is a call to a function that initiates a control flow transfer to a different part of an application, the call is firsly checked by CFG.
@@ -25,6 +27,14 @@ Let's take a look at a very simple program that performs a control flow transfer
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG2.png" alt="">
 
-> Due to the lack of CFG on this program, compilation is as simple as selecting `Build -> Build Solution`
+> Note that you will need Microsoft Visual Studio 2019 Preview 16.5 or greater in order to follow along
 
-The above program essentially has the `main()` function call a user-defined function that prints the number specified in `main()`. This will create a control flow transfer, as the main function (which will be the first function to execute), will perform a `call` to the `noCFG()` function. We can trace this execution flow in IDA.
+The above program essentially has the `main()` function call a user-defined function that prints the number specified in `main()`. This will create a control flow transfer, as the main function (which will be the first function to execute), will perform a `call` to the `noCFG()` function. Let's compile this program, so we can view it in IDA.
+
+To compile with the command line tool `cl`, type in "x64 Native Tools Command Prompt for VS 2019 Preview" in the Start menu and run the program as an administrator.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG3.png" alt="">
+
+This will drop you into a special Command Prompt. From here, you will need to navigate to the installation path of Visual Studio
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG4.png" alt="">

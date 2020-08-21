@@ -55,4 +55,28 @@ Let's examine the assembly above. The above function loads `noCFG()` into RAX. R
 
 Essentially what is happening here, is that the program is performing a control flow transfer to the `noCFG()` function from the `main()` function
 
-Nice! We know that our program will redirect execution from `main()` to `noCFG()`! Let's say as an attacker, we have an arbitrary write primitive and we were able to overwrite a function pointer, such as `noCFG()`.
+Nice! We know that our program will redirect execution from `main()` to `noCFG()`! Let's say as an attacker, we have an arbitrary write primitive and we were able to overwrite a pointer. Since the function `noCFG()` will be pointed to by something else (`[rsp+38h+var_18]` in this case), we know that if we were able to overwrite that pointer on the stack for instance, we could change what the final `call [rsp+38h+var_18]` actually ends up calling! This is not good from a defensive perspective.
+
+Let's go back and recompile our application with CFG this time.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG8.png" alt="">
+
+This time, we add `/guard:cf` as a flag, as well as a linking option.
+
+Disassembling the `main()` function in IDA again, we notice things look a bit different.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG9.png" alt="">
+
+Very interesting! Instead of making a call directly to `noCFG()` this time, it seems as though the function `__guard_disaptch_icall_fptr` will be invoked. Let's set a breakpoint in WinDbg on the main function and see how this looks after invoking the CFG dispatch function.
+
+After setting a breakpoint on the `main()` function, code execution hits the CFG dispatch function.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG10.png" alt="">
+
+The CFG disapatch function then performs a dereference and jumps to `ntdll!LdrpDispatchUserCallTarget`. 
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG11.png" alt="">
+
+We won't get into the technical details about what happens here, as this post isn't built around CFG and Morten's blog already explains what will happen. After stepping through the function, control flow transfers back to the `noCFG()` function.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG12.png" alt="">

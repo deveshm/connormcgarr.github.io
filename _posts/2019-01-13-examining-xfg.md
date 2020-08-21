@@ -71,7 +71,7 @@ Very interesting! Instead of making a call directly to `noCFG()` this time, it s
 
 After setting a breakpoint on the `main()` function, code execution hits the CFG dispatch function.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFG10.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG10a.png" alt="">
 
 The CFG disapatch function then performs a dereference and jumps to `ntdll!LdrpDispatchUserCallTarget`. 
 

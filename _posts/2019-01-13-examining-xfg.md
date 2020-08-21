@@ -41,23 +41,21 @@ This will drop you into a special Command Prompt. From here, you will need to na
 
 Let's compile our program now!
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFG5.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG5a.png" alt="">
 
-The above command essentially compiles the program and the `/Zi` and /`Gz` flags, per [Microsoft Docs](https://docs.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically?view=vs-2019), are used to create a .pdb file for symbols and to utilize the `__stdcall` calling convention respectively.
+The above command essentially compiles the program with the `/Zi` flags and the `/INCREMENTAL:NO` linking option. Per [Microsoft Docs](https://docs.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically?view=vs-2019), `/Zi` used to create a .pdb file for symbols (which will be useful to us). `/INCREMENTAL:NO` has been set to instruct `cl` not to use the Incremental linker. This is because the Incremental linker is essentially used for optimization, which can create things like jump thunks, which are used for optimization. Jump thunks are essentially a small function which only perform a jump to another function, which will hinder the ability to showcase why CFG (And XFG) are very important. It is also important to note that this "dummy program" is being built in "Debug" mode, which has Incremental linking on by default. Release builds do not- so essentially we would like to to "simulate a Release build" of a project.
 
-This will place the output file, named `Source.exe` in this case, into the current directory along with a symbol file (.pdb). Now, we can open this application in IDA (you'll need to run IDA as an administrator, as the application is in a privileged directory). Let's take a look at the `main()` function.
+The result of the compilation command will place the output file, named `Source.exe` in this case, into the current directory along with a symbol file (.pdb). Now, we can open this application in IDA (you'll need to run IDA as an administrator, as the application is in a privileged directory). Let's take a look at the `main()` function.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG6a.png" alt="">
 
-Let's examine the assembly above. The above function loads `loc_140002144` into RAX. RAX is then moved to `[rsp+38h+var_18]` and since `var_18` is assinged to negative 0x18, we can assume that this will place RAX at `[rsp+0x20]` (a.k.a cause RSP + 0x20 to point to `loc_140002144`. Eventually, a call to `[rsp+38h+var_18]` is made. So, we can make a determination that whatever is being placed into RAX will be called, via a pointer. So the question remains, what is `loc_140002144`?
-
-According to IDA, it is the `noCFG()` function
+Let's examine the assembly above. The above function loads `noCFG()` into RAX. RAX is then moved to `[rsp+38h+var_18]` and since `var_18` is assinged to negative 0x18, we can assume that this will place RAX at `[rsp+0x20]` (a.k.a cause RSP + 0x20 to point to `noCFG()`. Eventually, a call to `[rsp+38h+var_18]` is made. So, we can make a determination that this will call `noCFG()` via a pointer.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG7.png" alt="">
 
 Essentially what is happening here, is that the program is performing a control flow transfer to the `noCFG()` function from the `main()` function
 
-Nice! We know that our program will redirect execution from `main()` to `noCFG()`! Let's say as an attacker, we have an arbitrary write primitive and we were able to overwrite a function pointer, such as `noCFG()`. Let's simulate this in WinDbg (remember if you are following along, you'll need to run WinDbg as an administrator because our .exe is in a privileged directory). 
+Nice! We know that our program will redirect execution from `main()` to `noCFG()`! Let's say as an attacker, we have an arbitrary write primitive and we were able to overwrite a function pointer, such as `noCFG()`.
 
 
 

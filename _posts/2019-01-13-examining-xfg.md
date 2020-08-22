@@ -35,7 +35,7 @@ Moving on, let's examine how an indirect function call (e.g. `call [rax]` where 
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFGCode1s.png" alt="">
 
-> Note that you will need Microsoft Visual Studio 2019 Preview 16.5 or greater in order to follow along
+> Note that you will need Microsoft Visual Studio 2019 Preview 16.5 or greater in order to follow along.
 
 Let's talk about what is happening here. Firstly, this code is intentionally written this way and is obviously not the most effecient way to do this. However, it is done this way to help simulate a function pointer overwrite and the benefits of XFG/CFG.
 

@@ -79,25 +79,25 @@ This time, we add `/guard:cf` as a flag, as well as a linking option.
 
 Disassembling the `main()` function in IDA again, we notice things look a bit different.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFG9.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFGIDA3a.png" alt="">
 
-Very interesting! Instead of making a call directly to `noCFG()` this time, it seems as though the function `__guard_disaptch_icall_fptr` will be invoked. Let's set a breakpoint in WinDbg on `main()` and see how this looks after invoking the CFG dispatch function.
+Very interesting! Instead of making a call directly to `void (*cfgTest1)` this time, it seems as though the function `__guard_disaptch_icall_fptr` will be invoked. Let's set a breakpoint in WinDbg on `main()` and see how this looks after invoking the CFG dispatch function.
 
 After setting a breakpoint on the `main()` function, code execution hits the CFG dispatch function.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFG10a.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG10aa.png" alt="">
 
 The CFG disapatch function then performs a dereference and jumps to `ntdll!LdrpDispatchUserCallTarget`. 
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG11.png" alt="">
 
-We won't get into the technical details about what happens here, as this post isn't built around CFG and Morten's blog already explains what will happen. But essentially, at a high level, this function will check the CFG bitmap for the `Source.exe` process and determine if the `Source!noCFG` function is a valid target (a.k.a if it's in the bitmap). Obviously this function hasn't been overwritten, so we should have no problems here. After stepping through the function, control flow should transfter back to the `noCFG()` function seamlessly.
+We won't get into the technical details about what happens here, as this post isn't built around CFG and Morten's blog already explains what will happen. But essentially, at a high level, this function will check the CFG bitmap for the `Source.exe` process and determine if the `void cfgTest()` function is a valid target (a.k.a if it's in the bitmap). Obviously this function hasn't been overwritten, so we should have no problems here. After stepping through the function, control flow should transfter back to the `void cfgTest` function seamlessly.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFG12.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG12a.png" alt="">
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFG13a.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG13aa.png" alt="">
 
-Execution has returned back to the `noCFG()` function. Additionally what is nice, is the lack of overhead that CFG put on the program itself. The check was very quick because Microsoft opted to use a bitmap instead of indexing an array or some other structure. Let's see if we can take this even further.
+Execution has returned back to the `void cfgTest()` function. Additionally what is nice, is the lack of overhead that CFG put on the program itself. The check was very quick because Microsoft opted to use a bitmap instead of indexing an array or some other structure. Let's see if we can take this even further.
 
 CFG: Potential Shortcomings
 ---

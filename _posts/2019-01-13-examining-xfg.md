@@ -59,7 +59,7 @@ The result of the compilation command will place the output file, named `Source.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFGIDA1.png" alt="">
 
-Let's examine the assembly above. The above function loads `void (*cfgTest1)` function pointer into RCX. Since `void (*cfgTest1)` is a function pointer to an array, the value in RCX itself isn't what is needed to jump to the array. Only when RCX is dereferenced in the `call qword ptr [rcx+rax]` instruction does program execution actually perform a control flow transfer to the `void (*cfgTest1)`'s first index- which is `void cfgTest()`. This is why `call qword ptr [rcx+rax]` is being performed, as RAX is the position in the array that is being indexed.
+Let's examine the assembly above. The above function loads the `void (*cfgTest1)` function pointer into RCX. Since `void (*cfgTest1)` is a function pointer to an array, the value in RCX itself isn't what is needed to jump to the array. Only when RCX is dereferenced in the `call qword ptr [rcx+rax]` instruction does program execution actually perform a control flow transfer to the `void (*cfgTest1)`'s first index- which is `void cfgTest()`. This is why `call qword ptr [rcx+rax]` is being performed, as RAX is the position in the array that is being indexed.
 
 Taking a look at the `call` instruction in IDA, we can see that clearly this will redirect program execution to `void cfgTest()`.
 

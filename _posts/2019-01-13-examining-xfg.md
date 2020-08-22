@@ -91,7 +91,7 @@ The CFG disapatch function then performs a dereference and jumps to `ntdll!LdrpD
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG11.png" alt="">
 
-We won't get into the technical details about what happens here, as this post isn't built around CFG and Morten's blog already explains what will happen. But essentially, at a high level, this function will check the CFG bitmap for the `Source.exe` process and determine if the `void cfgTest()` function is a valid target (a.k.a if it's in the bitmap). Obviously this function hasn't been overwritten, so we should have no problems here. After stepping through the function, control flow should transfter back to the `void cfgTest` function seamlessly.
+We won't get into the technical details about what happens here, as this post isn't built around CFG and Morten's blog already explains what will happen. But essentially, at a high level, this function will check the CFG bitmap for the `Source.exe` process and determine if the `void cfgTest()` function is a valid target (a.k.a if it's in the bitmap). Obviously this function hasn't been overwritten, so we should have no problems here. After stepping through the function, control flow should transfter back to the `void cfgTest()` function seamlessly.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG12a.png" alt="">
 

@@ -57,17 +57,19 @@ The above command essentially compiles the program with the `/Zi` flag and the `
 
 The result of the compilation command will place the output file, named `Source.exe` in this case, into the current directory along with a symbol file (.pdb). Now, we can open this application in IDA (you'll need to run IDA as an administrator, as the application is in a privileged directory). Let's take a look at the `main()` function.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFGbb.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFGIDA1.png" alt="">
 
-Let's examine the assembly above. The above function loads `noCFG()` into RAX. RAX is then moved to `[rsp+38h+var_18]` and since `var_18` is assinged to negative 0x18, we can assume that what will actually happen here is that `noCFG()` will placed into RAX, which will be moved to `[rsp+0x20]` (a.k.a cause RSP + 0x20 to point to `noCFG()`). Eventually, a call to `[rsp+38h+var_18]` is made. So, we can make a determination that this will call `noCFG()` via a pointer. 
+Let's examine the assembly above. The above function loads `void (*cfgTest1)` function pointer into RCX. Since `void (*cfgTest1)` is a function pointer to an array, the value in RCX itself isn't what is needed to jump to the array. Only when RCX is dereferenced in the `call qword ptr [rcx+rax]` instruction does program execution actually perform a control flow transfer to the `void (*cfgTest1)`'s first index- which is `void cfgTest()`. This is why `call qword ptr [rcx+rax]` is being performed, as RAX is the position in the array that is being indexed.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFG7.png" alt="">
+Taking a look at the `call` instruction in IDA, we can see that clearly this will redirect program execution to `void cfgTest()`.
 
-Why does it call the pointer, instead of just performing a direct call to `noCFG()`? Remember we assigned `noCFG()` to a function pointer. This is why a call to an address which points to the function is made.
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFGIDA2.png" alt="">
 
-Essentially what is happening here is that the program is performing a control flow transfer to the `noCFG()` function from the `main()` function.
+Additionally, in WinDbg, we can see that `Source!cfgTest1`, which is a function, points to `Source!cfgTest`.
 
-Nice! We know that our program will redirect execution from `main()` to `noCFG()`! Let's say as an attacker, we have an arbitrary write primitive and we were able to overwrite a pointer. Since the function `noCFG()` will be pointed to by something else (`[rsp+38h+var_18]` in this case), we know that if we were able to overwrite that pointer on the stack for instance, we could change what the final `call [rsp+38h+var_18]` actually ends up calling! This is not good from a defensive perspective.
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG7a.png" alt="">
+
+Nice! We know that our program will redirect execution from `main()` to `void (*cfgTest1)` and then to `void cfgTest()`! Let's say as an attacker, we have an arbitrary write primitive and we were able to overwrite a pointer. Since the function `void (*cfgTest1)` will point to `void cfgTest()`, we know that if we were able to overwrite that pointer, we could change where the application actually ends up calling! This is not good from a defensive perspective.
 
 Can we mitigate this issue? Let's go back and recompile our application with CFG this time and find out.
 

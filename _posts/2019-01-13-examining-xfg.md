@@ -95,4 +95,7 @@ We won't get into the technical details about what happens here, as this post is
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG13a.png" alt="">
 
-Execution has returned back to the `noCFG()` function.
+Execution has returned back to the `noCFG()` function. Additionally what is nice, is the lack of overhead that CFG put on the program itself. The check was very quick because Microsoft opted to use a bitmap instead of indexing an array or some other structure. Let's see if we can take this even further.
+
+CFG: Potential Shortcomings
+---

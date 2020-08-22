@@ -69,7 +69,7 @@ Additionally, in WinDbg, we can see that `Source!cfgTest1`, which is a function,
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG7a.png" alt="">
 
-Nice! We know that our program will redirect execution from `main()` to `void (*cfgTest1)` and then to `void cfgTest()`! Let's say as an attacker, we have an arbitrary write primitive and we were able to overwrite a pointer. Since the function `void (*cfgTest1)` will point to `void cfgTest()`, we know that if we were able to overwrite that pointer, we could change where the application actually ends up calling! This is not good from a defensive perspective.
+Nice! We know that our program will redirect execution from `main()` to `void (*cfgTest1)` and then to `void cfgTest()`! Let's say as an attacker, we had an arbitrary write primitive and we were able to overwrite what `void (*cfgTest1)` points to. We could actually change where the application actually ends up calling! This is not good from a defensive perspective.
 
 Can we mitigate this issue? Let's go back and recompile our application with CFG this time and find out.
 

@@ -99,3 +99,14 @@ Execution has returned back to the `noCFG()` function. Additionally what is nice
 
 CFG: Potential Shortcomings
 ---
+
+As mentioned earlier, CFG checks function to make sure they are part of the "CFG bitmap" (a.k.a protected by CFG). This means a few things from an adversarial perspective. If we were to use `VirtualAlloc()` to allocate some virtual memory, and overwrite a function pointer that is protectged by CFG with the returned address of the allocation- CFG would make the program crash.
+
+Why? `VirtualAlloc()` (for instance) would return a virtual address of something like `0xdb000`. When the application in question was compiled with CFG, obviously this memory address wasn't a part of the application. Therefore, this address wouldn't be "protected by CFG". However, this is not very practical. Let's thing about what an adversary tries to accompish with ROP.
+
+Let's say that there is a vulnerability is `KERNELBASE.dll`. Let's also say that `KERNELBASE.dll` is compiled with CFG. This means that all of the functions within `KERNELBASE.dll` are a part of the CFG bitmap. Because CFG only validates if something is in the CFG bitmap (it doesn't technically validate if a function pointer was overwritten), it would be possible to overwrite a function pointer _WITH ANY_ other function protected by the current processes's CFG bitmap.
+
+Let's look at a practical example of this.
+
+Firstly, let's update our program in order to visualize this.
+

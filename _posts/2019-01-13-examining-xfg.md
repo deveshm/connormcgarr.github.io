@@ -97,7 +97,13 @@ We won't get into the technical details about what happens here, as this post is
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG13aa.png" alt="">
 
-Execution has returned back to the `void cfgTest()` function. Additionally what is nice, is the lack of overhead that CFG put on the program itself. The check was very quick because Microsoft opted to use a bitmap instead of indexing an array or some other structure. Let's see if we can take this even further.
+Execution has returned back to the `void cfgTest()` function. Additionally what is nice, is the lack of overhead that CFG put on the program itself. The check was very quick because Microsoft opted to use a bitmap instead of indexing an array or some other structure. 
+
+You can also see what functions are protected by the CFG bitmap by using the `dumpbin` tool within the Visual Studio installation directory and the special Visual Studio Command Prompt. Use the command `dumpbin /loadconfig APPLICATION.exe` to see this.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG134.png" alt="">
+
+Let's see if we can take this even further and potentially show why XFG is defintley a better/more viable option than CFG.
 
 CFG: Potential Shortcomings
 ---
@@ -110,5 +116,5 @@ Let's say that there is a vulnerability is `KERNELBASE.dll`. Let's also say that
 
 Let's look at a practical example of this.
 
-Firstly, let's update our program in order to visualize this.
+Firstly, let's update our program.
 

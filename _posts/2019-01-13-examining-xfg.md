@@ -65,7 +65,7 @@ Let's examine the assembly above. The above function loads `noCFG()` into RAX. R
 
 Why does it call the pointer, instead of just performing a direct call to `noCFG()`? Remember we assigned `noCFG()` to a function pointer. This is why a call to an address which points to the function is made.
 
-Moving on now, essentially what is happening here, is that the program is performing a control flow transfer to the `noCFG()` function from the `main()` function
+Essentially what is happening here is that the program is performing a control flow transfer to the `noCFG()` function from the `main()` function.
 
 Nice! We know that our program will redirect execution from `main()` to `noCFG()`! Let's say as an attacker, we have an arbitrary write primitive and we were able to overwrite a pointer. Since the function `noCFG()` will be pointed to by something else (`[rsp+38h+var_18]` in this case), we know that if we were able to overwrite that pointer on the stack for instance, we could change what the final `call [rsp+38h+var_18]` actually ends up calling! This is not good from a defensive perspective.
 

@@ -39,7 +39,7 @@ Moving on, let's examine how an indirect function call (e.g. `call [rax]` where 
 
 Let's talk about what is happening here. Firstly, this code is intentionally written this way and is obviously not the most efficient way to do this. However, it is done this way to help simulate a function pointer overwrite and the benefits of XFG/CFG.
 
-Firstly, we have a function called `void cfgTest()` that just prints a sentence. This function is then assigned to a function pointer called `void (*cfgTest1)`, which actually is an array. Then, in the `main()` function, the function pointer `void (*cfgTest1)` is executed. Since `void (*cfgtest1)` is pointing to `void cfgTest()`, this will actually just cause `void (*cfgtest1)` to just execute `void cfgTest()`. This will create a control flow transfer, as the `main()` function will perform a call to the `void (*cfgTest1)` function, which will then call the `void cfgTest()` function
+Firstly, we have a function called `void cfgTest()` that just prints a sentence. This function is then assigned to a function pointer called `void (*cfgTest1)`, which actually is an array. Then, in the `main()` function, the function pointer `void (*cfgTest1)` is executed. Since `void (*cfgtest1)` is pointing to `void cfgTest()`, this will actually just cause `void (*cfgtest1)` to just execute `void cfgTest()`. This will create a control flow transfer, as the `main()` function will perform a call to the `void (*cfgTest1)` function, which will then call the `void cfgTest()` function.
 
 To compile with the command line tool `cl`, type in "x64 Native Tools Command Prompt for VS 2019 Preview" in the Start menu and run the program as an administrator.
 

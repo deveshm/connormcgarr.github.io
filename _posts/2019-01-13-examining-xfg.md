@@ -33,13 +33,13 @@ Since this is a post about XFG, not CFG, we will skip over the technical details
 
 Moving on, let's examine how an indirect function call (e.g. `call [rax]` where RAX contains a function address or a function pointer), which initiates a control flow transfer to a different part of an application, looks without CFG or XFG. To do this, let's take a look at a very simple program that performs a control flow transfer.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFG2a.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFGCode1s.png" alt="">
 
 > Note that you will need Microsoft Visual Studio 2019 Preview 16.5 or greater in order to follow along
 
-The above program essentially has a `main()` function that calls a user-defined function called `noCFG()`. However, instead of being directly invoked in `main()`, the `noCFG()` function is firstly assigned to a function pointer called `void (*functionPointer)`. In the end, this whole program will simply just print "You don't have CFG enabled! Shame on you. Here is a random number: 10".
+Let's talk about what is happening here. Firstly, this code is intentionally written this way and is obviously not the most effecient way to do this. However, it is done this way to help simulate a function pointer overwrite and the benefits of XFG/CFG.
 
-However, that is not what is important. What is important is that this will create a control flow transfer, as the main function will perform a `call` to the function pointer `void (*functionPointer)`. Since this function pointer points to the `noCFG()` function, the `noCFG()` function is going to be executed. Let's compile this program, so we can view it in IDA.
+Firstly, we have a function called `void cfgTest()` that just prints a sentence. This function is then assigned to a function pointer called `void (*cfgTest1)`, which actually is an array. Then, in the `main()` function, the function pointer `void (*cfgTest1)` is executed. Since `void (*cfgtest1)` is pointing to `void cfgTest()`, this will actually just cause `void (*cfgtest1)` to just execute `void cfgTest()`. This will create a control flow transfer, as the `main()` function will perform a call to the `void (*cfgTest1)` function, which will then call the `void cfgTest()` function
 
 To compile with the command line tool `cl`, type in "x64 Native Tools Command Prompt for VS 2019 Preview" in the Start menu and run the program as an administrator.
 

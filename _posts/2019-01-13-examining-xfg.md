@@ -12,7 +12,7 @@ After a few years, and a few bypasses along the way, Microsoft decided they need
 
 1. This post is not an "XFG internals" post. I don't know every single low level detail about it.
 2. Don't expect any bypasses from this post- this mitigation is still very new and not very explored.
-3. We will spend a bit of time understanding what indirect function calls are via function pointers, what CFG is, and why XFG doesn't mean the end of CFG.
+3. We will spend a bit of time understanding what indirect function calls are via function pointers, what CFG is, and why XFG is a very, very nice mitigation (IMO).
 
 This is simply going to be an "organized brain dump" and isn't meant to be a "learn everything you need to know about XFG in one sitting" post. This is just simply documenting what I have learned after messing around with XFG for a while now.
 
@@ -87,7 +87,7 @@ After setting a breakpoint on the `main()` function, code execution hits the CFG
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG10aa.png" alt="">
 
-The CFG disapatch function then performs a dereference and jumps to `ntdll!LdrpDispatchUserCallTarget`. 
+The CFG dispatch function then performs a dereference and jumps to `ntdll!LdrpDispatchUserCallTarget`. 
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG11.png" alt="">
 
@@ -171,9 +171,9 @@ Now that we have armed ourselves with an understanding of why CFG is an amazing 
 XFG: The Next Era of CFI for Windows
 ---
 
-Let's preface these first points about XFG by saying this information was obtained from David Weston's talk about XFG. After we go through what David said about XFG, we will compile our program with XFG and walk through the dispatch function(s), as well as perform some simulated function pointer overwrites to see how XFG reacts and additionally see how XFG and CFG work together.
+Let's preface these first points about XFG by saying this information was obtained from David Weston's talk about XFG. After we go through what David said about XFG, we will compile our program with XFG and walk through the dispatch function(s), as well as perform some simulated function pointer overwrites to see how XFG reacts and additionally see how XFG differs from CFG.
 
-Let's talk about XFG. MY [last CrowdStrike blog post](https://www.crowdstrike.com/blog/state-of-exploit-development-part-2/) touches on XFG, but not in too much detail. XFG essentially is a more "hardened" version of CFG. How so? XFG, at compile time, produces a "type-based hash" of a function that is going to be called in a control flow transfer. This hash will be placed 8 bytes above the target function before execution, and will be used as a "compare". The hash, since it was made up of the function's prototype, is then compared against the in scope function. If the hash matches, the control flow transfer is then passed of to CFG. CFG then will validate the function is apart of the bitmap, and will then proceed accordingly. If the hash doesn't match the in scope function prototype, the function call will not go through and the application will crash.
+Let's talk about XFG. MY [last CrowdStrike blog post](https://www.crowdstrike.com/blog/state-of-exploit-development-part-2/) touches on XFG, but not in too much detail. XFG essentially is a more "hardened" version of CFG. How so? XFG, at compile time, produces a "type-based hash" of a function that is going to be called in a control flow transfer. This hash will be placed 8 bytes above the target function before execution, and will be used as a "compare". The hash, since it was made up of the function's prototype, is then compared against the in scope function. If the hash matches, the control flow transfer is then passed to the in scope function that was checked.
 
 Let's take a look a bit more at this. Firstly, let's compile our program with XFG!
 
@@ -193,17 +193,19 @@ Let's crack open IDA again to see how the `main()` function looks with the addit
 
 Very interesting! Firstly, we can see that R10 takes in the value of the XFG "type-based" hash. Then, a call is performed to the XFG dispatch call `__guard_xfg_dispatch_icall_fptr`. 
 
-Before we move on, one interesting thing to note is that XFG seems to use the same hash for a function type. For instance, after compiling an application, viewing the XFG hash for a function, deleting the application and recompiling it with XFG- the XFG hash for a specific function seems to not change.
+Before we move on, one interesting thing to note is that the XFG hash is already placed 8 bytes above a function BEFORE any code execution actually occurs.
+
+FOr instance, `Source!cfgTest` is an XFG protected function. 8 bytes above this function is the hash seen in the previous image, but with an additional bit set.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG30a.png" alt="">
+
+We will see why this additional bit has been set when we step through the functions that perform XFG checks.
 
 Moving on, let's step through this in WinDbg to see what we are working with here, and how execution flow will go.
 
 Firstly, execution lands on the XFG dispatch function.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG30.png" alt="">
-
-After landing on the dispatch function, we also notice that 8 bytes above our function, which has been loaded in RAX, is our "type-base" hash.
-
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFG30a.png" alt="">
 
 This time, when the `__guard_xfg_dispatch_icall_fptr` function is dereferenced, a jump to the function `ntdll!LdrpDispatchUserCallTargetXFG` is performed.
 

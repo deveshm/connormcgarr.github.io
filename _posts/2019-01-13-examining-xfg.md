@@ -281,3 +281,15 @@ As we can see below, the hashes do not match!
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG46.png" alt="">
 
 Since the hashes do not match, this will cause XFG to determine a function pointer has been overwritten with something it should not have been overwritten with- and causes a program crash.
+
+Let's examine another scenario, with two functions of the same return type- but not the same amount of parameters.
+
+To achieve this, our code has been edited to the following.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG47a.png" alt="">
+
+As we can see from the above image, we are using all integer functions now. However, the `int cfgTest()` function has two more paramegers than the `int protectMe2()` function. Let's compile and perform some static analysis in IDA.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG48a.png" alt="">
+
+The only difference between the two functions protected by XFG is the amount of parameters that `int cfgTest()` has, and yet the hashes are _TOTALLY_ different. From a defensive perspective, it seems like even very similar functions are viewed as "very different".

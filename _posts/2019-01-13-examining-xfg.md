@@ -262,7 +262,7 @@ We have changed the `protectMe2()` function to a function that returns an intege
 
 Very interesting! As we can see from the above image, there are two different hashes now. The hash for our original function has remained the same. However, the hash for the `int protectMe2()` function is very different, but the last part of each hash is 870 in our case. That is interesting to note, as an XFG hash seems to be 52 bits.
 
-Additionally, static and dynamic analysis both show that even before any code has executed, the actual has that is placed 8 bytes above each function has an additional bit set, just as we saw last time.
+Additionally, static and dynamic analysis both show that even before any code has executed, the actual hash that is placed 8 bytes above each function has an additional bit set, just as we saw last time.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG43.png" alt="">
 

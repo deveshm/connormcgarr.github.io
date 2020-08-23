@@ -165,3 +165,14 @@ Program execution passes through `Source!__guard_dispatch_icall_fptr` and `ntdll
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG26.png" alt="">
 
 This shows that even with CFG enabled, it is still possible to call functions that have overwritten other functions. This is not good, as calls can still be made with malign intent. Additionally, calling functions of different types out of context may result in a type confusion or other programmatic behavioral problems.
+
+Now that we have armed ourselves with an understanding of why CFG is an amazing start to solving the CFI problem, but yet still contains many shortcomings, let's get into XFG and what makes it better and different.
+
+XFG: The Next Era of XFI for Windows
+---
+
+Let's preface these first points about XFG by saying this information was obtained from David Weston's talk about XFG. After we go through what David said about XFG, we will compile our program with XFG and walk through the dispatch function(s), as well as perform some simulated function pointer overwrites to see how XFG reacts and additionally see how XFG and CFG work together.
+
+Let's talk about XFG. MY [last CrowdStrike blog post](https://www.crowdstrike.com/blog/state-of-exploit-development-part-2/) touches on XFG, but not in too much detail. XFG essentially is a more "hardened" version of CFG. How so? XFG, at compile time, produces a "type-based hash" of a function that is going to be called in a control flow transfer. This hash will be placed 8 bytes above the target function before execution, and will be used as a "compare". The hash, since it was made up of the function's prototype, is then compared against the in scope function. If the hash matches, the control flow transfer is then passed of to CFG. CFG then will validate the function is apart of the bitmap, and will then proceed accordingly. If the hash doesn't match the in scope function prototype, the function call will not go through and the application will crash.
+
+

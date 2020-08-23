@@ -193,7 +193,7 @@ Let's crack open IDA again to see how the `main()` function looks with the addit
 
 Very interesting! Firstly, we can see that R10 takes in the value of the XFG "type-based" hash. Then, a call is performed to the XFG dispatch call `__guard_xfg_dispatch_icall_fptr`. 
 
-Additionally, you can use the `dumpbin` tool to print out the functions protected by CFG/XFG. Functions protected by XFG are denoted with and `X`
+Additionally, you can use the `dumpbin` tool to print out the functions protected by CFG/XFG. Functions protected by XFG are denoted with an `X`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFGCHECK.png" alt="">
 

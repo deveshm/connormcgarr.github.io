@@ -219,7 +219,7 @@ Firstly, a bitwise OR of the XFG hash and 1 occurs, with the result placed in R1
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG32.png" alt="">
 
-Next, a `test al, 0xf` operation occurs, which performs a bitwise AND between the lower 8-bit of AX (AL) and 0xf.
+Next, a `test al, 0xf` operation occurs, which performs a bitwise AND between the lower 8 bits of AX (AL) and 0xf.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG33.png" alt="">
 

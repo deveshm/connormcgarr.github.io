@@ -175,4 +175,14 @@ Let's preface these first points about XFG by saying this information was obtain
 
 Let's talk about XFG. MY [last CrowdStrike blog post](https://www.crowdstrike.com/blog/state-of-exploit-development-part-2/) touches on XFG, but not in too much detail. XFG essentially is a more "hardened" version of CFG. How so? XFG, at compile time, produces a "type-based hash" of a function that is going to be called in a control flow transfer. This hash will be placed 8 bytes above the target function before execution, and will be used as a "compare". The hash, since it was made up of the function's prototype, is then compared against the in scope function. If the hash matches, the control flow transfer is then passed of to CFG. CFG then will validate the function is apart of the bitmap, and will then proceed accordingly. If the hash doesn't match the in scope function prototype, the function call will not go through and the application will crash.
 
+Let's take a look a bit more at this. Firstly, let's compile our program with XFG!
 
+> Note that you will need Visual Studio 2019 Preview + at least Windows 10 21H1 in order to use XFG. Additionally, XFG is not found in the UI for compilation options.
+
+Using the `/guard:xfg` flag in compilation and linking, we can enable XFG for our application.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG27.png" alt="">
+
+Notice that even though it was not selected, CFG is still enabled for our application.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG28.png" alt="">

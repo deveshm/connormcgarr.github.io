@@ -352,10 +352,10 @@ Taking a look at RAX - 8, where the XFG check occurs, we can see that the opcode
 
 Although this compare will fail, this brings up an interesting point.
 
-Since calling into a middle of a function results in the function's data being treated as opcodes and not memory addresses (usually), it may be possible for an adversary to utilize an arbitrary read primitive to do the following.
+Since calling into a middle of a function results in the function's data being treated as opcodes and not memory addresses (usually), it may be possible for an adversary to utilize an arbitrary read/write primitive to do the following.
 
 1. Locate the XFG hash for a function you want to overwrite
-2. Perform a loop to dereference memory and look for patterns that are identical to the XFG hash
+2. Perform a loop to dereference the process space's memory and look for patterns that are identical to the XFG hash (remember, we still have to abide by CFG's rules and choosing a function exported by the application or a function that is additionally located in the same bitmap)
 3. Overwrite the function pointer with any viable candidates
 
 Although you most likely are going to be very hard pressed to find anything identical to the hash in terms of opcodes in the middle of a function AND additionally make whatever you find useful from an attacker's perspective, this is still possible it seems.

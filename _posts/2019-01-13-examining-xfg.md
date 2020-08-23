@@ -204,3 +204,13 @@ Firstly, execution lands on the XFG dispatch function.
 This time, when the `__guard_xfg_dispatch_icall_fptr` function is dereferenced, a jump to the function `ntdll!LdrpDispatchUserCallTargetXFG` is performed.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG31.png" alt="">
+
+Firstly, a bitwise OR of the XFG hash and 1 occurs, with the result placed in R10. In our case, this sets a bit in the XFG function hash.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG32.png" alt="">
+
+Next, a `test al, 0xf` operation occurs, which performs a bitwise AND between the lower 8-bits of AX (AL) and 0xf.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG33.png" alt="">
+
+As we can see, this sets the zero flag in our case.

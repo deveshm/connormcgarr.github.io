@@ -173,7 +173,7 @@ XFG: The Next Era of CFI for Windows
 
 Let's start out by talking about what XFG is at a high level. After we go through some high level details about XFG, we will compile our program with XFG and walk through the dispatch function(s), as well as perform some simulated function pointer overwrites to see how XFG reacts and additionally see how XFG differs from CFG. 
 
-Let's talk about XFG. My [last CrowdStrike blog post](https://www.crowdstrike.com/blog/state-of-exploit-development-part-2/) touches on XFG, but not in too much detail. XFG essentially is a more "hardened" version of CFG. How so? XFG, at compile time, produces a "type-based hash" of a function that is going to be called in a control flow transfer. This hash will be placed 8 bytes above the target function, and will be compared against a preserved version of that hash when an XFG dispatch function is executed. If the hashes match, control flow transfer is then passed to the in scope function that was checked. If the hashes differ, the program crashes.
+My [last CrowdStrike blog post](https://www.crowdstrike.com/blog/state-of-exploit-development-part-2/) touches on XFG, but not in too much detail. XFG essentially is a more "hardened" version of CFG. How so? XFG, at compile time, produces a "type-based hash" of a function that is going to be called in a control flow transfer. This hash will be placed 8 bytes above the target function, and will be compared against a preserved version of that hash when an XFG dispatch function is executed. If the hashes match, control flow transfer is then passed to the in scope function that was checked. If the hashes differ, the program crashes.
 
 Let's take a look a bit more at this. Firstly, let's compile our program with XFG!
 

@@ -330,7 +330,7 @@ As we know, functions protected by XFG have an XFG hash placed above them (8 byt
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFGWPM1a.png" alt="">
 
-As we can see from the above image, calling into the middle of this function shows us that these hex numbers are being interpreted as opcodes, not memory addresses. This means that if a function pointer is overwritten by `KERNELBASE!VirtualProtect`, it would be loaded into RAX per the usual routine for XFG/CFG function checks.
+As we can see from the above image, calling into the middle of this function shows us that these hex numbers are being interpreted as opcodes, not memory addresses. This means that if XFG checks if a function pointer is overwritten by `KERNELBASE!VirtualProtect`, it would be load the address of this function into RAX per the usual routine for XFG/CFG function checks. Then, this address is dereferenced at an offset of negative 8 to perform the XFG check. When this dereference happens, since this address contains opcodes, the opcodes that are present when calling into the middle of the function will be used in the XFG check.
 
 Let's perform a function pointer overwrite.
 

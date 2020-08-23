@@ -223,7 +223,7 @@ As we can see from the image above, this sets the zero flag in our case. Additio
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG34.png" alt="">
 
-Since the zero flag has been set, we will NOT take the jump and instead move on to the next `test ax, 0xFFF` function.
+Since the zero flag has been set, we will NOT take the jump and instead move on to the next instruction,`test ax, 0xFFF`.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG35.png" alt="">
 

@@ -247,7 +247,7 @@ The compare statement, because the values are equal, causes the zero flag to be 
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG40.png" alt="">
 
-This is how a function protected by XFG is checked! Let's now edit our code a bit and explore into XFG a bit more.
+This is how a function protected by XFG is checked! Let's now edit our code a bit and explore XFG a bit more.
 
 Let's Keep Going!
 ---

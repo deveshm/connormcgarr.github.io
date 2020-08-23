@@ -144,4 +144,8 @@ Looking at the RAX register, which is used to hold the address of the function C
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG21.png" alt="">
 
+Execution then hits `ntdll!LdrpDispatchUserCallTarget`. After walking the function, which validates if the in scope function resides within the CFG bitmap for the process, execution redirects to `Source!protectMe2`!
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG22.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG23.png" alt="">
 

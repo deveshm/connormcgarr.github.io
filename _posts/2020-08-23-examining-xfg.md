@@ -352,8 +352,6 @@ Taking a look at RAX - 8, where the XFG check occurs, we can see that the opcode
 
 Although this compare will fail, this brings up an interesting point.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFGWPM5.png" alt="">
-
 Since calling into a middle of a function results in the function's data being treated as opcodes and not memory addresses (usually), it may be possible for an adversary to utilize an arbitrary read primitive to do the following.
 
 1. Locate the XFG hash for a function you want to overwrite

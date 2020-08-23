@@ -99,7 +99,7 @@ We won't get into the technical details about what happens here, as this post is
 
 Execution has returned back to the `void cfgTest()` function. Additionally what is nice, is the lack of overhead that CFG put on the program itself. The check was very quick because Microsoft opted to use a bitmap instead of indexing an array or some other structure. 
 
-You can also see what functions are protected by the CFG bitmap by using the `dumpbin` tool within the Visual Studio installation directory and the special Visual Studio Command Prompt. Use the command `dumpbin /loadconfig APPLICATION.exe` to see this.
+You can also see what functions are protected by the CFG bitmap by using the `dumpbin` tool within the Visual Studio installation directory and the special Visual Studio Command Prompt. You can use the command `dumpbin /loadconfig APPLICATION.exe` to view this.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG14.png" alt="">
 

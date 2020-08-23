@@ -300,6 +300,7 @@ As a sanity check and for completness sake, let's see what happens when two iden
 
 OMG Samesies!
 ---
+
 Here is an edited version of our code, with two idential functions.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG49.png" alt="">
@@ -311,3 +312,10 @@ Disassembling the functions in IDA, we can see that the hashes this time are ide
 Obviously, since the hashing process for an XFG hash takes a function prototype and hashes it, the two hashes are going to be the same. I would not call this a flaw at all, because it is obvious Microsoft knew this going into this. However, I feel this is a nice win for Microsoft in terms of their overall CFI strategy because as David pointed out, this was very little overhead to the already existing CFG infrastructure. 
 
 However, from an adversarial standpoint- it must be said. XFG functions _can_ be overwritten, so long as the function is basically an identical prototype of the original function.
+
+Final Thoughts
+---
+
+I think personally that XFG is an awesome mitigation and I am excited to see how people get creative with the solution. However, until CET comes into play, overwriting return addresses on the stack seems like it will still be fair game. I think the combination of XFG and CET is going to be very interesting for exploitation in the future. I think XFG is a great and pretty creative mitigation. However, it has yet to be seen yet how it performs against Indirect Branch Tracking (IBT), which is CET's forward-edge protection. All together, I think Microsoft has done a great thing with XFG by implementing it and not letting all of the work done with CFG go to waste.
+
+As always! Peace, love, and positivity :-)

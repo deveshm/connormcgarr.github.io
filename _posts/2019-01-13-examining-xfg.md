@@ -231,7 +231,7 @@ Since the zero flag has been set, we will NOT take the jump and instead move on 
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG35.png" alt="">
 
-Stepping through `test ax, 0xFFF`, which will perform a bitwise AND with the lower 16-bits of EAX and 0xFFF, plus set the zero flag accordingly, we see that we have cleared the zero flag in the image below. This means the jump will not occur, and we continue to move deeper into the `ntdll!LdrpDispatchUserCallTargetXFG` function.
+Stepping through `test ax, 0xFFF`, which will perform a bitwise AND with the lower 16 bits of EAX and 0xFFF, plus set the zero flag accordingly, we see that we have cleared the zero flag in the image below. This means the jump will not occur, and we continue to move deeper into the `ntdll!LdrpDispatchUserCallTargetXFG` function.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG36.png" alt="">
 

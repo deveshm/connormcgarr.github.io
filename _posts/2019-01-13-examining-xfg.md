@@ -101,7 +101,7 @@ Execution has returned back to the `void cfgTest()` function. Additionally what 
 
 You can also see what functions are protected by the CFG bitmap by using the `dumpbin` tool within the Visual Studio installation directory and the special Visual Studio Command Prompt. Use the command `dumpbin /loadconfig APPLICATION.exe` to see this.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFG134.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG14.png" alt="">
 
 Let's see if we can take this even further and potentially show why XFG is defintley a better/more viable option than CFG.
 

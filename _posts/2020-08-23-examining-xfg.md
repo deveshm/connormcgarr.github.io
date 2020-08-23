@@ -280,7 +280,7 @@ As we can see below, the hashes do not match!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG46.png" alt="">
 
-Since the hashes do not match, this will cause XFG to determine a function pointer has been overwritten with something it should not have been overwritten with- and causes a program crash.
+Since the hashes do not match, this will cause XFG to determine a function pointer has been overwritten with something it should not have been overwritten with- and causes a program crash. Even though the function pointer was overwritten by another function within the same bitmap- XFG still will crash the process.
 
 Let's examine another scenario, with two functions of the same return type- but not the same amount of parameters.
 

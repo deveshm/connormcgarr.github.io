@@ -301,7 +301,7 @@ As a sanity check and for completness sake, let's see what happens when two iden
 OMG Samesies!
 ---
 
-Here is an edited version of our code, with two idential functions.
+Here is an edited version of our code, with two identical functions.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG49.png" alt="">
 

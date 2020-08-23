@@ -248,3 +248,22 @@ The compare statement, because the values are equal, causes the zero flag to be 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG40.png" alt="">
 
 This is how a function protected by XFG is checked! Let's now edit our code a bit and explore into XFG a bit more.
+
+Let's Keep Going!
+---
+
+Recall that an XFG hash is made up of a function's return type and any parameters. Let's update our code to invoke another function of a different type.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG41s.png" alt="">
+
+We have changed the `protectMe2()` function to a function that returns an integer and takes a parameter of the type integer. This is different than our `void cfgTest()` function. We also set a function pointer, `int (*cfgTest2)` equal to the `int protectMe2()` function in order to create a new XFG hash for a different function type (`int` in this case). Let's recompile our program and disassemble it in IDA to see how the two functions may vary from an XFG perspective.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG42.png" alt="">
+
+Very interesting! As we can see from the above image, there are two different hashes now. The hash for our original function has remained the same. However, the hash for the `int protectMe2()` function is very different. However, the last part of each hash is 870 in our case- that is interesting to note.
+
+Additionally, static and dynamic analysis both show that even before any code has executed, the actual has that is placed 8 bytes above each function has an additional bit set, just as we saw last time.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG43.png" alt="">
+
+Let's take this opportunity to showcase why XFG is _significantly_ stronger than CFG.

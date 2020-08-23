@@ -168,7 +168,7 @@ This shows that even with CFG enabled, it is still possible to call functions th
 
 Now that we have armed ourselves with an understanding of why CFG is an amazing start to solving the CFI problem, but yet still contains many shortcomings, let's get into XFG and what makes it better and different.
 
-XFG: The Next Era of XFI for Windows
+XFG: The Next Era of CFI for Windows
 ---
 
 Let's preface these first points about XFG by saying this information was obtained from David Weston's talk about XFG. After we go through what David said about XFG, we will compile our program with XFG and walk through the dispatch function(s), as well as perform some simulated function pointer overwrites to see how XFG reacts and additionally see how XFG and CFG work together.

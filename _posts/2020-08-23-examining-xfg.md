@@ -191,7 +191,7 @@ Let's crack open IDA again to see how the `main()` function looks with the addit
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG29.png" alt="">
 
-Very interesting! Firstly, we can see that R10 takes in the value of the XFG "type-based" hash. Then, a call is performed to the XFG dispatch call `__guard_xfg_dispatch_icall_fptr`. 
+Very interesting! Firstly, we can see that R10 takes in the value of the XFG "type-based" hash. Then, a call is performed to the XFG dispatch call `__guard_xfg_dispatch_icall_fptr`. Note that the hash has been deemed "immutable" by Microsoft and cannot be modified by an attacker.
 
 Additionally, you can use the `dumpbin` tool to print out the functions protected by CFG/XFG. Functions protected by XFG are denoted with an `X`
 

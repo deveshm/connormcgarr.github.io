@@ -21,7 +21,7 @@ The Blueprint for XFG: CFG
 
 CFG is a pretty well documented exploit mitigation, and I have done [my fair share](https://www.crowdstrike.com/blog/state-of-exploit-development-part-1/) of documenting it as well. However, for completeness sake, let's talk about how CFG works and its potential shortcomings.
 
-> Note that before we begin, Microsoft deserves recognition for being the first to implement a Control Flow Integrity (CFI) solution.
+> Note that before we begin, Microsoft deserves recognition for being one of the leaders in a CFI initiative and among the first to implement a Control Flow Integrity (CFI) solution.
 
 Firstly, to enable CFG, a program is compiled and linked with the `/guard:cf` flag. This can be done through the Microsoft Visual Studio tool `cl` (which we will look at later). However, more easily, this can be done by opening Visual Studio and navigating to `Project -> Properties -> C/C++ -> Code Generation` and setting `Control Flow Guard` to `Yes (/guard:cf)`
 

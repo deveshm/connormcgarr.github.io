@@ -319,6 +319,49 @@ Obviously, since the hashing process for an XFG hash takes a function prototype 
 
 However, from an adversarial standpoint- it must be said. XFG functions _can_ be overwritten, so long as the function is basically an identical prototype of the original function.
 
+Potential Bypasses?
+---
+
+As mentioned above, utilizing functions of identical prototypes generates identical XFG hashes. Knowing this, it seems as though it could be possible to overwrite a function with an identical function of the same prototype. This is _SIGNIFICANTLY_ stronger than CFG in terms of what functions can actually be called.
+
+Let's talk about one more additional potential bypass.
+
+As we know, functions protected by XFG have an XFG hash placed above them (8 bytes above to be more specific). What would happen for instance, if we performed a function pointer overwrite and called into the middle of a function, like `KERNELBASE!VirtualProtect`.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFGWPM1a.png" alt="">
+
+As we can see from the above image, calling into the middle of this function shows us that these hex numbers are being interpreted as opcodes, not memory addresses. This means that if a function pointer is overwritten by `KERNELBASE!VirtualProtect`, it would be loaded into RAX per the usual routine for XFG/CFG function checks.
+
+Let's perform a function pointer overwrite.
+
+> Note that the machine was restarted in between screenshots, causing addresses to change (but the symbols will remain the same).
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFGWPM2.png" alt="">
+
+Next, let's step through the XFG dispatch functions and reach the compare statememt.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFGWPM3.png" alt="">
+
+Hitting the compare statement, we can see that R10 contains the preserved XFG hash, while RAX just contains the address of `KERNELBASE!VirtualProtect` + 0x50.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFGWPM4.png" alt="">
+
+Taking a look at RAX - 8, where the XFG check occurs, we can see that the opcodes that reside within `KERNELBASE!VirutalProtect` are being treated as the "compared hash".
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFGWPM5.png" alt="">
+
+Although this compare will fail, this brings up an interesting point.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFGWPM5.png" alt="">
+
+Since calling into a middle of a function results in the function's data being treated as opcodes and not memory addresses (usually), it may be possible for an adversary to utilize an arbitrary read primitive to do the following.
+
+1. Locate the XFG hash for a function you want to overwrite
+2. Perform a loop to dereference memory and look for patterns that are identical to the XFG hash
+3. Overwrite the function pointer with any viable candidates
+
+Although you most likely are going to be very hard pressed to find anything identical to the hash in terms of opcodes in the middle of a function AND additionally make whatever you find useful from an attacker's perspective, this is still possible it seems.
+
 Final Thoughts
 ---
 

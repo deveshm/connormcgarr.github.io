@@ -201,6 +201,10 @@ Firstly, execution lands on the XFG dispatch function.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG30.png" alt="">
 
+After landing on the dispatch function, we also notice that 8 bytes above our function, which has been loaded in RAX, is our "type-base" hash.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG30a.png" alt="">
+
 This time, when the `__guard_xfg_dispatch_icall_fptr` function is dereferenced, a jump to the function `ntdll!LdrpDispatchUserCallTargetXFG` is performed.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG31.png" alt="">
@@ -213,4 +217,26 @@ Next, a `test al, 0xf` operation occurs, which performs a bitwise AND between th
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG33.png" alt="">
 
-As we can see, this sets the zero flag in our case.
+As we can see, this sets the zero flag in our case. Additionally, now we have reached a possible jump within `ntdll!LdrpDispatchUserCallTargetXFG`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG34.png" alt="">
+
+Since the zero flag has been set, we will NOT take the jump and instead move on to the next `test ax, 0xFFF` function.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG35.png" alt="">
+
+Stepping through the `test ax, 0xFFF`, which will perform a bitwise AND with the lower 16-bits of EAX and 0xFFF and set the zero flag accordingly, we see that we have cleared the zero flag. This means the jump will not occur, and we continue to move deeper into the `ntdll!LdrpDispatchUserCallTargetXFG` function.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG36.png" alt="">
+
+Finally, we land on the `cmp` instruction which compares the hash above RAX (our target function) with the hash preserved in R10.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG37.png" alt="">
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG38.png" alt="">
+
+The compare statement, because the values are equal, causes the zero flag to be set. This skips the next jump, and performs the final jump to our target function in RAX!
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG39.png" alt="">
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG40.png" alt="">

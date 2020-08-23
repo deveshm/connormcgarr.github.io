@@ -187,7 +187,16 @@ Notice that even though it was not selected, CFG is still enabled for our applic
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG28.png" alt="">
 
-Let's crakc open IDA again to see how the `main()` function looks with the addition of XFG.
+Let's crack open IDA again to see how the `main()` function looks with the addition of XFG.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG29.png" alt="">
 
+Very interesting! Firstly, we can see that R10 takes in the value of the XFG "type-based" hash. Then, a call is performed to the XFG dispatch call `__guard_xfg_dispatch_icall_fptr`. 
+
+Before we move on, one interesting thing to note is that XFG seems to use the same hash for a function type. For instance, after compiling an application, viewing the XFG hash for a function, deleting the application and recompiling it with XFG- the XFG hash for a specific function seems to not change.
+
+Moving on, let's step through this in WinDbg to see what we are working with here, and how execution flow will go.
+
+Firstly, execution lands on the XFG dispatch function.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG30.png" alt="">

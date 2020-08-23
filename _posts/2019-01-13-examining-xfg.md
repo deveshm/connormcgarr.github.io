@@ -120,7 +120,7 @@ Let's see if/how this could be abused!
 
 Let's firstly update our program with a new function.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/XFG16aa.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFGaaa.png" alt="">
 
 This program works exactly as the program before, except the function `void protectMe2()` is added in to add another use defined function to the CFG bitmap. Note that this function will never be executed, and that is poor from a programmer's perspective. However, this function's sole purpose is to just show another protected function. This can be verified again with `dumpbin`.
 
@@ -193,6 +193,10 @@ Let's crack open IDA again to see how the `main()` function looks with the addit
 
 Very interesting! Firstly, we can see that R10 takes in the value of the XFG "type-based" hash. Then, a call is performed to the XFG dispatch call `__guard_xfg_dispatch_icall_fptr`. 
 
+Additionally, you can use the `dumpbin` tool to print out the functions protected by CFG/XFG. Functions protected by XFG are denoted with and `X`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFGCHECK.png" alt="">
+
 Before we move on, one interesting thing to note is that the XFG hash is already placed 8 bytes above an XFG protected function BEFORE any code execution actually occurs.
 
 FOr instance, `Source!cfgTest` is an XFG protected function. 8 bytes above this function is the hash seen in the previous image, but with an additional bit set.
@@ -242,3 +246,5 @@ The compare statement, because the values are equal, causes the zero flag to be 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG39.png" alt="">
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG40.png" alt="">
+
+This is how a function protected by XFG is checked! Let's now edit our code a bit and explore into XFG a bit more.

@@ -324,7 +324,7 @@ Potential Bypasses?
 
 As mentioned above, utilizing functions of identical prototypes generates identical XFG hashes. Knowing this, it seems as though it could be possible to overwrite a function with an identical function of the same prototype. This is _SIGNIFICANTLY_ stronger than CFG in terms of what functions can actually be called.
 
-Let's talk about one more additional potential bypass.
+Let's talk about one more (potential) additional potential bypass.
 
 As we know, functions protected by XFG have an XFG hash placed above them (8 bytes above to be more specific). What would happen for instance, if we performed a function pointer overwrite and called into the middle of a function, like `KERNELBASE!VirtualProtect`.
 

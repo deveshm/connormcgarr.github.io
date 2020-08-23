@@ -19,7 +19,7 @@ This is simply going to be an "organized brain dump" and isn't meant to be a "le
 The Blueprint for XFG: CFG
 ---
 
-CFG is a pretty well documented exploit mitigation, and I have done [my fair share](https://www.crowdstrike.com/blog/state-of-exploit-development-part-1/) of documenting it as well. However, for completeness sake, let's talk about how CFG works and what any potential shortcomings could be.
+CFG is a pretty well documented exploit mitigation, and I have done [my fair share](https://www.crowdstrike.com/blog/state-of-exploit-development-part-1/) of documenting it as well. However, for completeness sake, let's talk about how CFG works and its potential shortcomings.
 
 > Note that before we begin, Microsoft deserves recognition for being the first to implement a Control Flow Integrity (CFI) solution.
 

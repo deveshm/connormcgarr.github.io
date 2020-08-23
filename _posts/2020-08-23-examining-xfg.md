@@ -294,7 +294,7 @@ As we can see from the above image, we are using all integer functions now. Howe
 
 The only difference between the two functions protected by XFG is the amount of parameters that `int cfgTest()` has, and yet the hashes are _TOTALLY_ different. From a defensive perspective, it seems like even very similar functions are viewed as "very different".
 
-Additionally, we notice that the last 12 bits of the `int cfgTest()` hash have become 371 in hexadecimal instead of the previously mentioned 871 value. This means that XFG hashes seem to be unique until the last 8 bits. This puts the "unique" part of the has seemingly right at about 56 bits.
+Additionally, we notice that the last 12 bits of the `int cfgTest()` hash have become 371 in hexadecimal instead of the previously mentioned 871 value. This means that XFG hashes seem to be unique until the last 8 bits. This is indicative of the hash only being unique up until about 56 bits.
 
 As a sanity check and for completness sake, let's see what happens when two identical functions are assigned an XFG hash.
 

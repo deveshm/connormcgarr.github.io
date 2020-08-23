@@ -126,4 +126,11 @@ This program works exactly as the program before, except the function `void prot
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG17.png" alt="">
 
-Recall what was said earlier about how CFG only validates if a function resides within the CFG bitmap or not.
+Here, we can see that `Source!cfgTest1` still points to `Source!cfgTest`
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG18.png" alt="">
+
+Let's recall what was said earlier about how CFG only validates if a function resides within the CFG bitmap or not. Let's now perform a simulated arbitrary write condition in WinDbg to overwrite what `Source!cfgTest` points to, with `Source!protectMe2`.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG19.png" alt="">
+

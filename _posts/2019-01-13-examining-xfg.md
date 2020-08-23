@@ -200,3 +200,7 @@ Moving on, let's step through this in WinDbg to see what we are working with her
 Firstly, execution lands on the XFG dispatch function.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG30.png" alt="">
+
+This time, when the `__guard_xfg_dispatch_icall_fptr` function is dereferenced, a jump to the function `ntdll!LdrpDispatchUserCallTargetXFG` is performed.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG31.png" alt="">

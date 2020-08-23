@@ -122,7 +122,7 @@ Let's firstly update our program with a new function.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFGaaa.png" alt="">
 
-This program works exactly as the program before, except the function `void protectMe2()` is added in to add another use defined function to the CFG bitmap. Note that this function will never be executed, and that is poor from a programmer's perspective. However, this function's sole purpose is to just show another protected function. This can be verified again with `dumpbin`.
+This program works exactly as the program before, except the function `void protectMe2()` is added in to add another user defined function to the CFG bitmap. Note that this function will never be executed, and that is poor from a programmer's perspective. However, this function's sole purpose is to just show another protected function. This can be verified again with `dumpbin`.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG17.png" alt="">
 

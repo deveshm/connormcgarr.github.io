@@ -267,3 +267,17 @@ Additionally, static and dynamic analysis both show that even before any code ha
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG43.png" alt="">
 
 Let's take this opportunity to showcase why XFG is _significantly_ stronger than CFG.
+
+Let's simulate an arbitrary write again by overwriting what `Source!cfgTest1` points to with `Source!protectMe2`.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG44.png" alt="">
+
+After simulating the arbitrary write, we pick up execution in `ntdll!LdrpDispatchUserCallTargetXFG` again. Stepping through a few instructions, we once again land on the `cmp` instruction which checks to see if the preserved XFG hash matches the current XFG hash.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG45.png" alt="">
+
+As we can see below, the hashes do not match!
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG46.png" alt="">
+
+Since the hashes do not match, this will cause XFG to determine a function pointer has been overwritten with something it should not have been overwritten with- and causes a program crash.

@@ -288,7 +288,7 @@ To achieve this, our code has been edited to the following.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG47a.png" alt="">
 
-As we can see from the above image, we are using all integer functions now. However, the `int cfgTest()` function has two more paramegers than the `int protectMe2()` function. Let's compile and perform some static analysis in IDA.
+As we can see from the above image, we are using all integer functions now. However, the `int cfgTest()` function has two more parameters than the `int protectMe2()` function. Let's compile and perform some static analysis in IDA.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG48a.png" alt="">
 

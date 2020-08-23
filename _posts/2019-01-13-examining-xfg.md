@@ -260,7 +260,7 @@ We have changed the `protectMe2()` function to a function that returns an intege
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG42.png" alt="">
 
-Very interesting! As we can see from the above image, there are two different hashes now. The hash for our original function has remained the same. However, the hash for the `int protectMe2()` function is very different, but the last part of each hash is 870 in our case. That is interesting to note, as an XFG hash seems to be 52 bits.
+Very interesting! As we can see from the above image, there are two different hashes now. The hash for our original function has remained the same. However, the hash for the `int protectMe2()` function is very different, but the last part of each hash is 870 in our case. This an interesting and may be worth noting.
 
 Additionally, static and dynamic analysis both show that even before any code has executed, the actual hash that is placed 8 bytes above each function has an additional bit set, just as we saw last time.
 
@@ -293,3 +293,18 @@ As we can see from the above image, we are using all integer functions now. Howe
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG48a.png" alt="">
 
 The only difference between the two functions protected by XFG is the amount of parameters that `int cfgTest()` has, and yet the hashes are _TOTALLY_ different. From a defensive perspective, it seems like even very similar functions are viewed as "very different".
+
+As a sanity check and for completness sake, let's see what happens when two identical functions are assigned an XFG hash.
+
+OMG Samesies!
+---
+
+Here is an edited version of our code, with two idential functions.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG49.png" alt="">
+
+Disassembling the functions in IDA, we can see that the hashes this time are identical. Additionally, we notice that the last 12 bits of the hash have become 371 in hexadecimal instead of the previously mentioned 871 value. This means that XFG hashes seem to be unique until the last 8 bits. This puts the "unique" part of the has seemingly right at about 56 bits.
+
+Obviously, since the hashing process for an XFG hash takes a function prototype and hashes it, the two hashes are going to be the same. I would not call this a flaw at all, because it is obvious Microsoft knew this going into this. However, I feel this is a nice win for Microsoft in terms of their overall CFI strategy because as David pointed out, this was very little overhead to the already existing CFG infrastructure. 
+
+However, from an adversarial standpoint- it must be said. XFG functions _can_ be overwritten, so long as the function is basically an identical prototype of the original function.

@@ -110,11 +110,20 @@ CFG: Potential Shortcomings
 
 As mentioned earlier, CFG checks functions to make sure they are part of the "CFG bitmap" (a.k.a protected by CFG). This means a few things from an adversarial perspective. If we were to use `VirtualAlloc()` to allocate some virtual memory, and overwrite a function pointer that is protected by CFG with the returned address of the allocation- CFG would make the program crash.
 
-Why? `VirtualAlloc()` (for instance) would return a virtual address of something like `0xdb0000`. When the application in question was compiled with CFG, obviously this memory address wasn't a part of the application. Therefore, this address wouldn't be "protected by CFG". However, this is not very practical. Let's think about what an adversary tries to accompish with ROP.
+Why? `VirtualAlloc()` (for instance) would return a virtual address of something like `0xdb0000`. When the application in question was compiled with CFG, obviously this memory address wasn't a part of the application. Therefore, this address wouldn't be "protected by CFG" and the program would crash. However, this is not very practical. Let's think about what an adversary tries to accompish with ROP.
 
-Let's say that there is a vulnerability is `KERNELBASE.dll`. Let's also say that `KERNELBASE.dll` is compiled with CFG. This means that all of the functions within `KERNELBASE.dll` are a part of the CFG bitmap. Because CFG only validates if something is in the CFG bitmap (it doesn't technically validate if a function pointer was overwritten), it would be possible to overwrite a function pointer _WITH ANY_ other function protected by the current processes's CFG bitmap.
+Adversaries want to return into a Windows API function like `VirtualProtect()` in order to dynamically change permissions of memory. What is interesting about CFG is that in addition to the program's functions, all exported Windows functions are apart of the processes's CFG bitmap. For instance, the application we are looking at is called `Source.exe` Dumping the loaded modules for the application, we can see that `KERNELBASE.dll`, `kernel32.dll`, and `ntdll.dll` (which are the usual suspects) are loaded for this application.
 
-Let's look at a practical example of this.
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG15.png" alt="">
 
-Firstly, let's update our program.
+Let's see if/how this could be abused!
 
+Let's firstly update our program with a new function.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG16aa.png" alt="">
+
+This program works exactly as the program before, except the function `void protectMe2()` is added in to add another use defined function to the CFG bitmap. Note that this function will never be executed, and that is poor from a programmer's perspective. However, this function's sole purpose is to just show another protected function. This can be verified again with `dumpbin`.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG17.png" alt="">
+
+Recall what was said earlier about how CFG only validates if a function resides within the CFG bitmap or not.

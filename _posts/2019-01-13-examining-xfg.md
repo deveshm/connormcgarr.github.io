@@ -193,7 +193,7 @@ Let's crack open IDA again to see how the `main()` function looks with the addit
 
 Very interesting! Firstly, we can see that R10 takes in the value of the XFG "type-based" hash. Then, a call is performed to the XFG dispatch call `__guard_xfg_dispatch_icall_fptr`. 
 
-Before we move on, one interesting thing to note is that the XFG hash is already placed 8 bytes above a function BEFORE any code execution actually occurs.
+Before we move on, one interesting thing to note is that the XFG hash is already placed 8 bytes above an XFG protected function BEFORE any code execution actually occurs.
 
 FOr instance, `Source!cfgTest` is an XFG protected function. 8 bytes above this function is the hash seen in the previous image, but with an additional bit set.
 

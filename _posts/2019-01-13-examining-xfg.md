@@ -260,7 +260,7 @@ We have changed the `protectMe2()` function to a function that returns an intege
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG42.png" alt="">
 
-Very interesting! As we can see from the above image, there are two different hashes now. The hash for our original function has remained the same. However, the hash for the `int protectMe2()` function is very different. However, the last part of each hash is 870 in our case- that is interesting to note.
+Very interesting! As we can see from the above image, there are two different hashes now. The hash for our original function has remained the same. However, the hash for the `int protectMe2()` function is very different. However, the last part of each hash is 870 in our case- that is interesting to note, as the hash is 52 bits in our case.
 
 Additionally, static and dynamic analysis both show that even before any code has executed, the actual has that is placed 8 bytes above each function has an additional bit set, just as we saw last time.
 

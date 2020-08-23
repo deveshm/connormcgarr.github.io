@@ -147,5 +147,11 @@ Looking at the RAX register, which is used to hold the address of the function C
 Execution then hits `ntdll!LdrpDispatchUserCallTarget`. After walking the function, which validates if the in scope function resides within the CFG bitmap for the process, execution redirects to `Source!protectMe2`!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG22.png" alt="">
+
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG23.png" alt="">
+
+This is very interesting from an adversarial perspective, as we were successfully able to overwrite a function pointer and CFG didn't terminate our process! The only caveat being that the function is a part of the current processes's CFG bitmap.
+
+What is even more interesting, is that function pointers protected by CFG can be overwritten by any loaded module at runtime! Let's rework this example, but try to call a Windows API function like `KERNELBASE!WriteProcessMemory`.
+
 

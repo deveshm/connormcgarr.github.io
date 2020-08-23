@@ -305,6 +305,8 @@ Here is an edited version of our code, with two idential functions.
 
 Disassembling the functions in IDA, we can see that the hashes this time are identical. Additionally, we notice that the last 12 bits of the hash have become 371 in hexadecimal instead of the previously mentioned 871 value. This means that XFG hashes seem to be unique until the last 8 bits. This puts the "unique" part of the has seemingly right at about 56 bits.
 
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG50.png" alt="">
+
 Obviously, since the hashing process for an XFG hash takes a function prototype and hashes it, the two hashes are going to be the same. I would not call this a flaw at all, because it is obvious Microsoft knew this going into this. However, I feel this is a nice win for Microsoft in terms of their overall CFI strategy because as David pointed out, this was very little overhead to the already existing CFG infrastructure. 
 
 However, from an adversarial standpoint- it must be said. XFG functions _can_ be overwritten, so long as the function is basically an identical prototype of the original function.

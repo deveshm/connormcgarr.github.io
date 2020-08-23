@@ -112,7 +112,7 @@ As mentioned earlier, CFG checks functions to make sure they are part of the "CF
 
 Why? `VirtualAlloc()` (for instance) would return a virtual address of something like `0xdb0000`. When the application in question was compiled with CFG, obviously this memory address wasn't a part of the application. Therefore, this address wouldn't be "protected by CFG" and the program would crash. However, this is not very practical. Let's think about what an adversary tries to accompish with ROP.
 
-Adversaries want to return into a Windows API function like `VirtualProtect()` in order to dynamically change permissions of memory. What is interesting about CFG is that in addition to the program's functions, all exported Windows functions are apart of the processes's CFG bitmap. For instance, the application we are looking at is called `Source.exe` Dumping the loaded modules for the application, we can see that `KERNELBASE.dll`, `kernel32.dll`, and `ntdll.dll` (which are the usual suspects) are loaded for this application.
+Adversaries want to return into a Windows API function like `VirtualProtect()` in order to dynamically change permissions of memory. What is interesting about CFG is that in addition to the program's functions, all exported Windows functions that make up the "module" import list for a program can be called. For instance, the application we are looking at is called `Source.exe` Dumping the loaded modules for the application, we can see that `KERNELBASE.dll`, `kernel32.dll`, and `ntdll.dll` (which are the usual suspects) are loaded for this application.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG15.png" alt="">
 
@@ -152,6 +152,16 @@ Execution then hits `ntdll!LdrpDispatchUserCallTarget`. After walking the functi
 
 This is very interesting from an adversarial perspective, as we were successfully able to overwrite a function pointer and CFG didn't terminate our process! The only caveat being that the function is a part of the current processes's CFG bitmap.
 
-What is even more interesting, is that function pointers protected by CFG can be overwritten by any loaded module at runtime! Let's rework this example, but try to call a Windows API function like `KERNELBASE!WriteProcessMemory`.
+What is even more interesting, is that function pointers protected by CFG can be overwritten by any exported function at runtime! Let's rework this example, but try to call a Windows API function like `KERNELBASE!WriteProcessMemory`.
 
+First, we simulate the arbitrary write by overwriting `Source!cfgTest1` with `KERNELBASE!WriteProcessMemory`.
 
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG24.png" alt="">
+
+Program execution passes through `Source!__guard_dispatch_icall_fptr` and `ntdll!LdrpDispatchUserCallTarget` and we can clearly see execution returns to `KERNELBASE!WriteProcessMemory`.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG25.png" alt="">
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG26.png" alt="">
+
+This shows that even with CFG enabled, it is still possible to call functions that have overwritten other functions. This is not good, as calls can still be made with malign intent. Additionally, calling functions of different types out of context may result in a type confusion or other programmatic behavioral problems.

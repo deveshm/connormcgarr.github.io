@@ -186,3 +186,8 @@ Using the `/guard:xfg` flag in compilation and linking, we can enable XFG for ou
 Notice that even though it was not selected, CFG is still enabled for our application.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG28.png" alt="">
+
+Let's crakc open IDA again to see how the `main()` function looks with the addition of XFG.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG29.png" alt="">
+

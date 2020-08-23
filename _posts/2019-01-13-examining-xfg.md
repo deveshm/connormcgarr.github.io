@@ -134,3 +134,14 @@ Let's recall what was said earlier about how CFG only validates if a function re
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG19.png" alt="">
 
+The above command uses `x` to show the address of the `Source!protectMe2` function and then uses `dps` to show that `Source!cfgTest1` still points to `Source!cfgTest1`. Then, using `ep`, we overwrite the function. `dps` once again verifies that the function overwrite has occured.
+
+Let's now step through the program to see what happens. Program execution firstly hits the CFG dispatch function.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG20.png" alt="">
+
+Looking at the RAX register, which is used to hold the address of the function CFG will check, we see it has been overwritten with `Source!protectMe2` instead of `Source!cfgTest`.
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/XFG21.png" alt="">
+
+

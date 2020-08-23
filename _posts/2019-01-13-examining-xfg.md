@@ -219,7 +219,7 @@ Next, a `test al, 0xf` operation occurs, which performs a bitwise AND between th
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG33.png" alt="">
 
-As we can see, this sets the zero flag in our case. Additionally, now we have reached a possible jump within `ntdll!LdrpDispatchUserCallTargetXFG`
+As we can see from the image above, this sets the zero flag in our case. Additionally, now we have reached a possible jump within `ntdll!LdrpDispatchUserCallTargetXFG`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG34.png" alt="">
 

@@ -231,7 +231,7 @@ Stepping through `test ax, 0xFFF`, which will perform a bitwise AND with the low
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG36.png" alt="">
 
-Finally, we land on the `cmp` instruction which compares the hash above RAX (our target function) with the hash preserved in R10.
+Finally, we land on the `cmp` instruction which compares the hash 8 bytes above RAX (our target function) with the hash preserved in R10.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG37.png" alt="">
 

@@ -177,7 +177,7 @@ My [last CrowdStrike blog post](https://www.crowdstrike.com/blog/state-of-exploi
 
 Let's take a look a bit more at this. Firstly, let's compile our program with XFG!
 
-> Note that you will need Visual Studio 2019 Preview + at least Windows 10 21H1 in order to use XFG. Additionally, XFG is not found in the UI for compilation options.
+> Note that you will need Visual Studio 2019 Preview + at least Windows 10 21H1 in order to use XFG. Additionally, XFG is not found in the GUI compilation options.
 
 Using the `/guard:xfg` flag in compilation and linking, we can enable XFG for our application.
 

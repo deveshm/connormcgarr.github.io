@@ -710,6 +710,6 @@ Obviously, this technique isn't without its flaws. There are still IOCs for this
 
 Additionally, one thing to note is that since this technique suspends a thread and then resumes it, you may have to wait a few moments to even a few minutes, in order for the thread to get around to execution. Interacting with the process directly will force execution, but targeting Windows processes that perform execution often is a good target.
 
-You can find the full project [here]().
+You can find the full project [here](https://github.com/connormcgarr/cThreadHijack).
 
 I had a lot of fun implementing this into a BOF and I am really glad I have a reason to write more C code! Like always: peace, love, and positivity :-).

@@ -369,7 +369,7 @@ Although the above code practically represents what was said about, you can see 
 
 At this point, the `NtContinue` routine would have called the `CreateThread` routine. The `CreateThread` routine would have returned execution back to the `NtContinue` routine, and the next instructions in the `NtContinue` routine would execute.
 
-The next few instructions are a bit of a "hacky" method to pass the first parameter, a pointer to our `CONTEXT` record, to the `NtContinue` function. As we know, we are required to place the first value, for our purposes, into the RCX register - per the `__fastcall` calling convention. This means we need to calculate the address of the `CONTEXT` record somehow. To do this, we actually use another near call instruction in order to call the immediate byte after the call instruction.
+The next few instructions are a bit of a "hacky" method to pass the first parameter, a pointer to our `CONTEXT` record, to the `NtContinue` function. We will use a `call/pop` routine, which is a very documented method and can be read about [here](https://www.boozallen.com/c/insight/blog/finding-the-instruction-pointer.html) and [here](https://marcosvalle.github.io/osce/2018/05/06/JMP-CALL-POP-technique.html). As we know, we are required to place the first value, for our purposes, into the RCX register - per the `__fastcall` calling convention. This means we need to calculate the address of the `CONTEXT` record somehow. To do this, we actually use another near call instruction in order to call the immediate byte after the call instruction.
 
 ```c
 // Near call instruction to call the address directly after, which is used to pop the pushed return address onto the stack with a RVA from the same page (call pushes return address onto the stack)

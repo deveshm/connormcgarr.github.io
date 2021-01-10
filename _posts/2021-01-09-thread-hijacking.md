@@ -10,25 +10,25 @@ As people I have interacted with will attest, my favorite subject in the entire 
 
 However, before beginning I would like to delineate this post will be focused on the technique of remote process injection, thread hijacking, and thread restoration - not so much on Beacon Object Files themselves. Beacon Object Files, for our purposes, are a means to an end, as this technique can be deployed in many other fashions. As was aforementioned, Cobalt Strike is widely adopted and I think it is a great tool and I am a big proponent of it. I still believe at the end of the day, however, it is more important to understand the overarching concept surrounding a TTP (Tactic, Technique, and Procedure), versus learning how to just arbitrarily run a tool, which in turn will create a bottleneck in your red teaming methodology by relying on a tool itself. If Cobalt Strike went away tomorrow, that shouldn't render this TTP, or any other TTPs, useless. However, almost contradictorily, this first portion of this post will briefly outline what Beacon Object Files are, a quick recap on remote process injection, and a bit on writing code that adheres to the needs of Beacon Object Files.
 
-Lastly, the final project link will be at the end of this post and can be found on my GitHub.
+Lastly, the final project can be found [here](https://github.com/connormcgarr/cThreadHijack).
 
 Beacon Object Files - _You have two minutes, go._
 ---
 Back in June, I saw a very interesting [blog post](https://blog.cobaltstrike.com/2020/06/25/cobalt-strike-4-1-the-mark-of-injection/) from Cobalt Strike that outlined a new Beacon capability, known as Beacon Object Files. [Beacon Object Files](https://www.cobaltstrike.com/help-beacon-object-files), stylized as BOFs, are essentially compiled C programs that are executed as position-independent code within Beacon. You bring the object file and Cobalt Strike supplies the linking. Raphael Mudge, the creator of Cobalt Strike, has a [YouTube video](https://youtu.be/gfYswA_Ronw) that goes over the intrinsics, capabilities, and limitations of BOFs. I _highly_ recommend you check out this video. In addition, I encourage you to check out TrustedSec's [BOF blog and project](https://www.trustedsec.com/blog/a-developers-introduction-to-beacon-object-files/) to supplement the available Cobalt Strike documentation for BOF development.
 
 One thing to note before moving on is that BOFs are intended to be "lightweight" tools. Lightweight may be subjective, but as Raphael points out in his video and blog, the main benefit of BOFs are twofold: 
-1. BOFs do not spawn a temporary "sacrificial" process to perform post-exploitation work - they're directly executed as position-independent code within the current Beacon process, increasing overall OPSEC (operational security)
+1. BOFs do not spawn a temporary "sacrificial" process to perform post-exploitation work - they're directly executed as position-independent code within the current Beacon process, increasing overall OPSEC (operational security).
 2. BOFs are really meant to interact with the Windows API and the internal Beacon API, as BOFs expose a set of functions operators can use when developing. This means BOFs are smaller in size and easily allow you to invoke Window APIs and interact with the internal Beacon API.
 
 Additionally, there are a few drawbacks to BOFs:
-1. Cobalt Strike is the linker for BOFs - meaning libc style functions like `strlen` will not resolve. To compensate for this, however, you can decorate function prototypes with the MSVCRT (Microsoft C Run-time) library and grab such functions from there - declaring and using such functions with BOFs will be outlined in the latter portions of this post. Additionally, from Raphael's [CVE-2020-0796 BOF](https://github.com/rsmudge/CVE-2020-0796-BOF), there are ways to define your own C-style functions.
+1. Cobalt Strike is the linker for BOFs - meaning libc style functions like `strlen` will not resolve. To compensate for this, however, you can use BOF compliant decorators in your function prototypes with the MSVCRT (Microsoft C Run-time) library and grab such functions from there. Declaring and using such functions with BOFs will be outlined in the latter portions of this post. Additionally, from Raphael's [CVE-2020-0796 BOF](https://github.com/rsmudge/CVE-2020-0796-BOF), there are ways to define your own C-style functions.
 2. BOFs are executed within the current Beacon process - meaning that if your BOF encounters some kind of internal error and fails, your Beacon process will crash as well. This means BOFs should be carefully vetted and tested across multiple systems, networks, and environments, while also implementing host-based checks for version information, using properly documented data types and structures outlined in a function's prototype, and cleaning up any opened handles, allocated memory, etc.
 
-Let's get into a bit of background on remote process injection and thread hijacking, as well as outline our BOF's execution flow.
+Now that that's out of the way, let's get into a bit of background on remote process injection and thread hijacking, as well as outline our BOF's execution flow.
 
 Remote Process Injection
 ---
-Remote process injection, for the unfamiliar, is a technique in which an operator can inject code into _another_ process on a machine, under certain circumstances. This is most commonly done with an chain of Windows APIs being called in order to allocate some memory in the other process, write user-defined memory (usually a shellcode of some sort) to that allocation, and kicking off execution by create a thread within the remote process. The APIs, `VirtualAllocEx`, `WriteProcessMemory`, and `CreateRemoteThread` are often popular choices, respectively.
+Remote process injection, for the unfamiliar, is a technique in which an operator can inject code into _another_ process on a machine, under certain circumstances. This is most commonly done with a chain of Windows APIs being called in order to allocate some memory in the other process, write user-defined memory (usually a shellcode of some sort) to that allocation, and kicking off execution by create a thread within the remote process. The APIs, `VirtualAllocEx`, `WriteProcessMemory`, and `CreateRemoteThread` are often popular choices, respectively.
 
 Why is remote process injection important? Take a look at the image below, which is a listing of processes performed inside of a Cobalt Strike Beacon implant.
 
@@ -53,18 +53,18 @@ Thread Hijacking and Thread Restoration
 As mentioned earlier, the process for a typical remote injection is:
 1. Allocate a memory region within the target process using `VirtualAllocEx`. A handle to the target process must already be existing with an access right of at least `PROCESS_VM_OPERATION` in order to leverage this API successfully. This handle can be obtained using the Windows API function `OpenProcess`.
 2. Write your code to the allocated region using `WriteProcessMemory`. A handle to the target process must already be existing with an access right of at least `PROCESS_WRITE` and the previously mentioned `PROCESS_VM_OPERATION` - meaning a handle to the remote process must have both of these access rights at minimum to perform remote injection.
-3. Create a remote thread, within the remote process, to execute the shellcode using `CreateRemoteThread`.
+3. Create a remote thread, within the remote process, to execute the shellcode, using `CreateRemoteThread`.
 
 Our thread hijacking technique will utilize the first two members of the previous list, but instead of `CreateRemoteThread`, our workflow will consist of the following:
 1. Open a handle to the remote process using the aforementioned access rights required by `VirtualAllocEx` and `WriteProcessMemory`.
 2. Loop through the threads on the machine utilizing the Windows API `CreateToolhelp32Snapshot`. This loop will contain logic to `break` upon identifying the first thread within the target process.
 3. Upon breaking the loop, open a handle to the target thread using the Windows API function `OpenThread`. 
 4. Call `SuspendThread`, passing the former thread handle mentioned as the argument. `SuspendThread` requires the handle has an access right of `THREAD_SUSPEND_RESUME`.
-5. Call `GetThreadContext`, using the thread handle. This function requires that handles have a  `THREAD_GET_CONTEXT` access right. This function will dump the current state of the CPU registers, processor flags, and other CPU information into a `CONTEXT` record. This is because each thread has its own stack, CPU registers, etc. This information will be later used to execute our shellcode and to restore the thread once execution has completed.
+5. Call `GetThreadContext`, using the thread handle. This function requires that handles have a  `THREAD_GET_CONTEXT` access right. This function will dump the current state of the target thread's CPU registers, processor flags, and other CPU information into a `CONTEXT` record. This is because each thread has its own stack, CPU registers, etc. This information will be later used to execute our shellcode and to restore the thread once execution has completed.
 6. Inject the shellcode into the desired process using `VirtualAllocEx` and `WriteProcessMemory`. The shellcode that will be used in this blog will be the default Cobalt Strike payload, which is a reflective DLL. This payload will be dynamically generated with a user-specified listener that exists already, using a Cobalt Strike Aggressor Script. Creation of the Aggressor Script will follow in the latter portions of this blog post. The Beacon implant won't be executed quite yet, it will just be sitting within the target remote process, for the time being.
-7. Since Cobalt Strike's default stageless payload is a [reflective DLL](https://blog.cobaltstrike.com/2016/06/15/what-is-a-stageless-payload-artifact/), it works a bit differently than traditional shellcode. Because of its a reflective DLL, when the `DllMain` function is called to kick off Beacon, the shellcode never performs a "return", because Beacon calls either `ExitThread` or `ExitProcess` depending on what is specified in the payload by the operator. Because of this, it would not be possible to restore the hijacked thread, as the thread will run the `DllMain` function until the operator exits the Beacon, since the stageless raw Beacon artifact does not perform a "return". Due to this, we must create a shellcode that our Beacon implant will be wrapped in, with a custom `CreateThread` routine that creates a _local_ thread within the remote process for the Beacon implant to run. Essentially, this is one of three components our "new" full payload will "carry", so when execution reaches the remote process, the call to `CreaeteThread`, which creates a local thread, will allocate the thread in the remote process for Beacon to run in. This means that the hijacked thread will never actually execute the Beacon implant, it will actually execute a small shellcode, made up of three components, that places the Beacon implant into its own local thread, along with a two other routines that will be described here shortly. Up until this point, no code has been executed and everything mentioned is just a synopsis of each component's purpose.
+7. Since Cobalt Strike's default stageless payload is a [reflective DLL](https://blog.cobaltstrike.com/2016/06/15/what-is-a-stageless-payload-artifact/), it works a bit differently than traditional shellcode. Because it is a reflective DLL, when the `DllMain` function is called to kick off Beacon, the shellcode never performs a "return", because Beacon calls either `ExitThread` or `ExitProcess` to leave `DllMain`, depending on what is specified in the payload by the operator. Because of this, it would not be possible to restore the hijacked thread, as the thread will run the `DllMain` function until the operator exits the Beacon, since the stageless raw Beacon artifact does not perform a "return". Due to this, we must create a shellcode that our Beacon implant will be wrapped in, with a custom `CreateThread` routine that creates a _local_ thread within the remote process for the Beacon implant to run. Essentially, this is one of three components our "new" full payload will "carry", so when execution reaches the remote process, the call to `CreaeteThread`, which creates a local thread, will allocate the thread in the remote process for Beacon to run in. This means that the hijacked thread will never actually execute the Beacon implant, it will actually execute a small shellcode, made up of three components, that places the Beacon implant into its own local thread, along with a two other routines that will be described here shortly. Up until this point, no code has been executed and everything mentioned is just a synopsis of each component's purpose.
 8. The custom `CreateThread` routine is actually executed by being called from _another_ routine that will be wrapped into our final payload, which is a routine for a call to `NtContinue`. This is the second component of our custom shellcode. After the `CreateThread` routine is finished executing, it will perform a return back into the `NtContinue` routine. After the hijacked thread executes the `CreateThread` routine, the thread needs to be restored with the original CPU registers, flags, etc. it had before the thread hijack occurred. `NtContinue` will be talked about in the latter portions of this post, but for now just know that `NtContinue`, at a high level, is a function in `ntdll.dll` that accepts a pointer to a `CONTEXT` record and sets the calling thread to that context. Again, no code has been executed so far. The only thing that has changed is our large "final payload" has added another component to it, `NtContinue`.
-9. The `CreateThread` stub is first prepended with a stack alignment stub, which performs bitwise AND with the stack pointer, to ensure a 16-byte alignment. Some function calls fail if they are not 16-byte aligned, and this ensures when the shellcode performs a call to the `CreateThread` stub, it is first 16-byte aligned. `malloc` is then invoked to create one giant buffer that all components necessary are copied to.
+9. The `CreateThread` routine is first prepended with a stack alignment routine, which performs bitwise AND with the stack pointer, to ensure a 16-byte alignment. Some function calls fail if they are not 16-byte aligned, and this ensures when the shellcode performs a call to the `CreateThread` routine, it is first 16-byte aligned. `malloc` is then invoked to create one giant buffer that all of these "moving parts" are added to.
 10. Now that there is one contiguous buffer for the final payload, using `VirtualAllocEx` and `WriteProcessMemory`, again, the final payload, consisting of the three routines, is injected into the remote process.
 11. Lastly, the previously captured `CONTEXT` record is updated to point the `DWORD.Rip` member, which represents the value of the 64-bit instruction pointer, to the address of our full payload. 
 12. `SetThreadContext` is then called, which forces the target thread to be updated to point to the final payload, and `ResumeThread` is used to queue our shellcode execution, by resuming the hijacked thread.
@@ -83,7 +83,7 @@ If you would like to call a Windows API function, BOFs require a `__declspec(dll
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon5.png" alt="">
 
-Pulling the definition of `WINBASEAPI` reveals the `__declspec(dllimport)` keyword will be present when this BOF is compiled.
+This reveals the `__declspec(dllimport)` keyword will be present when this BOF is compiled.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon6.png" alt="">
 
@@ -158,11 +158,11 @@ The function `BeaconDataParse` is first used, with a special `datap` structure, 
 
 Open, Enumerate, Suspend, Get, Inject, and Get Out!
 ---
-The first step in thread hijacking is to first open a handle to the target process. As mentioned before calls that utilize this handle, `VirtualAllocEx` and `WriteProcessMemory`, must have a total access right of `PROCESS_VM_OPERATION` and `PROCESS_VM_WRITE`. This can be correlated to the following code.
+The first step in thread hijacking is to first open a handle to the target process. As mentioned before, calls that utilize this handle, `VirtualAllocEx` and `WriteProcessMemory`, must have a total access right of `PROCESS_VM_OPERATION` and `PROCESS_VM_WRITE`. This can be correlated to the following code.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon8.png" alt="">
 
-This function accepts the user-supplied argument for a PID and returns a handle to it. After the process handle is opened, the BOF starts enumerating threads using the API `CreateToolhelp32Snapshot`. This routine is sent through a loop and "breaks" upon the first thread of the target PID being reached. When this happens, a call to `OpenThread` with the rights `THREAD_SUSPEND_RESUME`, `THREAD_SET_CONTEXT`, and `THREAD_GET_CONTEXT`. This allows the program to suspend the thread, obtain the thread's context, and set the thread's context.
+This function accepts the user-supplied argument for a PID and returns a handle to it. After the process handle is opened, the BOF starts enumerating threads using the API `CreateToolhelp32Snapshot`. This routine is sent through a loop and "breaks" upon the first thread of the target PID being reached. When this happens, a call to `OpenThread` with the rights `THREAD_SUSPEND_RESUME`, `THREAD_SET_CONTEXT`, and `THREAD_GET_CONTEXT` occurs. This allows the program to suspend the thread, obtain the thread's context, and set the thread's context.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon9.png" alt="">
 
@@ -174,7 +174,7 @@ Once the thread has been suspended, the Beacon implant is remotely injected into
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon11.png" alt="">
 
-Now that the remote thread is suspended and our Beacon implant shellcode is sitting within the remote process, it is time to implement a `BYTE` array that places the Beacon implant in a thread and executes it.
+Now that the remote thread is suspended and our Beacon implant shellcode is sitting within the remote process address space, it is time to implement a `BYTE` array that places the Beacon implant in a thread and executes it.
 
 Beacon - Stay Put!
 ---
@@ -232,7 +232,7 @@ The next step, is really the only parameter we need to specify a specific value 
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon11.png" alt="">
 
-The above code returns the virtual memory address of our allocation into the variable `placeRemotely`. As can be seen, this return value is of the data type `LPVOID`, while the `lpStartParameter` argument takes a data type of `LPTHREAD_START_ROUTINE`, which is pretty similar with `LPVOID`. However, for continuity sake, we sill first type cast this allocation into an `LPTHREAD_START_ROUTINE` function pointer.
+The above code returns the virtual memory address of our allocation into the variable `placeRemotely`. As can be seen, this return value is of the data type `LPVOID`, while the `lpStartParameter` argument takes a data type of `LPTHREAD_START_ROUTINE`, which is pretty similar with `LPVOID`. However, for continuity sake, we will first type cast this allocation into an `LPTHREAD_START_ROUTINE` function pointer.
 
 ```c
 // Casting shellcode address to LPTHREAD_START_ROUTINE function pointer
@@ -252,7 +252,7 @@ mycopy(createThread + z, &threadCast, sizeof(threadCast));
 z += sizeof(threadCast);
 ```
 
-Notice how the end of this small shellcode blob contains an update for the array index counter `z`, to ensure as the array is written to at the correct index. We have the luxury of using a `mov r8, LPTHREAD_START_ROUTINE`, as our shellcode pointer has already been mapped into the remote process. This will allow the `CreateThread` routine to find this function pointer, in memory, as it is available within the remote process address space. We must remember that each process on Windows has its own private virtual address space, meaning memory from in one user mode process isn't generally visible to another user mode process. As we will see with the `NtContinue` stub coming up, we will actually have to embed the preserved `CONTEXT` record of the hijacked thread into the payload itself, as the structure is located in the current process, while the code will be executing within the desired remote process.
+Notice how the end of this small shellcode blob contains an update for the array index counter `z`, to ensure as the array is written to at the correct index. We have the luxury of using a `mov r8, LPTHREAD_START_ROUTINE`, as our shellcode pointer has already been mapped into the remote process. This will allow the `CreateThread` routine to find this function pointer, in memory, as it is available within the remote process address space. We must remember that each process on Windows has its own private virtual address space, meaning memory in one user mode process isn't visible to another user mode process. As we will see with the `NtContinue` stub coming up, we will actually have to embed the preserved `CONTEXT` record of the hijacked thread into the payload itself, as the structure is located in the current process, while the code will be executing within the desired remote process.
 
 Now that the `lpStartAddress` parameter has been completed, `lpParameter` must be set to `NULL`. Again, this can be done by utilizing bitwise XOR.
 
@@ -281,7 +281,9 @@ createThread[z++] = 0x24;
 createThread[z++] = 0x28;
 ```
 
-The brackets surrounding each `[rsp+OFFSET]` operand indicate we would like to overwrite what that value is pointing to. The next goal is to resolve the address of `CreateThread`. Even though we will be resolving this address within the BOF, meaning it will be resolved within the current process, not the desired remote process, the address of `CreateThread` will be the same across processes, although each user mode process is mapped its own view of `kernel32.dll`. To resolve this address, we will use the following routine, with BOF denotations in our code.
+A quick note - notice that the brackets surrounding each `[rsp+OFFSET]` operand indicate we would like to overwrite what that value is pointing to. 
+
+The next goal is to resolve the address of `CreateThread`. Even though we will be resolving this address within the BOF, meaning it will be resolved within the current process, not the desired remote process, the address of `CreateThread` will be the same across processes, although each user mode process is mapped its own view of `kernel32.dll`. To resolve this address, we will use the following routine, with BOF denotations in our code.
 
 ```c
 // Resolve the address of CreateThread
@@ -294,7 +296,7 @@ if (createthreadAddress == NULL)
 }
 ```
 
-The `unsigned long long` variable `createthreadAddress` will be filled with the address of `CreateThread`. `unsigned long long` is a 64-bit (at least) value, which is the size of a memory address on a 64-bit address. Although `KERNEL32$GetProcAddress` has a prototype with a return value of `FARPROC`, we need the address to actually be of the type `unsigned long long`, `DWORD64`, or similar, to allow us to properly copy this address into the routine with `mycopy`. The next goal is to move the address of `CreateThread` into RAX. After this, we will perform a `call rax` instruction, which will kick off the routine. This can be seen below.
+The `unsigned long long` variable `createthreadAddress` will be filled with the address of `CreateThread`. `unsigned long long` is a 64-bit value, which is the size of a memory address on a 64-bit address. Although `KERNEL32$GetProcAddress` has a prototype with a return value of `FARPROC`, we need the address to actually be of the type `unsigned long long`, `DWORD64`, or similar, to allow us to properly copy this address into the routine with `mycopy`. The next goal is to move the address of `CreateThread` into RAX. After this, we will perform a `call rax` instruction, which will kick off the routine. This can be seen below.
 
 ```c
 // mov rax, CreateThread
@@ -310,9 +312,9 @@ createThread[z++] = 0xd0;
 
 Additionally, we want to add a `ret` opcode. The way our full payload will be setup is as follows: 
 
-1. A call to the `CreateThread` routine will be made firstly. When a `call` instruction is executed, it pushes a return address onto the stack. This is the address that `ret` will jump to in order to continue execution of the payload. When the `CreateThread` routine is called, it will push a return address onto the stack. This return address will actually be the address of the `NtContinue` routine.
-2. We want to end our `CreateThread` routine with a `ret` instruction. This `ret` will force execution back to the `NtContinue` routine. This will all be outlined when executed is examined inside of WinDbg.
-3. The call to the `CreateThread` routine is actually going to be a part of the `NtContinue` routine. The first instruction in the `NtContinue` routine will be a call to `CreateThread`, which will then perform a `ret` back to the `NtContinue` routine, where thread execution will be restored. Here is a quick visual.
+1. A call to the stack alignment/`CreateThread` routine will be made firstly (the stack alignment routine will be hit on in a latter portion of this blog). When a `call` instruction is executed, it pushes a return address onto the stack. This is the address that `ret` will jump to in order to continue execution of the payload. When the stack alignment/`CreateThread` routine is called, it will push a return address onto the stack. This return address will actually be the address of the `NtContinue` routine.
+2. We want to end our stack alignment/`CreateThread` routine with a `ret` instruction. This `ret` will force execution back to the `NtContinue` routine. This will all be outlined when executed is examined inside of WinDbg.
+3. The call to the stack alignment/`CreateThread` routine is actually going to be a part of the `NtContinue` routine. The first instruction in the `NtContinue` routine will be a call to the stack alignment/`CreateThread` shellcode, which will then perform a `ret` back to the `NtContinue` routine, where thread execution will be restored. Here is a quick visual.
 
 `PAYLOAD = NtContinue shellcode calls stack alignment/CreateThread shellcode -> stack alignment/CreateThread shellcode executes, placing Beacon in its own local thread. This shellcode performs a return back to the NtContinue shellcode -> NtContinue shellcode finishes executing, which restores the thread`
 
@@ -323,7 +325,7 @@ In accordance with out plan, let's end the `CreateThread` routine with a `0xc3` 
 createThread[z++] = 0xc3;
 ```
 
-Let's continue by developing a `NtContinue` shellcode routine. After that, we will develop a stack alignment shellcode in order to ensure the stack pointer is 16-byte aligned, when the Beacon implant is called. Once we have completed both of these routines, we will walk through the entire shellcode inside of the debugger.
+Let's continue by developing a `NtContinue` shellcode routine. After that, we will develop a stack alignment shellcode in order to ensure the stack pointer is 16-byte aligned, when the first call occurs in our final payload. Once we have completed both of these routines, we will walk through the entire shellcode inside of the debugger.
 
 
 "Never in the Field of Human Conflict, Was So Much Owed, by So Many, to `NtContinue`"
@@ -333,9 +335,9 @@ Up until now, we have achieved the following:
 2. We have identified a remote thread, which we will later manipulate to execute our Beacon implant
 3. We have created a routine that will place the Beacon implant in its own local thread, within the remote process, upon execution
 
-This is great, and we are almost home free. The issue remains, however, the topic of thread restoration. After all, we are taking a thread, which was performing some sort of action before, unbeknownst to us, and forcing it to do something else. This will certainly result in execution of our shellcode, however, it will also present some unintended consequences. Upon executing our shellcode, the thread's CPU registers, along with other information, will be out of context from the actions it was performing before execution. This will cause the the process housing this thread, the desired remote process we are injecting into, to most likely crash. To avoid this, we can utilize an undocumented `ntdll.dll` function, `NtContinue`. As pointed out in Alex Ionescu and Yarden Shafir's [R.I.P ROP: CET Internals in Windows 20H1](https://windows-internals.com/cet-on-windows/), `NtContinue` is used to resume execution after an exception or interrupt. This is perfect for our use case, as we can abuse this functionality. `NtContinue` accepts a pointer to a `CONTEXT` record, and a parameter that allows a programmer to set if the _Alerted_ state should be removed from the thread, as outlined in its [function prototype](http://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FNT%20Objects%2FThread%2FNtContinue.html). We need not worry about the second parameter for our purposes, as we will set this parameter to `FALSE`. However, there remains the issue of the first parameter, `PCONTEXT`.
+This is great, and we are almost home free. The issue remains, however, the topic of thread restoration. After all, we are taking a thread, which was performing some sort of action before, unbeknownst to us, and forcing it to do something else. This will certainly result in execution of our shellcode, however, it will also present some unintended consequences. Upon executing our shellcode, the thread's CPU registers, along with other information, will be out of context from the actions it was performing before execution. This will cause the the process housing this thread, the desired remote process we are injecting into, to most likely crash. To avoid this, we can utilize an undocumented `ntdll.dll` function, `NtContinue`. As pointed out in Alex Ionescu and Yarden Shafir's [R.I.P ROP: CET Internals in Windows 20H1](https://windows-internals.com/cet-on-windows/) blog post, `NtContinue` is used to resume execution after an exception or interrupt. This is perfect for our use case, as we can abuse this functionality. Since our thread will be mangled, calling this function with the preserved `CONTEXT` record from earlier will restore execution properly. `NtContinue` accepts a pointer to a `CONTEXT` record, and a parameter that allows a programmer to set if the _Alerted_ state should be removed from the thread, as outlined in its [function prototype](http://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FNT%20Objects%2FThread%2FNtContinue.html). We need not worry about the second parameter for our purposes, as we will set this parameter to `FALSE`. However, there remains the issue of the first parameter, `PCONTEXT`.
 
-As you can recall in the former portion of this blog post, we first preserved the `CONTEXT` record for our hijacked thread, within our BOF code. The issue we have, however, is that this `CONTEXT` record is sitting within the current process, while our shellcode will be executed within the desired remote process. Because of the fact each user mode process has its own private address space, this `CONTEXT` record's address is not visible to the remote process we are injecting into. Additionally, since `NtContinue` does not accept a `HANDLE` parameter, it expects the thread it will resume execution for is the current calling thread. This means we will need to embed the `CONTEXT` record into our final payload that will be injected into the remote process. Additionally, since `NtContinue` restores execution of the calling thread, this is why we need to embed an `NtContinue` shellcode into the final payload that will be placed into the remote process. That way, when the hijacked thread executes the `NtContinue` routine, restoration of the hijacked thread will occur, since it is the calling thread. With that said, let's get into developing the routine.
+As you can recall in the former portion of this blog post, we first preserved the `CONTEXT` record for our hijacked thread, within our BOF code. The issue we have, however, is that this `CONTEXT` record is sitting within the current process, while our shellcode will be executed within the desired remote process. Because of the fact each user mode process has its own private address space, this `CONTEXT` record's address is not visible to the remote process we are injecting into. Additionally, since `NtContinue` does not accept a `HANDLE` parameter, it expects the thread it will resume execution for is the current calling thread, which will be in the remote process. This means we will need to embed the `CONTEXT` record into our final payload that will be injected into the remote process. Additionally, since `NtContinue` restores execution of the calling thread, this is why we need to embed an `NtContinue` shellcode into the final payload that will be placed into the remote process. That way, when the hijacked thread executes the `NtContinue` routine, restoration of the hijacked thread will occur, since it is the calling thread. With that said, let's get into developing the routine.
 
 Synonymous with our `CreateThread` routine, let's create a 64-byte buffer and a new counter.
 
@@ -353,7 +355,6 @@ The first goal is to start off the `NtContinue` routine with a call to the `Crea
 // Then, "jump over shellcode" by calling the buffer at an offset of the calculation (64 bytes + CONTEXT size)
 
 // 0xe8 is a near call, which uses RIP as the base address for RVA calculations and dynamically adds the offset specified by shellcodeOffset
-// Placing at an index of 0 to begin the routine
 ntContinue[i++] = 0xe8;
 
 // Subtracting to compensate for the near call opcode (represented by i) and the DWORD used for relative addressing
@@ -364,7 +365,7 @@ mycopy(ntContinue + i, &shellcodeOffset, sizeof(shellcodeOffset));
 i += sizeof(shellcodeOffset);
 ```
 
-Although the above code practically represents what was said about, you can see that the size of a `DWORD` and the value of `i` are subtracted from the offset previously mentioned. This is because, the whole `NtContinue` routine is 64 bytes. By the time the code has finished executing the entire `call` instruction, a few things will have happened. The first being, the call instruction itself, `0xe8`, will have been executed. This takes us from being at the beginning of our routine, byte 1/64, to the second byte in our routine, byte 2/64. The `CreateThread` routine is now one byte _closer_ than when we started - and this will affect our calculations. In the above set of instructions, this byte has been compensated for, by subtracting the already executed opcode. Additionally, four bytes are taken up by the `DWORD`, a 4 byte value. This means execution will now be at byte 5/64 (one byte for the opcode and four bytes for the `DWORD`). To compensate for this, the size of a DWORD has been subtracted from the total offset. If you think about it, this makes sense. By the time the call has finished executing, the `CreateThread` routine will be 5 bytes close. If we used the original offset, we would have overshot the `CONTEXT` record by five bytes. Additionally, we update the `i` counter variable to let it know how many bytes we have written to the overall `NtContinue` routine. We will walk through all of these instructions inside of the debugger, once we have finished developing this small shellcode routine.
+Although the above code practically represents what was said about, you can see that the size of a `DWORD` and the value of `i` are subtracted from the offset previously mentioned. This is because, the whole `NtContinue` routine is 64 bytes. By the time the code has finished executing the entire `call` instruction, a few things will have happened. The first being, the call instruction itself, `0xe8`, will have been executed. This takes us from being at the beginning of our routine, byte 1/64, to the second byte in our routine, byte 2/64. The `CreateThread` routine, which we need to call, is now one byte _closer_ than when we started - and this will affect our calculations. In the above set of instructions, this byte has been compensated for, by subtracting the already executed opcode (the current value of `i`). Additionally, four bytes are taken up by the actuall offset itself, a`DWORD`, which is a 4 byte value. This means execution will now be at byte 5/64 (one byte for the opcode and four bytes for the `DWORD`). To compensate for this, the size of a DWORD has been subtracted from the total offset. If you think about it, this makes sense. By the time the call has finished executing, the `CreateThread` routine will be five bytes closer. If we used the original offset, we would have overshot the `CreateThread` routine by five bytes. Additionally, we update the `i` counter variable to let it know how many bytes we have written to the overall `NtContinue` routine. We will walk through all of these instructions inside of the debugger, once we have finished developing this small shellcode routine.
 
 At this point, the `NtContinue` routine would have called the `CreateThread` routine. The `CreateThread` routine would have returned execution back to the `NtContinue` routine, and the next instructions in the `NtContinue` routine would execute.
 
@@ -379,7 +380,7 @@ ntContinue[i++] = 0x00;
 ntContinue[i++] = 0x00;
 ```
 
-The instruction this `call` will execute is a `pop rcx` instruction. Additionally the value of `i` at this point is saved into a new variable called `contextOffset`.
+The instruction this `call` will execute is the immediate next instruction to be executed, which will be a `pop rcx` instruction added by us. Additionally the value of `i` at this point is saved into a new variable called `contextOffset`.
 
 ```c
 // The previous call instruction pushes a return address onto the stack
@@ -395,9 +396,9 @@ int contextOffset = i;
 ntContinue[i++] = 0x59;
 ```
 
-The purpose of this, is the `call` instruction will push the value of RIP onto the stack, which will be the actual address of the `pop rcx` instruction, in memory. This is the return address of this function. Since the next instruction directly after the `call` is `pop rcx`, it will place the value at RSP, which is now the address of the `pop rcx` instruction due to `call POP_RCX_INSTRUCTION` pushing it onto the stack, into the RCX register. This helps us, as now we have a memory address that is relatively close the the `CONTEXT` record, which will be located directly after the call to `NtContinue`.
+The purpose of this, is the `call` instruction will push the address of the `pop rcx` instruction onto the stack. This is the return address of this function. Since the next instruction directly after the `call` is `pop rcx`, it will place the value at RSP, which is now the address of the `pop rcx` instruction due to `call POP_RCX_INSTRUCTION` pushing it onto the stack, into the RCX register. This helps us, as now we have a memory address that is relatively close the the `CONTEXT` record, which will be located directly after the call to `NtContinue`.
 
-Now, as we know, the original offset of the `CONTEXT` record from the very beginning of the entire `NtContinue` routine was 64-bytes. This is because the `CONTEXT` record will be located _immediately_ after the 64-byte `BYTE` array, `ntContinue`. Right now, if we add 64-bytes, however, to the value in RCX, we will again overshoot the `CONTEXT` record's address. This is because we have executed quite a few instructions of the 64-byte shellcode, meaning we are now closer to the `CONTEXT` record, than we where when we started. To compensate for this, we can add the original 64-byte offset to the RCX register, and then subtract the `contextOffset` value, which represents the total amount of opcodes executed up until that point. This will give us the correct distance from our current location to the `CONTEXT` record.
+Now, as we know, the original offset of the `CONTEXT` record from the very beginning of the entire `NtContinue` routine was 64-bytes. This is because we will copy the `CONTEXT` record _directly_ after the 64-byte `BYTE` array, `ntContinue`, in our final buffer. Right now however, if we add 64-bytes, however, to the value in RCX, we will overshoot the `CONTEXT` record's address. This is because we have executed quite a few instructions of the 64-byte shellcode, meaning we are now closer to the `CONTEXT` record, than we where when we started. To compensate for this, we can add the original 64-byte offset to the RCX register, and then subtract the `contextOffset` value, which represents the total amount of opcodes executed up until that point. This will give us the correct distance from our current location to the `CONTEXT` record.
 
 ```c
 // The address of the pop rcx instruction is now in RCX
@@ -457,7 +458,7 @@ mycopy(ntContinue + i, &ntcontinueAddress, sizeof(ntcontinueAddress));
 i += sizeof(ntcontinueAddress);
 ```
 
-At this point, things are as easy as just allocating some stack space for good measure calling the value in RAX, `NtContinue`!
+At this point, things are as easy as just allocating some stack space for good measure and calling the value in RAX, `NtContinue`!
 
 ```c
 // Allocate some space on the stack for the call to NtContinue
@@ -508,7 +509,7 @@ mycopy((DWORD64)shellcodeFinal + sizeof(ntContinue) + sizeof(CONTEXT) + sizeof(s
 int finalLength = (int)sizeof(ntContinue) + (int)sizeof(CONTEXT) + sizeof(stackAlignment) + sizeof(createThread);
 ```
 
-Before moving on, notice the call to `RtlMoveMemory` when it comes to copying the `CONTEXT` record to the buffer. This is due to `mycopy` being prototyped to access `char*` types as `_In_` and `_Out_`. However, `RtlMoveMemory` is prototyped to accept data types of `VOID UNALIGNED`, which indicates pretty much any data type can be used, which is perfect for us as `CONTEXT` is a structure, not a `char*`.
+Before moving on, notice the call to `RtlMoveMemory` when it comes to copying the `CONTEXT` record to the buffer. This is due to `mycopy` being prototyped to access the source and destination buffers as`char*` data types. However, `RtlMoveMemory` is prototyped to accept data types of `VOID UNALIGNED`, which indicates pretty much any data type can be used, which is perfect for us as `CONTEXT` is a structure, not a `char*`.
 
 The above code creates a buffer with the size of our routines, and copies it into the routine at the correct offsets, with the `NtContinue` routine being copied first, followed by the preserved `CONTEXT` record of the hijacked thread, the stack alignment routine, and the `CreateThread` routine. After this, the shellcode is injected into the remote process.
 
@@ -548,7 +549,7 @@ if (!writeMemory)
 }
 ```
 
-Firstly, RSP and RIP are set before the call to `SetThreadContext`. RIP will point to our final buffer and upon thread restoration, the value in RIP will be executed.
+After that, RSP and RIP are set before the call to `SetThreadContext`. RIP will point to our final buffer and upon thread restoration, the value in RIP will be executed.
 
 ```c
 // Allocate stack space by subtracting the stack by 0x2000 bytes
@@ -628,7 +629,7 @@ There we go, our BOF successfully ran. Now, let's examine what we are working wi
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon16.png" alt="">
 
-Great! Everything seems to be in place. As is shown in the `mov rax,offset ntdll!NtContinue` instruction, this seems to be our `NtContinue` routine. As has been outlined in this blog post, the beginning of the `NtContinue` routine should call the address of the stack alignment and `CreateThread` shellcode. Let's see what the address `0x000001f027f20510` references, which is the memory address being called.
+Great! Everything seems to be in place. As is shown in the `mov rax,offset ntdll!NtContinue` instruction, we can see our `NtContinue` routine. The beginning of the `NtContinue` routine should call the address of the stack alignment and `CreateThread` shellcode, as mentioned earlier in this blog post. Let's see what the address `0x000001f027f20510` references, which is the memory address being called.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon17.png" alt="">
 
@@ -636,7 +637,7 @@ Perfect! As we can see by the `and rsp, 0FFFFFFFFFFFFFFFF0` instruction, along w
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon18.png" alt="">
 
-Upon thread restoration and execution, we can see that execution has reached the first `call`, to the stack alignment and `CreateThread` routines. Stepping through this call, as we know, will push a return address onto the stack. As mentioned previously, this will be the address of that next `call 0x000001f027f2000a` instruction. When the `CreateThread` routine returns, it will return to this address. After stepping through the instruction, we can see that the address of the next `call` is pushed onto the stack.
+Upon `SetThreadContext` being invoked, which changes the RIP register to execute our shellcode, we can see that execution has reached the first `call`, which will invoke the stack alignment and `CreateThread` routines. Stepping through this call, as we know, will push a return address onto the stack. As mentioned previously, this will be the address of that next `call 0x000001f027f2000a` instruction. When the `CreateThread` routine returns, it will return to this address. After stepping through the instruction, we can see that the address of the next `call` is pushed onto the stack.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon19.png" alt="">
 
@@ -644,15 +645,15 @@ Execution then reaches the bitwise AND instruction. As we can see from the above
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon20.png" alt="">
 
-As we know from the `CreateThread` prototype, the `lpStartAddress` is a pointer to our shellcode. Looking at the above image, we can see the third argument, which will be loaded into R8, is `0x1f027ee0000`. Unassembling this address in the debugger discloses this is our Beacon implant, which was injected earlier! You can generate a raw Beacon stageless artifact in Cobalt Strike manually and run it through `hexdump` to verify the first few opcodes correspond. However, for our purposes, we will consider this the Beacon implant, as it is in this case. In most other case - trust, but verify.
+As we know from the `CreateThread` prototype, the `lpStartAddress` parameter is a pointer to our shellcode. Looking at the above image, we can see the third argument, which will be loaded into R8, is `0x1f027ee0000`. Unassembling this address in the debugger discloses this is our Beacon implant, which was injected earlier! TO verify this, you can generate a raw Beacon stageless artifact in Cobalt Strike manually and run it through `hexdump` to verify the first few opcodes correspond.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon21.png" alt="">
 
-After stepping through the instruction, the R9 register is set to 0 via `xor r9, r9`.
+After stepping through the instruction, the value is loaded into the R8 register. The next instruction sets R9 to 0 via `xor r9, r9`.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon22.png" alt="">
 
-Additionally, so are [RSP + 0x20] and [RSP + 0x28] by copying the value of R9, which is now 0, to these locations. Here is what [RSP + 0x20] and [RSP + 0x28] look like before the `mov [rsp + 0x20], r9` and `mov [rsp + 0x28], r9` instructions.
+Additionally, [RSP + 0x20] and [RSP + 0x28] are set to 0, by copying the value of R9, which is now 0, to these locations. Here is what [RSP + 0x20] and [RSP + 0x28] look like before the `mov [rsp + 0x20], r9` and `mov [rsp + 0x28], r9` instructions and after.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon23.png" alt="">
 
@@ -668,11 +669,11 @@ Stepping over the function, with `p` in WinDbg, places the `CreateThread` return
 
 After execution of our `NtContinue` routine is complete, we will receive the Beacon callback as a result of this thread.
 
-Additionally, we can see that RSP is set to the first instruction of our `NtContinue` routine. A `ret` instruction, which is what is in RIP currently, will take the stack pointer (RSP) and place it into RIP. Executing the return redirects execution back to the `NtContinue` routine.
+Additionally, we can see that RSP is set to the first "real" instruction of our `NtContinue` routine. A `ret` instruction, which is what is in RIP currently, will take the stack pointer (RSP) and place it into RIP. Executing the return redirects execution back to the `NtContinue` routine.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon27.png" alt="">
 
-As we can see in the image above, the next `call` instruction calls the `pop rcx` function. This `call` instruction, when executed, will push the `pop rcx` instruction onto the stack, as a return address.
+As we can see in the image above, the next `call` instruction calls the `pop rcx` instruction. This `call` instruction, when executed, will push the address of the `pop rcx` instruction onto the stack, as a return address.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon28.png" alt="">
 
@@ -682,7 +683,7 @@ Executing the `pop rcx` instruction, we can see that RCX now contains the addres
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon30.png" alt="">
 
- To verify if our offset is correct, we can use `.cxr` in WinDbg to divulge if the contiguous memory block located at RCX + 0x26 is in fact a `CONTEXT` record. Verifying with WinDbg, we can see this is the case.
+ To verify if our offset is correct, we can use `.cxr` in WinDbg to divulge if the contiguous memory block located at RCX + 0x36 is in fact a `CONTEXT` record. `0x36` is chosen, as this is the value currently that is about to be added to RCX, as seen a few screenshots ago. Verifying with WinDbg, we can see this is the case.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon31.png" alt="">
 
@@ -706,10 +707,8 @@ Additionally, you will notice on the victim machine that `notepad.exe` is fully 
 
 Final Thoughts
 ---
-Obviously, this technique isn't without its flaws. There are still IOCs for this technique, including invoking `SetThreadContext` and others. However, this does avoid invoking any sort of action that creates a remote thread into a process, which is still useful in most situations. This technique could be taken further, perhaps with invoking direct system calls versus invoking these APIs, which are susceptible to hooking, with most EDR products.
+Obviously, this technique isn't without its flaws. There are still IOCs for this technique, including invoking `SetThreadContext`, amongst other things. However, this does avoid invoking any sort of action that creates a remote thread, which is still useful in most situations. This technique could be taken further, perhaps with invoking direct system calls versus invoking these APIs, which are susceptible to hooking, with most EDR products.
 
-Additionally, one thing to note is that since this technique suspends a thread and then resumes it, you may have to wait a few moments to even a few minutes, in order for the thread to get around to execution. Interacting with the process directly will force execution, but targeting Windows processes that perform execution often is a good target.
+Additionally, one thing to note is that since this technique suspends a thread and then resumes it, you may have to wait a few moments to even a few minutes, in order for the thread to get around to executing. Interacting with the process directly will force execution, but targeting Windows processes that perform execution often is a good target also to avoid long waits.
 
-You can find the full project [here](https://github.com/connormcgarr/cThreadHijack).
-
-I had a lot of fun implementing this into a BOF and I am really glad I have a reason to write more C code! Like always: peace, love, and positivity :-).
+I had a lot of fun implementing this technqieu into a BOF and I am really glad I have a reason to write more C code! Like always: peace, love, and positivity :-).

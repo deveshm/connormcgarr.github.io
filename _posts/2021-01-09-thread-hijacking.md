@@ -711,4 +711,4 @@ Obviously, this technique isn't without its flaws. There are still IOCs for this
 
 Additionally, one thing to note is that since this technique suspends a thread and then resumes it, you may have to wait a few moments to even a few minutes, in order for the thread to get around to executing. Interacting with the process directly will force execution, but targeting Windows processes that perform execution often is a good target also to avoid long waits.
 
-I had a lot of fun implementing this technqieu into a BOF and I am really glad I have a reason to write more C code! Like always: peace, love, and positivity :-).
+I had a lot of fun implementing this technique into a BOF and I am really glad I have a reason to write more C code! Like always: peace, love, and positivity :-).

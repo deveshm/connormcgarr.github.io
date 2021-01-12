@@ -621,7 +621,7 @@ Let's use an instance of `notepad.exe` as our target process and attach it in Wi
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon14.png" alt="">
 
-The PID we want to inject into is `7548` for our purposes. After loading our Aggressor Script developed earlier, we can use the command `cThreadHijack 3428 TESTING`, where `TESTING` is the name of the HTTP listener Beacon will interact with.
+The PID we want to inject into is `7548` for our purposes. After loading our Aggressor Script developed earlier, we can use the command `cThreadHijack 7548 TESTING`, where `TESTING` is the name of the HTTP listener Beacon will interact with.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/Beacon15.png" alt="">
 

@@ -296,7 +296,7 @@ if (createthreadAddress == NULL)
 }
 ```
 
-The `unsigned long long` variable `createthreadAddress` will be filled with the address of `CreateThread`. `unsigned long long` is a 64-bit value, which is the size of a memory address on a 64-bit address. Although `KERNEL32$GetProcAddress` has a prototype with a return value of `FARPROC`, we need the address to actually be of the type `unsigned long long`, `DWORD64`, or similar, to allow us to properly copy this address into the routine with `mycopy`. The next goal is to move the address of `CreateThread` into RAX. After this, we will perform a `call rax` instruction, which will kick off the routine. This can be seen below.
+The `unsigned long long` variable `createthreadAddress` will be filled with the address of `CreateThread`. `unsigned long long` is a 64-bit value, which is the size of a memory address on a 64-bit system. Although `KERNEL32$GetProcAddress` has a prototype with a return value of `FARPROC`, we need the address to actually be of the type `unsigned long long`, `DWORD64`, or similar, to allow us to properly copy this address into the routine with `mycopy`. The next goal is to move the address of `CreateThread` into RAX. After this, we will perform a `call rax` instruction, which will kick off the routine. This can be seen below.
 
 ```c
 // mov rax, CreateThread

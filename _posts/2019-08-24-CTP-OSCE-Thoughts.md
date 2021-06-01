@@ -11,7 +11,7 @@ Introduction
 
 "Can you please update the course materials?" "I'll take this course when the materials are updated!" These are some of the retorts I frequently see, in response to words of commendation and praise that the Offensive Security community attribute to the [_Cracking The Perimeter_](https://www.offensive-security.com/information-security-training/cracking-the-perimeter/) course and [OSCE](https://www.offensive-security.com/information-security-certifications/osce-offensive-security-certified-expert/) exam.
 
-_Cracking The Perimeter_, stylized as _CTP_, is the accompanying course to the Offensive Security Certified Expert (OSCE) certification. Although this course is often seen as "outdated", there is a reason why Offensive Security certifications do not have an expiration date. There is a reason why the courses receive strategic updates. There are reasons why Offensive Security alumni are frequently sought out in the information security market. I will hit on all of the previously mentioned notions, in the middle and latter parts of this post. For now, understand this- there is a reason why Offensive Security has accrued so much notoriety over the years.
+_Cracking The Perimeter_, stylized as _CTP_, is the accompanying course to the Offensive Security Certified Expert (OSCE) certification. Although this course is often seen as "outdated", there is a reason why Offensive Security certifications do not have an expiration date. There is a reason why the courses receive strategic updates. There are reasons why Offensive Security alumni are frequently sought out in the information security market. I will hit on all of the previously mentioned notions, in the middle and latter parts of this post. For now, understand this - there is a reason why Offensive Security has accrued so much notoriety over the years.
 
 What are the prerequisites to this course?
 ---
@@ -46,7 +46,7 @@ The content of the course really opens your eyes to what goes on under the hood.
 The exam?
 ---
 
-I will try not to discourage any readers I may have, but this exam was brutal. I have a short lived information security career at the time of this post, but up until the time this post was written- it is easily the hardest thing I have ever done. In my life.
+I will try not to discourage any readers I may have, but this exam was brutal. I have a short lived information security career at the time of this post, but up until the time this post was written - it is easily the hardest thing I have ever done. In my life.
 
 It is, however, possible.
 
@@ -65,17 +65,17 @@ This is the most comical of the comments I see, and where the real ranting will 
 
 Why do you think Offensive Security certifications never expire? Why do you think many organizations value any Offensive Security certified personnel, and invest in their training?
 
-The reason is clear. Although there definitely is a lot of technical acumen to be obtained from these courses- the courses are all about the ["Try Harder"](https://www.offensive-security.com/offsec/say-try-harder/) mentality and mindset.
+The reason is clear. Although there definitely is a lot of technical acumen to be obtained from these courses - the courses are all about the ["Try Harder"](https://www.offensive-security.com/offsec/say-try-harder/) mentality and mindset.
 
 The reason why the Offensive Security certifications don't expire, in my opinion, is this. Anyone who obtained the OSCP when the course was _Penetration with BackTrack_ has the same validity as anyone who took the updated course, _Penetration with Kali Linux_. This is because Offensive Security is aware that anyone who can complete the course at one stage, would be able to do it at any other stage (given the fact they have access to the same resources as students who enroll in updated courses). Offensive Security know the ferocity and vigor that goes into the exams. It’s as much a mind game as it is a test of your technical knowledge. Offensive Security knows that anyone who has the mindset to pass the exams in one variation of the material, would be capable of applying the same techniques, mental focus, and sheer willpower to any other type of material/exam. The exams are designed in such a way that lateral thinking and creativity are just as important, if not more, than the technical aspects of the exams. In all reality, anyone who is persistent enough to obtain the certification in 2009, could replicate the same dedication and discipline in 2039.
 
-The course is called _Cracking the Perimeter_ for a reason. There is so much more out there in the world of offensive security. This course barely scratches the surface- yet is still like drinking from a garden hose. All of the concepts taught in the course, are needed in order to understand modern day exploit mitigations.
+The course is called _Cracking the Perimeter_ for a reason. There is so much more out there in the world of offensive security. This course barely scratches the surface - yet is still like drinking from a garden hose. All of the concepts taught in the course, are needed in order to understand modern day exploit mitigations.
 
 How can you run if you don't know how to walk?
 
 OSCE is not a matter the outdated content. It is a matter of understanding the material from the course, along with thinking in multiple dimensions and laterally. That is why these courses are created with the certification challenges. It is so students learn how to apply what they know in effective and creative new ways, not just regurgitate what was memorized in the course.
 
-Although I think that the courses are always valuable, in any state, if Offensive Security updated the OSCE tomorrow- that would be awesome! I would be 100 percent behind it, and I am sure the material would be amazing. However, that does not take away anything from someone who obtained the OSCE if new course materials came along 2 days later. The certification is about actually thinking, and not just tallying up completed objectives.
+Although I think that the courses are always valuable, in any state, if Offensive Security updated the OSCE tomorrow - that would be awesome! I would be 100 percent behind it, and I am sure the material would be amazing. However, that does not take away anything from someone who obtained the OSCE if new course materials came along 2 days later. The certification is about actually thinking, and not just tallying up completed objectives.
 
 Remember what competencies are gained from these exams. Not just technical knowledge, but ingenious thinking and being persistent until the job is done. That is why the Offensive Security courses get updated at strategic times, and why the certifications do not expire.
 

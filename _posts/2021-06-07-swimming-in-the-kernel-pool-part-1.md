@@ -216,7 +216,7 @@ As we can see, there are several free slots within this specific page in the poo
 
 Let's recall the previous image which shows where the vulnerable pool chunk ends up currently.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/pool33.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/pool30.png" alt="">
 
 Organically, without any grooming/spraying, we can see that there are several other types of objects in this page. Notably we can see several `Even` tags. This tag is actually a tag used for an object created with a call to `CreateEvent`, a Windows API, which can actually be invoked from user mode. The prototype can be seen below.
 

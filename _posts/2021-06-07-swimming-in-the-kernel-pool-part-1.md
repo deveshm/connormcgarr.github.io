@@ -70,7 +70,7 @@ Chunks allocated by the kLFH and VS segments are are shown below.
 
 Why does this matter? For the purposes of exploitation in part 2, there will be a pool overflow at some point during exploitation. Since we know that pool chunks are prefaced with a header, and because we know that an invalid header will cause a crash, we need to be mindful of this. Using our overflow, we will need to make sure that a valid header is present during exploitation. Since our exploit will be targeting the kLFH, which still uses the standard `_POOL_HEADER` structure with no encoding, this will prove to be rather trivial later. `_HEAP_VS_CHUNK_HEADER`, however, performs additional encoding on its members.
 
-The "last piece of this puzzle" is to understand how do we force the system to allocate pool chunks via the kLFH segment. The kLFH services requests that range in size from 1 byte to 16,368 bytes. The kLFH segment is also managed by the `_HEAP_LFH_CONTEXT` structure, which can be dumped in WinDbg.
+The "last piece of this puzzle" is to understand how we can force the system to allocate pool chunks via the kLFH segment. The kLFH services requests that range in size from 1 byte to 16,368 bytes. The kLFH segment is also managed by the `_HEAP_LFH_CONTEXT` structure, which can be dumped in WinDbg.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/pool8.png" alt="">
 

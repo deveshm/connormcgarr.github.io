@@ -8,10 +8,10 @@ Introduction
 ---
 Previously, I have [blogged](https://connormcgarr.github.io/ROP2) about ROP and the benefits of understanding how it works. Not only is it a viable first-stage payload for obtaining native code execution, but it can also be leveraged for things like arbitrary read/write primitives and data-only attacks. Unfortunately, if your end goal is native code execution, there is a good chance you are going to need to overwrite a function pointer in order to hijack control flow. Taking this into consideration, Microsoft implemented [Control Flow Guard](https://docs.microsoft.com/en-us/windows/win32/secbp/control-flow-guard), or CFG, as an optional update back in Windows 8.1. Although it was released before Windows 10, it did not really catch on in terms of "mainstream" exploitation until recent years.
 
-After a few years, and a few bypasses along the way, Microsoft decided they needed a new Control Flow Integrity (CFI) solution- hence XFG, or Xtended Flow Guard. David Weston gave an overview of XFG at his [talk](https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE37dMC) at BlueHat Shanghai 2019, and it is pretty much the only public information we have at this time about XFG. This "finer-grained" CFI solution will be the subject of this blog post. A few things before we start about what this post _is_ and what it _isn't_:
+After a few years, and a few bypasses along the way, Microsoft decided they needed a new Control Flow Integrity (CFI) solution - hence XFG, or Xtended Flow Guard. David Weston gave an overview of XFG at his [talk](https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE37dMC) at BlueHat Shanghai 2019, and it is pretty much the only public information we have at this time about XFG. This "finer-grained" CFI solution will be the subject of this blog post. A few things before we start about what this post _is_ and what it _isn't_:
 
 1. This post is not an "XFG internals" post. I don't know every single low level detail about it.
-2. Don't expect any bypasses from this post- this mitigation is still very new and not very explored.
+2. Don't expect any bypasses from this post - this mitigation is still very new and not very explored.
 3. We will spend a bit of time understanding what indirect function calls are via function pointers, what CFG is, and why XFG is a very, very nice mitigation (IMO).
 
 This is simply going to be an "organized brain dump" and isn't meant to be a "learn everything you need to know about XFG in one sitting" post. This is just simply documenting what I have learned after messing around with XFG for a while now.
@@ -27,7 +27,7 @@ Firstly, to enable CFG, a program is compiled and linked with the `/guard:cf` fl
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG1.png" alt="">
 
-CFG at this point would now be enabled for the program- or in the case of Microsoft binaries, they would already be CFG enabled (most of them). This causes a bitmap to be created, which essentially is made up of all functions within the process space that are "protected by CFG". Then, before an indirect function call is made (we will explore what an indirect call is shortly if you are not familiar), the function being called is sent to a special CFG function. This function checks to make sure that the function being called is a part of the CFG bitmap. If it is, the call goes through. If it isn't, the call fails.
+CFG at this point would now be enabled for the program - or in the case of Microsoft binaries, they would already be CFG enabled (most of them). This causes a bitmap to be created, which essentially is made up of all functions within the process space that are "protected by CFG". Then, before an indirect function call is made (we will explore what an indirect call is shortly if you are not familiar), the function being called is sent to a special CFG function. This function checks to make sure that the function being called is a part of the CFG bitmap. If it is, the call goes through. If it isn't, the call fails.
 
 Since this is a post about XFG, not CFG, we will skip over the technical details of CFG. However, if you are interested to see how CFG works at a lower level, Morten Schenk has an excellent [post](https://improsec.com/tech-blog/bypassing-control-flow-guard-in-windows-10) about its implementation in user mode (the Windows kernel has been compiled with CFG, known as kCFG, since Windows 10 1703. Note that Virtualization-Base Security, or VBS, is required for kCFG to be enforced. However, even when VBS is disabled, kCFG has some limited functionality. This is beyond the scope of this blog post).
 
@@ -53,13 +53,13 @@ Let's compile our program now!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG5a.png" alt="">
 
-The above command essentially compiles the program with the `/Zi` flag and the `/INCREMENTAL:NO` linking option. Per [Microsoft Docs](https://docs.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically?view=vs-2019), `/Zi` is used to create a .pdb file for symbols (which will be useful to us). `/INCREMENTAL:NO` has been set to instruct `cl` not to use the incremental linker. This is because the incremental linker is essentially used for optimization, which can create things like jump thunks. Jump thunks are essentially small functions that only perform a jump to another function. An example would be, instead of `call function1`, the program would actuall perform a `call j_function1`. `j_function1` would simply be a function that performs a `jmp function1` instruction. This functionality will be turned off for brevity. Since our "dummy program" is so simple, it will be optimized very easily. Knowing this, we are disabling incremental linking in order to simulate a "Release" build (we are currently building "Debug" builds) of an application, where incremental linking would be disabled by default. However, none of this is really prevalent here- just a point of contention to the reader. Just know we are doing it for our purposes.
+The above command essentially compiles the program with the `/Zi` flag and the `/INCREMENTAL:NO` linking option. Per [Microsoft Docs](https://docs.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically?view=vs-2019), `/Zi` is used to create a .pdb file for symbols (which will be useful to us). `/INCREMENTAL:NO` has been set to instruct `cl` not to use the incremental linker. This is because the incremental linker is essentially used for optimization, which can create things like jump thunks. Jump thunks are essentially small functions that only perform a jump to another function. An example would be, instead of `call function1`, the program would actually perform a `call j_function1`. `j_function1` would simply be a function that performs a `jmp function1` instruction. This functionality will be turned off for brevity. Since our "dummy program" is so simple, it will be optimized very easily. Knowing this, we are disabling incremental linking in order to simulate a "Release" build (we are currently building "Debug" builds) of an application, where incremental linking would be disabled by default. However, none of this is really prevalent here - just a point of contention to the reader. Just know we are doing it for our purposes.
 
 The result of the compilation command will place the output file, named `Source.exe` in this case, into the current directory along with a symbol file (.pdb). Now, we can open this application in IDA (you'll need to run IDA as an administrator, as the application is in a privileged directory). Let's take a look at the `main()` function.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFGIDA1.png" alt="">
 
-Let's examine the assembly above. The above function loads the `void (*cfgTest1)` function pointer into RCX. Since `void (*cfgTest1)` is a function pointer to an array, the value in RCX itself isn't what is needed to jump to the array. Only when RCX is dereferenced in the `call qword ptr [rcx+rax]` instruction does program execution actually perform a control flow transfer to `void (*cfgTest1)`'s first index- which is `void cfgTest()`. This is why `call qword ptr [rcx+rax]` is being performed, as RAX is the position in the array that is being indexed.
+Let's examine the assembly above. The above function loads the `void (*cfgTest1)` function pointer into RCX. Since `void (*cfgTest1)` is a function pointer to an array, the value in RCX itself isn't what is needed to jump to the array. Only when RCX is dereferenced in the `call qword ptr [rcx+rax]` instruction does program execution actually perform a control flow transfer to `void (*cfgTest1)`'s first index - which is `void cfgTest()`. This is why `call qword ptr [rcx+rax]` is being performed, as RAX is the position in the array that is being indexed.
 
 Taking a look at the `call` instruction in IDA, we can see that clearly this will redirect program execution to `void cfgTest()`.
 
@@ -91,7 +91,7 @@ The CFG dispatch function then performs a dereference and jumps to `ntdll!LdrpDi
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG11.png" alt="">
 
-We won't get into the technical details about what happens here, as this post isn't built around CFG and Morten's blog already explains what will happen. But essentially, at a high level, this function will check the CFG bitmap for the `Source.exe` process and determine if the `void cfgTest()` function is a valid target (a.k.a if it's in the bitmap). Obviously this function hasn't been overwritten, so we should have no problems here. After stepping through the function, control flow should transfter back to the `void cfgTest()` function seamlessly.
+We won't get into the technical details about what happens here, as this post isn't built around CFG and Morten's blog already explains what will happen. But essentially, at a high level, this function will check the CFG bitmap for the `Source.exe` process and determine if the `void cfgTest()` function is a valid target (a.k.a if it's in the bitmap). Obviously this function hasn't been overwritten, so we should have no problems here. After stepping through the function, control flow should transfer back to the `void cfgTest()` function seamlessly.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG12a.png" alt="">
 
@@ -108,9 +108,9 @@ Let's see if we can take this even further and potentially show why XFG is defin
 CFG: Potential Shortcomings
 ---
 
-As mentioned earlier, CFG checks functions to make sure they are part of the "CFG bitmap" (a.k.a protected by CFG). This means a few things from an adversarial perspective. If we were to use `VirtualAlloc()` to allocate some virtual memory, and overwrite a function pointer that is protected by CFG with the returned address of the allocation- CFG would make the program crash.
+As mentioned earlier, CFG checks functions to make sure they are part of the "CFG bitmap" (a.k.a protected by CFG). This means a few things from an adversarial perspective. If we were to use `VirtualAlloc()` to allocate some virtual memory, and overwrite a function pointer that is protected by CFG with the returned address of the allocation - CFG would make the program crash.
 
-Why? `VirtualAlloc()` (for instance) would return a virtual address of something like `0xdb0000`. When the application in question was compiled with CFG, obviously this memory address wasn't a part of the application. Therefore, this address wouldn't be "protected by CFG" and the program would crash. However, this is not very practical. Let's think about what an adversary tries to accompish with ROP.
+Why? `VirtualAlloc()` (for instance) would return a virtual address of something like `0xdb0000`. When the application in question was compiled with CFG, obviously this memory address wasn't a part of the application. Therefore, this address wouldn't be "protected by CFG" and the program would crash. However, this is not very practical. Let's think about what an adversary tries to accomplish with ROP.
 
 Adversaries want to return into a Windows API function like `VirtualProtect()` in order to dynamically change permissions of memory. What is interesting about CFG is that in addition to the program's functions, all exported Windows functions that make up the "module" import list for a program can be called. For instance, the application we are looking at is called `Source.exe` Dumping the loaded modules for the application, we can see that `KERNELBASE.dll`, `kernel32.dll`, and `ntdll.dll` (which are the usual suspects) are loaded for this application.
 
@@ -134,7 +134,7 @@ Let's recall what was said earlier about how CFG only validates if a function re
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG19.png" alt="">
 
-The above command uses `x` to show the address of the `Source!protectMe2` function and then uses `dps` to show that `Source!cfgTest1` still points to `Source!cfgTest1`. Then, using `ep`, we overwrite the function pointer. `dps` once again verifies that the function overwrite has occured.
+The above command uses `x` to show the address of the `Source!protectMe2` function and then uses `dps` to show that `Source!cfgTest1` still points to `Source!cfgTest1`. Then, using `ep`, we overwrite the function pointer. `dps` once again verifies that the function overwrite has occurred.
 
 Let's now step through the program to see what happens. Program execution firstly hits the CFG dispatch function.
 
@@ -150,7 +150,7 @@ Execution then hits `ntdll!LdrpDispatchUserCallTarget`. After walking the functi
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG23.png" alt="">
 
-This is very interesting from an adversarial perspective, as we were successfully able to overwrite a function pointer and CFG didn't terminate our process! The only caveat being that the function is a part of the current processes's CFG bitmap.
+This is very interesting from an adversarial perspective, as we were successfully able to overwrite a function pointer and CFG didn't terminate our process! The only caveat being that the function is a part of the current process's CFG bitmap.
 
 What is even more interesting, is that function pointers protected by CFG can be overwritten by any exported function at runtime! Let's rework this example, but try to call a Windows API function like `KERNELBASE!WriteProcessMemory`.
 
@@ -197,7 +197,7 @@ In the image, below, the location of the XFG hash is at `00007ff7ded4110c`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFGIMMUTABLE.png" alt="">
 
-We can see that this address is executable (obviously) and readable- with the ability to write disabled.
+We can see that this address is executable (obviously) and readable - with the ability to write disabled.
 
 Additionally, you can use the `dumpbin` tool to print out the functions protected by CFG/XFG. Functions protected by XFG are denoted with an `X`
 
@@ -286,9 +286,9 @@ As we can see below, the hashes do not match!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFG46.png" alt="">
 
-Since the hashes do not match, this will cause XFG to determine a function pointer has been overwritten with something it should not have been overwritten with- and causes a program crash. Even though the function pointer was overwritten by another function within the same bitmap- XFG still will crash the process.
+Since the hashes do not match, this will cause XFG to determine a function pointer has been overwritten with something it should not have been overwritten with - and causes a program crash. Even though the function pointer was overwritten by another function within the same bitmap - XFG still will crash the process.
 
-Let's examine another scenario, with two functions of the same return type- but not the same amount of parameters.
+Let's examine another scenario, with two functions of the same return type - but not the same amount of parameters.
 
 To achieve this, our code has been edited to the following.
 
@@ -302,7 +302,7 @@ The only difference between the two functions protected by XFG is the amount of 
 
 Additionally, we notice that the last 12 bits of the `int cfgTest()` hash have become 371 in hexadecimal instead of the previously mentioned 871 value. This means that XFG hashes seem to be unique until the last 8 bits. This is indicative of the hash only being unique up until about 56 bits.
 
-As a sanity check and for completness sake, let's see what happens when two identical functions are assigned an XFG hash.
+As a sanity check and for completeness sake, let's see what happens when two identical functions are assigned an XFG hash.
 
 OMG Samesies!
 ---
@@ -317,7 +317,7 @@ Disassembling the functions in IDA, we can see that the hashes this time are ide
 
 Obviously, since the hashing process for an XFG hash takes a function prototype and hashes it, the two hashes are going to be the same. I would not call this a flaw at all, because it is obvious Microsoft knew to this going in. However, I feel this is a nice win for Microsoft in terms of their overall CFI strategy because as David pointed out, this was very little overhead to the already existing CFG infrastructure. 
 
-However, from an adversarial standpoint- it must be said. XFG functions _can_ be overwritten, so long as the function is basically an identical prototype of the original function.
+However, from an adversarial standpoint - it must be said. XFG functions _can_ be overwritten, so long as the function is basically an identical prototype of the original function.
 
 Potential Bypasses?
 ---
@@ -338,7 +338,7 @@ Let's perform a function pointer overwrite.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFGWPM2.png" alt="">
 
-Next, let's step through the XFG dispatch functions and reach the compare statememt.
+Next, let's step through the XFG dispatch functions and reach the compare statement.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/XFGWPM3.png" alt="">
 

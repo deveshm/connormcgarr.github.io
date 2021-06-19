@@ -7,12 +7,12 @@ excerpt: "Exploiting page table entries through arbitrary read/write primitives 
 Introduction
 ---
 
-Taking the prerequisite knowledge from my [last blog post](https://connormcgarr.github.io/paging/), let's talk about additional ways to bypass [SMEP](https://en.wikipedia.org/wiki/Supervisor_Mode_Access_Prevention) other than [flipping the 20th bit of the CR4 register](https://connormcgarr.github.io/x64-Kernel-Shellcode-Revisited-and-SMEP-Bypass/)- or completely circumventing SMEP all together by bypassing [NX](https://docs.microsoft.com/en-us/windows-hardware/drivers/kernel/no-execute-nonpaged-pool) in the kernel! This blog post in particular will leverage page table entry control bits to bypass these kernel mode mitigations, as well as leveraging additional vulnerabilities such as an arbitrary read to bypass page table randomization to achieve said goals.
+Taking the prerequisite knowledge from my [last blog post](https://connormcgarr.github.io/paging/), let's talk about additional ways to bypass [SMEP](https://en.wikipedia.org/wiki/Supervisor_Mode_Access_Prevention) other than [flipping the 20th bit of the CR4 register](https://connormcgarr.github.io/x64-Kernel-Shellcode-Revisited-and-SMEP-Bypass/) - or completely circumventing SMEP all together by bypassing [NX](https://docs.microsoft.com/en-us/windows-hardware/drivers/kernel/no-execute-nonpaged-pool) in the kernel! This blog post in particular will leverage page table entry control bits to bypass these kernel mode mitigations, as well as leveraging additional vulnerabilities such as an arbitrary read to bypass page table randomization to achieve said goals.
 
 Before We Begin
 ---
 
-[Morten Schenk](https://twitter.com/blomster81?lang=en) of Offensive Security has done a lot of the leg work for shedding light on this topic to the public, namely at [DefCon 25](https://www.defcon.org/html/defcon-25/dc-25-index.html) and [Black Hat 2017](https://www.blackhat.com/us-17/).
+[Morten Schenk](https://twitter.com/blomster81?lang=en) of Offensive Security has done a lot of the leg work for shedding light on this topic to the public, namely at [DEF CON 25](https://www.defcon.org/html/defcon-25/dc-25-index.html) and [Black Hat 2017](https://www.blackhat.com/us-17/).
 
 Although there has been some _AMAZING_ research on this, I have not seen much in the way of _practical_ blog posts showcasing this technique in the wild (that is, taking an exploit start to finish leveraging this technique in a blog post). Most of the research surrounding this topic, although absolutely brilliant, only explains how these mitigation bypasses work. This led to some issues for me when I started applying this research into actual exploitation, as I only had theory to go off of.
 
@@ -22,7 +22,7 @@ This blog post is going to utilize the [HackSysExtreme](https://github.com/hacks
 
 Thank you to Ashfaq of HackSysTeam for this driver!
 
-In addition to said information, these techniques will be utilized on a Windows 10 64-bit RS1 build. This is because Windows 10 RS2 has kernel Control Flow Guard (kCFG) enabled by default, which is beyond the scope of this post. This post simply aims to show the techniques used in today's "modern exploitaiton era" to bypass SMEP or NX in kernel mode memory.
+In addition to said information, these techniques will be utilized on a Windows 10 64-bit RS1 build. This is because Windows 10 RS2 has kernel Control Flow Guard (kCFG) enabled by default, which is beyond the scope of this post. This post simply aims to show the techniques used in today's "modern exploitation era" to bypass SMEP or NX in kernel mode memory.
 
 Why Go to the Mountain, If You Can Bring the Mountain to You?
 ---
@@ -102,16 +102,16 @@ Let's take a look at the output of `!pte` in WinDbg of our user mode shellcode p
 
 What Intel means by the their statement in Alex's talk, is that only ONE of the paging structure table entries (a page table entry) is needed to be set to kernel, in order for SMEP to not trigger. We do not need all 4 entries to be supervisor (kernel) mode!
 
-This is wonderful for us, from an exploit development standpoint- as this _GREATLY_ reduces our workload (we will see why shortly)!
+This is wonderful for us, from an exploit development standpoint - as this _GREATLY_ reduces our workload (we will see why shortly)!
 
 Let's learn how we can leverage this new knowledge, by first examining the current PTE control bits of our shellcode page:
 
-1. `D`- The "dirty" bit has been set, meaning a write to this address has occured (`KERNELBASE!VirtualAlloc()`).
-2. `A`- The "access" bit has been set, meaning this address has been referenced at some point.
-3. `U`- The "user" bit has been set here. When the memory manager unit reads in this address, it recognizes is as a user mode address. When this bit is 1, the page is user mode. When this bit is clear, the page is kernel mode.
-4. `W`- The "write" bit has been set here, meaning this memory page is writeable.
-5. `E`- The "executable" bit has been set here, meaning this memory page is executable.
-6. `V`- The "valid" bit is set here, meaning that the PTE is a valid PTE.
+1. `D` - The "dirty" bit has been set, meaning a write to this address has occurred (`KERNELBASE!VirtualAlloc()`).
+2. `A` - The "access" bit has been set, meaning this address has been referenced at some point.
+3. `U` - The "user" bit has been set here. When the memory manager unit reads in this address, it recognizes is as a user mode address. When this bit is 1, the page is user mode. When this bit is clear, the page is kernel mode.
+4. `W` - The "write" bit has been set here, meaning this memory page is writable.
+5. `E` - The "executable" bit has been set here, meaning this memory page is executable.
+6. `V` - The "valid" bit is set here, meaning that the PTE is a valid PTE.
 
 Notice that most of these control bits were set with our call earlier to `KERNELBASE!VirtualAlloc()` in the psuedo code snippet via the function's arguments of `flAllocationType` and `flProtect`.
 
@@ -155,7 +155,7 @@ Let's refer back to the phraseology earlier in the post that uttered:
 
 Notice how we didn't "disable" SMEP like we did a few blog posts ago with ROP. All we did this time was just play by SMEP's rules! We didn't go to SMEP and try to disable it, instead, we brought our shellcode to SMEP and said "treat this as you normally treat kernel mode memory."
 
-This is great, we know we can bypass SMEP through this method! But the quesiton remains, how can we achieve this dynamically?
+This is great, we know we can bypass SMEP through this method! But the question remains, how can we achieve this dynamically?
 
 After all, we cannot just arbitrarily use WinDbg when exploiting other systems.
 
@@ -179,7 +179,7 @@ The above function performs the following instructions:
 5. Adds the values of RAX and RCX
 6. Performs a return out of the function
 
-Let's take a second to break this down by importance. First things first, the number `0xFFFFFE0000000000` looks like it could potentially be important- as it resembles a 64-bit virtual memory address.
+Let's take a second to break this down by importance. First things first, the number `0xFFFFFE0000000000` looks like it could potentially be important - as it resembles a 64-bit virtual memory address.
 
 Turns out, this is important. This number is actually a memory address, and it is the base address of all of the PTEs! Let's talk about the base of the PTEs for a second and its significance.
 
@@ -195,7 +195,7 @@ An attacker needs an arbitrary read primitive in the first place to extract the 
 
 If an attacker already has this ability, the adversary could just use the same primitive to read in `nt!MiGetPteAddress+0x13`, which, when dereferenced, contains the base of the PTEs.
 
-Again, not ripping on Microsoft- I think they honestly have some of the best default OS exploit mitigations in the business. Just something I thought of.
+Again, not ripping on Microsoft - I think they honestly have some of the best default OS exploit mitigations in the business. Just something I thought of.
 
 The method of reusing an arbitrary read primitive is actually what we are going to do here! But before we do, let's talk about the PTE formula one last time.
 
@@ -220,7 +220,7 @@ The variable `shellcode_pte` will now contain the PTE for our shellcode page! We
 
 Sorry for the poor screenshot above in advance.
 
-But as we can see, our version of the formula works- and we know can now dynamically fetch a PTE address! The only question remains, how do we dynamically dereference `nt!MiGetPteAddress+0x13` with an arbitrary read?
+But as we can see, our version of the formula works - and we know can now dynamically fetch a PTE address! The only question remains, how do we dynamically dereference `nt!MiGetPteAddress+0x13` with an arbitrary read?
 
 Read, Read, Read!
 ---
@@ -231,10 +231,10 @@ Our write-what-where primitive allows us to write a pointer (the what) to a poin
 
 What will happen here is the following:
 
-1. Since the write portion of the write-what-where writes a POINTER (a.k.a the write will take a memory address and dereference it- which results in extracting the contents of a pointer), we will write the value of `nt!MiGetPteAddress+0x13` somewhere we control. The write primitive will extract what `nt!MiGetPteAddress+0x13` points to, which is the base of the PTEs, and write it somewhere we can fetch the result!
+1. Since the write portion of the write-what-where writes a POINTER (a.k.a the write will take a memory address and dereference it - which results in extracting the contents of a pointer), we will write the value of `nt!MiGetPteAddress+0x13` somewhere we control. The write primitive will extract what `nt!MiGetPteAddress+0x13` points to, which is the base of the PTEs, and write it somewhere we can fetch the result!
 2. The "where" value in the write-what-were vulnerability will write the "what" value (base of the PTEs) to a pointer (a.k.a if the "what" value (base of the PTEs) gets written to `0xFFFFFFFFFFFFFFFF`, that means `0xFFFFFFFFFFFFFFFF` will now POINT to the "what" value, which is the base of the PTEs).
 
-The thought process here is, if we write the base of the PTEs to OUR OWN pointer that we create- we can then dereference our pointer and extract the contents ourselves!
+The thought process here is, if we write the base of the PTEs to OUR OWN pointer that we create - we can then dereference our pointer and extract the contents ourselves!
 
 Here is how this all looks in Python!
 
@@ -250,7 +250,7 @@ class WriteWhatWhere_PTE_Base(Structure):
 ```
 
 Secondly, we fetch the memory address of `nt!MiGetPteAddress+0x13`
-> Note- your offset from the kernel base to this function may be different!
+> Note - your offset from the kernel base to this function may be different!
 
 ```python
 # Retrieving nt!MiGetPteAddress (Windows 10 RS1 offset)
@@ -278,7 +278,7 @@ www_pte_base.Where_PTE_Base = addressof(base_of_ptes_pointer)
 www_pte_pointer = pointer(www_pte_base)
 ```
 
-Notice the where is the address of the pointer `addressof(base_of_ptes_pointer)`. This is because we don't want to overwrite the `c_void_p`'s address with anything- we want to store the value inside of the pointer.
+Notice the where is the address of the pointer `addressof(base_of_ptes_pointer)`. This is because we don't want to overwrite the `c_void_p`'s address with anything - we want to store the value inside of the pointer.
 
 This will store the value inside of the pointer because our write-what-where primitive writes a "what" value to a pointer.
 
@@ -353,7 +353,7 @@ We then make another call to the IOCTL responsible for the vulnerability.
 
 Before executing our updated exploit, let's restart the computer to prove everything is working dynamically.
 
-Our combined code executes- resulting in the extraction of the PTE control bits!
+Our combined code executes - resulting in the extraction of the PTE control bits!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/PTE_15.png" alt="">
 
@@ -705,7 +705,7 @@ Let's say you want to take advantage of various defensive tools and their lack o
 Okay, This Time We Are Going To The Mountain! `KUSER_SHARED_DATA` Time!
 ---
 
-Morten in his research [suggests](https://www.blackhat.com/docs/us-17/wednesday/us-17-Schenk-Taking-Windows-10-Kernel-Exploitation-To-The-Next-Level%E2%80%93Leveraging-Write-What-Where-Vulnerabilities-In-Creators-Update.pdf) that another suitable method may be to utilize the [KUSER_SHARED_DATA]() structure in the kernel directly, similarily to how ROP works in user mode.
+Morten in his research [suggests](https://www.blackhat.com/docs/us-17/wednesday/us-17-Schenk-Taking-Windows-10-Kernel-Exploitation-To-The-Next-Level%E2%80%93Leveraging-Write-What-Where-Vulnerabilities-In-Creators-Update.pdf) that another suitable method may be to utilize the [KUSER_SHARED_DATA]() structure in the kernel directly, similarly to how ROP works in user mode.
 
 The concept of ROP in user mode is the idea that we have the ability to write shellcode to the stack, we just don't have the ability to execute it. Using ROP, we can change the permissions of the stack to that of executable, and execute our shellcode from there.
 
@@ -747,7 +747,7 @@ Before we begin, the steps about obtaining the contents of `nt!MiGetPteAddress+0
 
 Moving on, let's start with each line of shellcode.
 
-For each line written the data type chosen was that of a [c_ulonglong()](https://docs.python.org/2/library/ctypes.html#ctypes.c_ulonglong)- as it was easy to store into a `c_void_p`.
+For each line written the data type chosen was that of a [c_ulonglong()](https://docs.python.org/2/library/ctypes.html#ctypes.c_ulonglong) - as it was easy to store into a `c_void_p`.
 
 The first line of shellcode had an associated structure as shown below.
 
@@ -786,7 +786,7 @@ As you can see in the image below, the shellcode was successfully written to `KU
 Executable, Please!
 ---
 
-Using the same arbitrary read primitives as earlier, we can extract the PTE control bits of `KUSER_SHARED_DATA+0x800`'s memory page. This time, however, instead of subtracting 4- we are going to use bitwise AND per Morten's research.
+Using the same arbitrary read primitives as earlier, we can extract the PTE control bits of `KUSER_SHARED_DATA+0x800`'s memory page. This time, however, instead of subtracting 4 - we are going to use bitwise AND per Morten's research.
 
 ```python
 # Setting KUSER_SHARED_DATA + 0x800 to executable
@@ -1354,7 +1354,7 @@ I really enjoyed this method of SMEP bypass! I also loved circumventing SMEP all
 
 I am always looking for new challenges and decided this would be a fun one!
 
-If you would like to take a look at how SMEP can be bypassed via `U/S` bit corruption in C, [here](https://github.com/connormcgarr/Kernel-Exploits/blob/master/HEVD/Write-What-Where/Windows10_WriteWhatWhere.c) is this same exploit written in C (note- some offsets may be different).
+If you would like to take a look at how SMEP can be bypassed via `U/S` bit corruption in C, [here](https://github.com/connormcgarr/Kernel-Exploits/blob/master/HEVD/Write-What-Where/Windows10_WriteWhatWhere.c) is this same exploit written in C (note - some offsets may be different).
 
 As always, feel free to reach out to me with any questions, comments, or corrections! Until then!
 

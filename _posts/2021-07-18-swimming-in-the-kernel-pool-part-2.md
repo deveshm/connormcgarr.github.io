@@ -147,7 +147,7 @@ Also note the debug print `Name Length` is zero. This value was supplied by us f
 
 We then know that _another_ call to `ExAllocatePoolWithTag` will occur, which will allocate memory for the `Name` member of `ARWHelperObject->Name`, where `ARWHelperObject` is of type `PARW_HELPER_OBJECT_NON_PAGED_POOL_NX`. Let's set a breakpoint on this memory allocation operation and inspect the contents of the operation.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/2pool24png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/2pool24.png" alt="">
 
 We can see this chunk is allocated in the same pool and kLFH bucket as the previous `ARWHelperObject` pointer. The address of this chunk, which is `0xffff838b6e6d73d0`, will eventually be set as `ARWHelperObject`'s `Name` member, along with `ARWHelperObject`'s `Length` member being set to the original user mode input buffer's `Length` member, which comes from an `ARW_HELPER_OBJECT_IO` structure.
 

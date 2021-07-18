@@ -41,7 +41,7 @@ Let's put this theory to the test by expanding upon our exploit from part one an
 Triggering The Vulnerability
 ---
 
-We will leverage the previous exploit from Part 1 and tack on the pool overflow code to the end, after the `for` loop which does parsing to extract the base address of `HEVD.sys`. This code can be seen below, which sends a buffer of 500 bytes to the pool chunk of 16 bytes. The IOCTL for to reach the `TriggerBufferOverflowNonPagedPool` function is `0x0022204b`
+We will leverage the previous exploit from Part 1 and tack on the pool overflow code to the end, after the `for` loop which does parsing to extract the base address of `HEVD.sys`. This code can be seen below, which sends a buffer of 50 bytes to the pool chunk of 16 bytes. The IOCTL for to reach the `TriggerBufferOverflowNonPagedPool` function is `0x0022204b`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/2pool6.png" alt="">
 

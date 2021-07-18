@@ -391,7 +391,7 @@ We want to use a controlled write to only overwrite the first member of this adj
 
 As shown in the `readwritePrimitive()` function, the goal here will be to actually corrupt the adjacent chunk(s) with the address of the "main" `ARW_HELPER_OBJECT_NON_PAGED_POOL_NX` object, which we will manage via `ARW_HELPER_OBJECT_IO.HelperObjectAddress`. We would like to corrupt the adjacent `ARW_HELPER_OBJECT_NON_PAGED_POOL_NX` object with a precise overflow to corrupt the `Name` value with the address of our "main" object. Currently this value is set to `0x9090909090909090`. Once we prove this is possible, we can then take this further to obtain the eventual read/write primitive.
 
-Setting a breakpoint on the `TriggerBufferOverflowNonPagedPoolNx` routine in HEVD.sys, and setting an additional breakpoint on the `memcpy` routine, which performs the pool overflow, we can investigate the contents of the pool.
+Setting a breakpoint on the `TriggerBufferOverflowNonPagedPoolNx` routine in `HEVD.sys`, and setting an additional breakpoint on the `memcpy` routine, which performs the pool overflow, we can investigate the contents of the pool.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/2pool57.png" alt="">
 
@@ -436,7 +436,7 @@ Performing the "Set" operation on the corrupted object will actually set the val
 
 At this point we need to identify what out goal is. To comprehensively bypass kASLR, our goal is as follows:
 
-1. Use the base address of HEVD.sys from the original exploit in [part one]() to provide the offset to the Import Address Table
+1. Use the base address of `HEVD.sys` from the original exploit in [part one]() to provide the offset to the Import Address Table
 2. Supply an IAT entry that points to `ntoskrnl.exe` to the exploit to be arbitrarily read from (thus obtaining a pointer to `ntoskrnl.exe`)
 3. Calculate the distance from the pointer to the kernel to obtain the base
 

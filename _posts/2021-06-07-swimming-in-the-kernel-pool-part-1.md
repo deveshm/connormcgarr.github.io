@@ -143,7 +143,7 @@ We can then set a breakpoint on the call to `nt!ExAllocatePoolWithTag`.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/pool18.png" alt="">
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/pool19.png" alt="">g
+<img src="{{ site.url }}{{ site.baseurl }}/images/pool19.png" alt="">
 
 After executing the call, we can then inspect the return value in RAX.
 

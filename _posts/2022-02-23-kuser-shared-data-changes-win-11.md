@@ -196,7 +196,7 @@ According to [ReactOS](https://github.com/reactos/reactos/blob/b0dfe209810657932
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSERREACTOS2.png" alt="">
 
-This function provides a combination of the functionality exposed by both `nt!MiMakeProtectionPfnCompatible` and`nt!MiMakeValidPte` (which is a function we will see shortly). The value 4, or `MM_READWRITE`, is actually [an index into an array](https://github.com/reactos/reactos/blob/1e01afab990b9fb9255d0c0d253ca141d5731a65/ntoskrnl/mm/arm/page.c#L18-L68) called `MmProtectToPteMask`. This array is responsible for converting the requested permission of the page (4, or `MM_READWRITE`) to a PTE-compliant mask.
+This function provides a combination of the functionality exposed by both `nt!MiMakeProtectionPfnCompatible` and `nt!MiMakeValidPte` (which is a function we will see shortly). The value 4, or `MM_READWRITE`, is actually [an index into an array](https://github.com/reactos/reactos/blob/1e01afab990b9fb9255d0c0d253ca141d5731a65/ntoskrnl/mm/arm/page.c#L18-L68) called `MmProtectToPteMask`. This array is responsible for converting the requested permission of the page (4, or `MM_READWRITE`) to a PTE-compliant mask.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSERREACTOS3.png" alt="">
 

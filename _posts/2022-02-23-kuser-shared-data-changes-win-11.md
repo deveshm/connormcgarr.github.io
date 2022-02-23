@@ -200,7 +200,7 @@ This function provides a combination of the functionality exposed by both `nt!Mi
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSERREACTOS3.png" alt="">
 
-We can see the first five elements are as follows: `{0, PTE_READONLY, PTE_EXECUTE, PTE_EXECUTE_READ, PTE_READWRITE}`. From here we can confirm that indexing this array at the index of 4 will retrieve a PTE mask of `PTE_READWRITE`, which are exactly the memory permissions we would like `nt!MmWriteableSharedUserData` to assume, as we know this should be the "new mapped view" of `KUSER_SHARED_DATA`, which is writable. The virtual address of the PFN record associated with the “static” `KUSER_SHARED_DATA` is used in the function call.
+We can see the first five elements are as follows: `{0, PTE_READONLY, PTE_EXECUTE, PTE_EXECUTE_READ, PTE_READWRITE}`. From here we can confirm that indexing this array at the index of 4 will retrieve a PTE mask of `PTE_READWRITE`, which are exactly the memory permissions we would like `nt!MmWriteableSharedUserData` to assume, as we know this should be the "new mapped view" of `KUSER_SHARED_DATA`, which is writable. Recall also that the virtual address of the PFN record associated with the “static” `KUSER_SHARED_DATA` is used in the function call, via RDX.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER27.png" alt="">
 

@@ -32,7 +32,7 @@ My first thought about possible changes to `KUSER_SHARED_DATA` was that the memo
 
 My next thought was to try and write to `KUSER_SHARED_DATA`, at an offset of `0x800`, to look for any unexpected behavior. It was here I realized that `KUSER_SHARED_DATA` was now read-only, by examining the PTE. 
 
-The address provided below, `0xfffffe7bc0000000` is the virtual address of the PTE associated with the virtual address `0xfffff78000000000`, or `KUSER_SHARED_DATA`. You can find the address on your system with the command in Windbg `!pte 0xfffff78000000000`. I have omitted these commands for readability of this blog, so as to not keep executing this command over and over again. This blog will inform readers what addresses correspond to what and how to find these addresses on your system.
+The address provided below, `0xfffffe7bc0000000`, is the virtual address of the PTE associated with the virtual address `0xfffff78000000000`, or `KUSER_SHARED_DATA`. You can find the address on your system with the command in Windbg `!pte 0xfffff78000000000`. I have omitted these commands for readability of this blog, so as to not keep executing this command over and over again. This blog will inform readers what addresses correspond to what and how to find these addresses on your system.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER5.png" alt="">
 

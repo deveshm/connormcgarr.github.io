@@ -251,7 +251,7 @@ At this point, we are just a few instructions away from our target symbol of `nt
 
 Currently, in RDI, we have the address of the PTE we want to use for our new read/write and randomized mapped view of `KUSER_SHARED_DATA` (generated via `nt!MiReservePtes`). The above screenshot shows that there will be some bitwise operations performed on RDI and, as well, we can see that the base of the page table entries will be involved with this operation. These are simply compiler optimizations for converting a given PTE to the virtual address the PTE is applied to.
 
-This is a necessary step, recall, as up until this point we have successfully generated a PTE from the System PTE region and have marked it as read/write, told it to use the “static” `KUSER_SHAREDas the phy_DATA` as the physical memory backing the virtual memory, but we have not actually applied it to the virtual memory address which will be described and mapped by this PTE! This virtual address we want to apply this PTE to will be the value we want to store in `nt!MmWriteableUserSharedData`!
+This is a necessary step, recall, as up until this point we have successfully generated a PTE from the System PTE region and have marked it as read/write, told it to use the “static” `KUSER_SHARED_DATA` as the physical memory backing the virtual memory, but we have not actually applied it to the virtual memory address which will be described and mapped by this PTE! This virtual address we want to apply this PTE to will be the value we want to store in `nt!MmWriteableUserSharedData`!
 
 Let’s again recall the bitwise operations that are in place which will convert the new PTE to the virtual address it backs.
 

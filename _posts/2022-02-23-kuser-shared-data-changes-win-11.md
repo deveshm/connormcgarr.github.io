@@ -118,7 +118,7 @@ Looking deeper into the disassembly of `nt!MiProtectSharedUserPage` we can see t
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER16.png" alt="">
 
-Let's take a look at the beginning of the function. The first thing that stands out is the kernel-mode address and calls to the `nt!MI_READ_PTE_LOCK_FREE` macro and the `nt!Feature_KernelSharedUserDataAaslr__private_IsEnabled` function (which isn't very interesting for our purposes).
+Let's take a look at the beginning of the function. The first thing that stands out is the kernel-mode address and calls to `nt!MI_READ_PTE_LOCK_FREE` and `nt!Feature_KernelSharedUserDataAaslr__private_IsEnabled` (which isn't very interesting for our purposes).
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER17.png" alt="">
 
@@ -128,15 +128,15 @@ The kernel-mode address in the image above of `0xfffffb7000000000`, outlined in 
 
 We can see this by replicating this formula on the virtual address of `0xfffff78000000000`. The resulting value will be the appropriate index into the PTE array to get the PTE associated with the “static” `KUSER_SHARED_DATA`. This can be seen in the `Command` window of WinDbg above.
 
-This means the PTE associated with the “static” `KUSER_SHARED_DATA`, is going to be passed in to the `nt!MI_READ_PTE_LOCK_FREE` macro. The address of said PTE is `0xffffb7fbc0000000`.
+This means the PTE associated with the “static” `KUSER_SHARED_DATA` is going to be passed in to `nt!MI_READ_PTE_LOCK_FREE`. The address of said PTE is `0xffffb7fbc0000000`.
 
-`nt!MI_READ_PTE_LOCK_FREE` is a relatively straight-forward macro. At a high level it essentially performs bounds checking on the in-scope page table entry to ensure it is within the known address space of the PML4E array, which contains an array of PML4 page table entries for usage with the PML4 paging structure. Recall that the PML4 structure is the base paging structure. So, in other words, this ensures that the page table entry provided resides somewhere within the paging structures. This can be seen below.
+`nt!MI_READ_PTE_LOCK_FREE`, at a high level, essentially performs bounds checking on the in-scope page table entry to ensure it is within the known address space of the PML4E array, which contains an array of PML4 page table entries for usage with the PML4 paging structure. Recall that the PML4 structure is the base paging structure. So, in other words, this ensures that the page table entry provided resides somewhere within the paging structures. This can be seen below.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER18.png" alt="">
 
 However, slightly more nuanced, the function is actually checking to see if the page table entry resides within the “user mode paging structures”, known otherwise as the “shadow space”. Recall that with [KVA Shadow](https://labs.bluefrostsecurity.de/blog/2020/06/30/meltdown-reloaded-breaking-windows-kaslr/)’s implementation, Microsoft’s implementation of Kernel Page-Table Isolation (KPTI), there are now two sets of paging structures: one for kernel mode execution and one for user mode. This mitigation was used to mitigate Meltdown. This check is easily “bypassed”, as the PTE is obviously mapped to a kernel mode address and, thus, not represented by the “user mode paging structures”.
 
-The macro then returns the dereferenced contents of the PTE (e.g. the PTE "bits") if the PTE _doens’t_ reside within the “shadow space”. If the PTE does reside in the “shadow space”, there are a few more checks performed on the PTE to determine if KVAS is enabled before the contents are returned. This is not _too_ important for the overall changes we are focusing on, from an exploitation perspective, but still a part of the overall “process”.
+`nt!MI_READ_PTE_LOCK_FREE` then returns the dereferenced contents of the PTE (e.g. the PTE "bits") if the PTE _doens’t_ reside within the “shadow space”. If the PTE does reside in the “shadow space”, there are a few more checks performed on the PTE to determine if KVAS is enabled before the contents are returned. This is not _too_ important for the overall changes we are focusing on, from an exploitation perspective, but still a part of the overall “process”.
 
 Additionally, `nt!Feature_KernelSharedUserDataAslr__private_IsEnabled` isn't very useful to us, except for letting us know we are potentially on the right track by the naming convention. This function mainly seems to be for metrics and telemetry gathering about this feature.
 
@@ -146,7 +146,7 @@ Earlier, after the first call to `nt!MI_READ_PTE_LOCK_FREE`, the contents of the
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER20.png" alt="">
 
-More interestingly, however, is the fact that the `nt!MI_READ_PTE_LOCK_FREE` macro dereferences the PTE contents and returns them via RAX. Since the PTE "bits" for the “static” `KUSER_SHARED_DATA`, which define the memory properties/permissions, are in RAX, they’re then acted upon in the subsequent bitwise-operations to extract the page frame number (PFN) from the PTE of the “static” `KUSER_SHARED_DATA`. This value is `0xf52e` within the PTE, which has a value of `0x800000000000f52e863`.
+More interestingly, however, is the fact that `nt!MI_READ_PTE_LOCK_FREE` dereferences the PTE contents and returns them via RAX. Since the PTE "bits" for the “static” `KUSER_SHARED_DATA`, which define the memory properties/permissions, are in RAX, they’re then acted upon in the subsequent bitwise-operations to extract the page frame number (PFN) from the PTE of the “static” `KUSER_SHARED_DATA`. This value is `0xf52e` within the PTE, which has a value of `0x800000000000f52e863`.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER21.png" alt="">
 
@@ -192,11 +192,11 @@ The first argument passed to `nt!MiMakeProtectionPfnCompatible` is a constant of
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSERREACTOS1.png" alt="">
 
-According to [ReactOS](https://github.com/reactos/reactos/blob/b0dfe20981065793244a2b8bb6787b441098e715/ntoskrnl/mm/ARM3/miarm.h#L773-L805), there is also a macro called `MI_MAKE_HARDWARE_PTE_KERNEL`, which leverages these constants. The prototype and definition can be seen below.
+According to [ReactOS](https://github.com/reactos/reactos/blob/b0dfe20981065793244a2b8bb6787b441098e715/ntoskrnl/mm/ARM3/miarm.h#L773-L805), there is also a function called `MI_MAKE_HARDWARE_PTE_KERNEL`, which leverages these constants. The prototype and definition can be seen below.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSERREACTOS2.png" alt="">
 
-This macro provides a combination of the functionality exposed by both `nt!MiMakeProtectionPfnCompatible` and`nt!MiMakeValidPte` (which is a function we will see shortly). The value 4, or `MM_READWRITE`, is actually [an index into an array](https://github.com/reactos/reactos/blob/1e01afab990b9fb9255d0c0d253ca141d5731a65/ntoskrnl/mm/arm/page.c#L18-L68) called `MmProtectToPteMask`. This array is responsible for converting the requested permission of the page (4, or `MM_READWRITE`) to a PTE-compliant mask.
+This function provides a combination of the functionality exposed by both `nt!MiMakeProtectionPfnCompatible` and`nt!MiMakeValidPte` (which is a function we will see shortly). The value 4, or `MM_READWRITE`, is actually [an index into an array](https://github.com/reactos/reactos/blob/1e01afab990b9fb9255d0c0d253ca141d5731a65/ntoskrnl/mm/arm/page.c#L18-L68) called `MmProtectToPteMask`. This array is responsible for converting the requested permission of the page (4, or `MM_READWRITE`) to a PTE-compliant mask.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSERREACTOS3.png" alt="">
 
@@ -216,7 +216,7 @@ With this in the back of our mind, let's now turn our attention to the call to `
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER30.png" alt="">
 
-`nt!MiMakeValidPte` essentially provides “the rest” of the functionality outlined by the ReactOS macro `MI_MAKE_HARDWARE_PTE_KERNEL`. `nt!MiMakeValiePte` requires the following information:
+`nt!MiMakeValidPte` essentially provides “the rest” of the functionality outlined by the ReactOS function `MI_MAKE_HARDWARE_PTE_KERNEL`. `nt!MiMakeValiePte` requires the following information:
 1. Address of the newly created, empty PTE (this PTE will be applied to the virtual address of `nt!MmWriteableUserSharedData`)
 2. A PFN
 3. A "PTE-compliant" mask (e.g. our read/write attributes)
@@ -277,7 +277,7 @@ Comparing our computed value with the kernel-produced value, we can see we now h
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER36.png" alt="">
 
-This functionality is provided in ReactOS in the form of a [macro](https://github.com/reactos/reactos/blob/b0dfe20981065793244a2b8bb6787b441098e715/ntoskrnl/mm/ARM3/miarm.h#L959-L975) called `MI_WRITE_VALID_PTE`. As we can see it essentially not only writes the PTE contents to the PTE address (in this case the allocation from the System PTE region via `nt!MiReservePtes`) but it also fetches the virtual address associated with the PTE through the function `MiPteToAddress`.
+This functionality is provided in ReactOS in the form of a [function](https://github.com/reactos/reactos/blob/b0dfe20981065793244a2b8bb6787b441098e715/ntoskrnl/mm/ARM3/miarm.h#L959-L975) called `MI_WRITE_VALID_PTE`. As we can see it essentially not only writes the PTE contents to the PTE address (in this case the allocation from the System PTE region via `nt!MiReservePtes`) but it also fetches the virtual address associated with the PTE through the function `MiPteToAddress`.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSERREACTOS4.png" alt="">
 

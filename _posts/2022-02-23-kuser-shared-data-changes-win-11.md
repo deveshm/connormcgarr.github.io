@@ -7,7 +7,7 @@ excerpt: "Examining recent changes to a highly-abused static structure, KUSER_SH
 Introduction
 ---
 
-A while back, in September, I came across an interesting [tweet](https://twitter.com/rohitwas/status/1442966987198459904?s=20&t=VY_l3TIXBMk1U6juAfGMSQ) that talked about some upcoming changes to `KUSER_SHARED_DATA` on Insider Preview builds of Windows 11.
+A little while back I came across an interesting [tweet](https://twitter.com/rohitwas/status/1442966987198459904?s=20&t=VY_l3TIXBMk1U6juAfGMSQ) that talked about some upcoming changes to `KUSER_SHARED_DATA` on Insider Preview builds of Windows 11.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER1.png" alt="">
 

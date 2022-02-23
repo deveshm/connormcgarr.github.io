@@ -305,7 +305,7 @@ The "static" `KUSER_SHARED_DATA` gets updated through the same methods aforement
 
 For our purposes, this is the end of the interesting things that `nt!MiProtectSharedUserPage` does! We now have two virtual addresses that are backed by `KUSER_SHARED_DATA`’s physical memory (one read-only, the "static" `0xfffff78000000000` `KUSER_SHARED_DATA` structure and a new `nt!MmWriteableUserSharedData` version which is randomized and read/write)!
 
-We can now see in IDA, for instance, when `KUSER_SHARED_DATA` needs to be updated, this is done through the new symbol which is randomized and writable. The below image is taken from `nt!KiUpdateTime`, where we can see several offsets of `KUSER_SHARED_DATA` are updated (namely `0x328` and `0x320`). On the same note, in the same photo, we can see that when members from `KUSER_SHARED_DATA` are needed to be read Windows goes through the old "static" hard coded address (in this case, `0xfffff78000000008` and `0xfffff78000000320` in the IDA screenshot).
+We can now see in IDA, for instance, when `KUSER_SHARED_DATA` needs to be updated, this is done through the new symbol which is randomized and writable. The below image is taken from `nt!KiUpdateTime`, where we can see several offsets of `KUSER_SHARED_DATA` are updated (namely `0x328` and `0x320`). On the same note, in the same photo, we can see that when members from `KUSER_SHARED_DATA` are read, Windows goes through the old "static" hard coded address (in this case, `0xfffff78000000008` and `0xfffff78000000320` in the IDA screenshot).
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER42.png" alt="">
 

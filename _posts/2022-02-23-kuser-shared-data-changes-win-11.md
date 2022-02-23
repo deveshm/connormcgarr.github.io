@@ -36,7 +36,7 @@ The address provided below, `0xfffffe7bc0000000`, is the virtual address of the 
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER5.png" alt="">
 
-This, at first, made sense. However, after talking with my coworker [Yarden Shafir](https://twitter.com/yarden_shafir), there are things in `KUSER_SHARED_DATA`, such as the `SystemTime` member which are _constantly_ updated and, therefore, Yarden told me to keep digging, as there obviously was some way `KUSER_SHARED_DATA` was being written to/updated with a read-only PTE. This also makes sense, as I found out later, because the `Dirty` bit for the PTE that corresponds with `KUSER_SHARED_DATA` is set to 0, which means the page hasn't been written to. So how exactly is this happening?
+This, at first, made sense. However, after talking with my coworker [Yarden Shafir](https://twitter.com/yarden_shafir), there are things in `KUSER_SHARED_DATA`, such as the `SystemTime` member, which are _constantly_ updated and, therefore, Yarden told me to keep digging, as there obviously was some way `KUSER_SHARED_DATA` was being written to/updated with a read-only PTE. This also makes sense, as I found out later, because the `Dirty` bit for the PTE that corresponds with `KUSER_SHARED_DATA` is set to 0, which means the page hasn't been written to. So how exactly is this happening?
 
 Armed with the following information, I went to IDA to look for anything interesting.
 

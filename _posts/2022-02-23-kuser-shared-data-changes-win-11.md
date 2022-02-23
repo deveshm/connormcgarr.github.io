@@ -114,7 +114,7 @@ Even more interesting, the “static” `KUSER_SHARED_DATA`’ is _still_ static
 
 Since we know `0xfffff78000000000`, the address of the “static” `KUSER_SHARED_DATA` structure, becomes read-only at some point, this is indicative of this function likely being responsible for changing the permissions of this address _AND_ also dynamically filling `nt!MmWriteableSharedUserData`, especially based on naming convention.
 
-Looking deeper into the disassembly of `nt!MiProtectSharedUserPage` we can see that the symbol `nt!MmWriteableSharedUserData` is updated with the value in RDI at the time of the instruction executing. But where does this value come from?
+Looking deeper into the disassembly of `nt!MiProtectSharedUserPage` we can see that the symbol `nt!MmWriteableSharedUserData` is updated with the value in RDI at the time that this instruction executes. But where does this value come from?
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER16.png" alt="">
 

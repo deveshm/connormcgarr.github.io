@@ -130,7 +130,7 @@ We can see this by replicating this formula on the virtual address of `0xfffff78
 
 This means the PTE associated with the “static” `KUSER_SHARED_DATA` is going to be passed in to `nt!MI_READ_PTE_LOCK_FREE`. The address of said PTE is `0xffffb7fbc0000000`.
 
-`nt!MI_READ_PTE_LOCK_FREE`, at a high level, will dereference the contents of the PTE and return them, while also performing a check on the in-scope page table entry to ensure it is see if it is within the known address space of the PML4E array, which contains an array of PML4 page table entries for usage with the PML4 paging structure. Recall that the PML4 structure is the base paging structure. So, in other words, this ensures that the page table entry provided resides somewhere within the paging structures. This can be seen below.
+`nt!MI_READ_PTE_LOCK_FREE`, at a high level, will dereference the contents of the PTE and return them, while also performing a check on the in-scope page table entry to see if it is within the known address space of the PML4E array, which contains an array of PML4 page table entries for usage with the PML4 paging structure. Recall that the PML4 structure is the base paging structure. So, in other words, this ensures that the page table entry provided resides somewhere within the paging structures. This can be seen below.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER18.png" alt="">
 

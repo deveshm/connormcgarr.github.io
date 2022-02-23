@@ -217,9 +217,11 @@ With this in the back of our mind, let's now turn our attention to the call to `
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER30.png" alt="">
 
 `nt!MiMakeValidPte` essentially provides “the rest” of the functionality outlined by the ReactOS function `MI_MAKE_HARDWARE_PTE_KERNEL`. `nt!MiMakeValiePte` requires the following information:
-1. Address of the newly created, empty PTE (this PTE will be applied to the virtual address of `nt!MmWriteableUserSharedData`)
-2. A PFN
-3. A "PTE-compliant" mask (e.g. our read/write attributes)
+1. Address of the newly created, empty PTE (this PTE will be applied to the virtual address of `nt!MmWriteableUserSharedData`). This is currently in RCX
+2. A PFN. This is currently in RDX (e.g. not the virtual address from the PFN database, but the raw PFN "value")
+3. A "PTE-compliant" mask (e.g. our read/write attributes). This is currently in R8
+
+All of this information can be seen above in the following screenshot.
 
 In terms of "mapping different views of the same physical memory", the most important component here is the value in RDX, which is the actual PFN value of `KUSER_SHARED_DATA` (the raw value, not the virtual address). Let's recall first that a PFN, at a high level, is essentially a physical address, when multiplied by the size of a page (`0x1000`) bytes, or 4KB. This is true, especially in our case, as we are dealing with the most granular type of memory - a 4KB-aligned piece of memory. There are no more paging structures to index, which is usually what a PFN is used for. This means the PFN, in this case, is used to fetch a final, 4KB-aligned memory page.
 

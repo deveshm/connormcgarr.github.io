@@ -168,7 +168,7 @@ We can see this as the base of the PFN database, `0xffffc38000000000` in this ca
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER24.png" alt="">
 
-We can corroborate this by parsing the above virtual address as a `MMPFN` structure to see if the `PteAddress` member corresponds to the known PTE of the “static” `KUSER_SHARED_DATA`. As we know the PTE is located at `0xffffb7fbc0000000`.
+We can corroborate this by parsing the above virtual address as a `MMPFN` structure to see if the `PteAddress` member corresponds to the known PTE of the “static” `KUSER_SHARED_DATA`. As we know, the PTE is located at `0xffffb7fbc0000000`.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSERCONFIRM.png" alt="">
 

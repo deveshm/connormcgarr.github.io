@@ -118,7 +118,7 @@ Looking deeper into the disassembly of `nt!MiProtectSharedUserPage` we can see t
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER16.png" alt="">
 
-Let's take a look at the beginning of the function. The first thing that stands out is the kernel-mode address and calls to the `nt!MI_READ_PTE_LOCK_FREE` macro and the`nt!Feature_KernelSharedUserDataAaslr__private_IsEnabled` function (which isn't very interesting for our purposes).
+Let's take a look at the beginning of the function. The first thing that stands out is the kernel-mode address and calls to the `nt!MI_READ_PTE_LOCK_FREE` macro and the `nt!Feature_KernelSharedUserDataAaslr__private_IsEnabled` function (which isn't very interesting for our purposes).
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER17.png" alt="">
 

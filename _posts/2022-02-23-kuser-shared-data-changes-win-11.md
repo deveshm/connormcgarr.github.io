@@ -237,7 +237,7 @@ After executing the function, we can see this is the case!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSER31.png" alt="">
 
-The next function call, `nt!MiPteInShadowRange` essentially just does bounds checking to see if our PTE resides in the shadow space. Recall earlier that with the implementation of Kernel Virtual Address Shadow (KVAS) that paging structures are separated: one set for user mode and one set for kernel mode. The “shadow space”, otherwise known as the structures used for user mode addressing, are within the range checked by `nt!MiPteInShadowRange`. Since we are dealing with a kernel mode page, obviously the PTE it is applied to is not within the “shadow space”. It is not really of interest to us for our purposes.
+The next function call, `nt!MiPteInShadowRange`, essentially just does bounds checking to see if our PTE resides in the shadow space. Recall earlier that with the implementation of Kernel Virtual Address Shadow (KVAS) that paging structures are separated: one set for user mode and one set for kernel mode. The “shadow space”, otherwise known as the structures used for user mode addressing, are within the range checked by `nt!MiPteInShadowRange`. Since we are dealing with a kernel mode page, obviously the PTE it is applied to is not within the “shadow space”. It is not really of interest to us for our purposes.
 
 After this function call, a `mov qword ptr [rdi], rbx` instruction occurs. This updates our allocated PTE, which is still blank, with the proper bits created from our call to `nt!MiMakeValidPte`! We now have a valid PTE, backed by the same physical memory as `KUSER_SHARED_DATA` located at the virtual address of `0xfffff78000000000`!
 

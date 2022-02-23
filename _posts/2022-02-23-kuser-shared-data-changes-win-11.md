@@ -172,7 +172,7 @@ We can corroborate this by parsing the above virtual address as a `MMPFN` struct
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/KUSERCONFIRM.png" alt="">
 
-The `PteAddress` member of the PFN structure aligns with the virtual address of the PTE associated with the “static” `KUSER_SHARED_DATA` - thus confirming this is the associated PFN records with the “static” `KUSER_SHARED_DATA`.
+The `PteAddress` member of the PFN structure aligns with the virtual address of the PTE associated with the “static” `KUSER_SHARED_DATA` - thus confirming this is the associated PFN record with the “static” `KUSER_SHARED_DATA`.
 
 This value is then used in a call to `nt!MiReservePtes`, which we can see from two images ago. We know the first argument for this function will go into the RCX register, per the `__fastcall` calling convention. This argument is actually a `nt!_MI_SYSTEM_PTE_TYPE` structure.
 

@@ -389,7 +389,7 @@ When `o.b` and `o.a` are updated via the `opt()` function (`opt(o, o, 0x1234`):
 
 We can see that JavaScript just acted _directly_ on the already inlined-values of `1` and `2` and simply just overwrote them with the values provided by `opt()` to update the `o` object. This means that when ChakraCore updates objects that are of the _same_ type (e.g. a dynamic object with inlined-properties), it does so without needing to change the type in memory and just directly acts on the property values within the object.
 
-Let's quickly recall a snippet of code from the JavaScript dynamic object analysis section.
+Before moving on, let's quickly recall a snippet of code from the JavaScript dynamic object analysis section.
 
 ```javascript
 let a = {b: 1, c: 2, d: 3, e: 4};

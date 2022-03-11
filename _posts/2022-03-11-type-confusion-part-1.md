@@ -569,7 +569,7 @@ Looking above, we can see that above the currently executing instruction of `mov
 
 Perfect! We can see in RCX our inlined-property values of `o.a` and `o.b`! These values are stored in a pointer, `000001229cd38200`, which is the value in RCX. This is actually the address of our `auxSlots` array that will be assigned to our object `o` as a result of the type-transition! We can see this as RAX currently contains our `o` object, which has now been transitioned to an `auxSlots` variant of a dynamic object! We can confirm this by examining the `auxSlots` array located at `o+0x10`! Looking at the above image, we can see that our object was transitioned from an inlined-property represented object to one with properties held in an `auxSlots` array!
 
-Let's set one more breakpoint to confirm this 100 percent by watching the value, in memory, being updated. Let's set a breakpoint on the `mov qword [rax+10h], rcx` instruction, and remove all other breakpoints (except our `print()` debugging breakpoint). We can easily do this by removing breakpoints and leveraging the `.restart` command in WinDbg to restart execution of `ch.exe`.
+Let's set one more breakpoint to confirm this 100 percent by watching the value, in memory, being updated. Let's set a breakpoint on the `mov qword [rax+10h], rcx` instruction, and remove all other breakpoints (except our `print()` debugging breakpoint). We can easily do this by removing breakpoints and leveraging the `.restart` command in WinDbg to restart execution of `ch.exe` (please note that the below image bay be low resolution. Right click on it and open it ina new tab to view it if you have trouble seeing it).
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/typeconfusionanalysis25.png" alt="">
 

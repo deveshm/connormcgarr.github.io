@@ -396,7 +396,7 @@ let a = {b: 1, c: 2, d: 3, e: 4};
 a.f = 5;
 ```
 
-Here `a` is created with many inlined-properties, meaning `1`, `2`, `3`, and `4` are all stored _directly_ within the `a` object. However, when the new property of `a.f` is added _after_ the instantiation of the object `a`, JavaScript will convert this object to reference data via an `auxSlots` array. We can recall how this looks below.
+Here `a` is created with many inlined-properties, meaning `1`, `2`, `3`, and `4` are all stored _directly_ within the `a` object. However, when the new property of `a.f` is added _after_ the instantiation of the object `a`, JavaScript will convert this object to reference data via an `auxSlots` array, as the layout of this object has obviously changed with the introduction of a new property which was _not_ declared inline. We can recall how this looks below.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/typeconfusionobj15.png" alt="">
 

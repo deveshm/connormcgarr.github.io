@@ -525,7 +525,7 @@ Quickly, let's reference the Google Project Zero original vulnerability disclosu
 
 > NewScObjectNoCtor and InitProto opcodes are treated as having no side effects, but actually they can have via the SetIsPrototype method of the type handler that can cause transition to a new type. This can lead to type confusion in the JITed code.
 
-We know here that `InitProto` is a function that will be executed, due to our setting of the `tmp` function's `.prototype` property. As called out in the above snippet, this function internally invoked a method (function) called `SetIsPrototype`, which eventually is responsible to transitioning the type of the object used as the `prototype` for a function (in this case, it means `o` will be type-transitioned).
+We know here that `InitProto` is a function that will be executed, due to our setting of the `tmp` function's `.prototype` property. As called out in the above snippet, this function internally invokes a method (function) called `SetIsPrototype`, which eventually is responsible to transitioning the type of the object used as the `prototype` for a function (in this case, it means `o` will be type-transitioned).
 
 Knowing this, and knowing we want to see exactly where this type transition occurs, to confirm that this in fact is the case and ultimately how our vulnerability comes about, let's set a breakpoint on this `SetPrototype` method within `chakracore!Js::DynamicObject` (since we are dealing with a dynamic object). Please note we are setting a breakpoint on `SetPrototype` instead of `SetIsPrototype`, as `SetIsPrototype` is eventually invoked within the call stack of `SetPrototype`. Calling `SetPrototype` eventually will call `SetIsPrototype`.
 

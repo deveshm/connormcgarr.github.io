@@ -626,7 +626,7 @@ a.Member1 = 0x1234;
 
 The way this is achieved in Microsoft Edge is through a process known as out-of-process JIT compilation. The Edge "JIT server" is a separate process from the actual "renderer" or "content" process, which is the process a user interfaces with. When a function is JIT-compiled, it is injected into the content process from the JIT server (we will abuse this with an Arbitrary Code Guard (ACG) bypass in the third post. Note also that the ACG bypass we will use has since been patched as of Windows 10 RS4) after it is optimized.
 
-Let's now examine this function by setting a breakpoint on it.
+Let's now examine this function by setting a breakpoint on it (please note that the below image bay be low resolution. Right click on it and open it ina new tab to view it if you have trouble seeing it)..
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/typeconfusionanalysis37.png" alt="">
 

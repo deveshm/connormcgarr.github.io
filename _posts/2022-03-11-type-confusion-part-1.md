@@ -34,7 +34,7 @@ Part three, lastly, will deconstruct the following topics:
 
 There are also a few limitations you should be aware of as well:
 1. In this blog series we will have to bypass ACG. The [bypass](https://bugs.chromium.org/p/project-zero/issues/detail?id=1299) we will be using has been mitigated as of Windows 10 RS4.
-2. I am also aware Intel Control-Flow Enforcement Technology (CET), which is a mitigation that now exists (although it has yet to achieve widespread adoption). The version of Edge we are targeting doesn't have CET.
+2. I am also aware of Intel Control-Flow Enforcement Technology (CET), which is a mitigation that now exists (although it has yet to achieve widespread adoption). The version of Edge we are targeting doesn't have CET.
 3. Our initial analysis will be done with the `ch.exe` application, which is the ChakraCore shell. This is essentially a command-line JavaScript engine that can directly execute JavaScript (just as a browser does). Think of this as the "rendering" part of the browser, but without the graphics. Whatever can occur in `ch.exe` can occur in Edge itself (Chakra-based Edge). Our final exploit, as we will see in part three, will be detonated in Edge itself. However, `ch.exe` is a very powerful and useful debugging tool.
 4. Chakra, and the open-source twin ChakraCore, are both deprecated in their use with Microsoft Edge. Edge now runs on the V8 JavaScript engine, which is used by Chrome-based browsers.
 

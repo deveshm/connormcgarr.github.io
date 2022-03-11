@@ -404,6 +404,8 @@ Here `a` is created with many inlined-properties, meaning `1`, `2`, `3`, and `4`
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/typeconfusionobj14.png" alt="">
 
+This process is known as a _type transition_, where ChakraCore/Chakra will update the layout of a dynamic object, in memory, based on factors such as a dynamcic object with inlined-properties adding a new property which is _not_ declared inline after the fact.
+
 Let's now come back to the following code (`opt()` function call after the 2000 calls to `opt()` and `o` object creation)
 
 ```javascript
@@ -434,7 +436,7 @@ Before, we supplied the value of `tmp.prototype` with a value of `proto`. In thi
 
 `tmp.prototype = o`
 
-This may seem very innocent at first, but this is actually where our vulnerability occurs. When a function has its prototype set (e.g. `tmp.prototype = o`) the object which will become the prototype (in this case, our object `o`, since it is assigned to `tmp`'s prototype property) has to first go through a _type transition_. This means that `o` will no longer be represented in memory with inlined -values and instead will be updated to use `auxSlots` to access properties for the object.
+This may seem very innocent at first, but this is actually where our vulnerability occurs. When a function has its prototype set (e.g. `tmp.prototype = o`) the object which will become the prototype (in this case, our object `o`, since it is assigned to `tmp`'s prototype property) has to first go through a _type transition_. This means that `o` will no longer be represented in memory with inlined-values and instead will be updated to use `auxSlots` to access properties for the object.
 
 Before transition of `o` (`o.b = 1` occurs before the type transition, so it is still updated inline):
 

@@ -406,7 +406,7 @@ Here `a` is created with many inlined-properties, meaning `1`, `2`, `3`, and `4`
 
 This process is known as a _type transition_, where ChakraCore/Chakra will update the layout of a dynamic object, in memory, based on factors such as a dynamcic object with inlined-properties adding a new property which is _not_ declared inline after the fact.
 
-Now that we have been introduced to type transitions, let's now circle back to the following code in our analysis (`opt()` function call after the 2000 calls to `opt()` and `o` object creation)
+Now that we have been introduced to type transitions, let's now come back to the following code in our analysis (`opt()` function call after the 2000 calls to `opt()` and `o` object creation)
 
 ```javascript
 let o = {a: 1, b: 2};

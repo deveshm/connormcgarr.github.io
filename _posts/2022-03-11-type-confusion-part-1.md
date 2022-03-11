@@ -377,8 +377,6 @@ We know that a dynamic object `o` was declared with inlined-properties. We also 
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/typeconfusionobj7.png" alt="">
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/typeconfusionobj8.png" alt="">
-
 Skipping over the `prototype` now, we also can see that `o.a` is set. `o.a` was a property that was present when the object was declared, and is represented in the object directly, since is was declared inline. So essentially, here is how this should look in memory.
 
 When the object is instantiated (`let o = {a: 1, b: 2}`):

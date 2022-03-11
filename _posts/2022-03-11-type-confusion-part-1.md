@@ -44,9 +44,7 @@ Configuring a Chakra/ChakraCore Environment
 ---
 Before beginning, Chakra is the name of the "Microsoft proprietary" JavaScript engine used with Edge before V8. The "open-source" variant is known as ChakraCore. We will reference ChakraCore for this blog post, as the source code [is available](https://github.com/chakra-core/ChakraCore). CVE-2019-0567 affects both "versions", and at the end we will also port our exploit to actually target Chakra/Edge (we will be doing analysis in ChakraCore).
 
-For the purposes of this blog post, we will be performing analysis and exploitation with two environments:
-1. The standard Microsoft Edge (pre-V8 JavaScript engine) browser and Chakra JavaScript engine
-2. The open-source version of Chakra, the ChakraCore JavaScript engine + `ch.exe` shell
+For the purposes of this blog post, and part two, we will be performing analysis (and exploitation in part two) with the open-source version of Chakra, the ChakraCore JavaScript engine + `ch.exe` shell. In part three, we will perform exploitation with the standard Microsoft Edge (pre-V8 JavaScript engine) browser and Chakra JavaScript engine
 
 So we can knock out "two birds with one stone", our environment needs to first contain a pre-V8 version of Edge, as well as a version of Edge that doesn't have the patch applied for CVE-2019-0567 (the type confusion vulnerability) or CVE-2017-8637 (our ACG bypass primitive). Looking at the [Microsoft advisory](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2019-0567) for CVE-2019-0567, we can see that the applicable patch is KB4480961. The CVE-2017-8637 advisory can be found [here](https://msrc.microsoft.com/update-guide/en-us/vulnerability/CVE-2017-8637). The applicable patch in this case is KB4034674.
 

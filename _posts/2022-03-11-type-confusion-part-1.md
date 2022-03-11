@@ -340,7 +340,7 @@ When `opt(o, {}, {})` is executed, we are providing the function with two NULL v
 
 1. Set `o`'s (provided by the caller) `a` and `b` properties
 2. `b` is set to `1` (it was initially `2` when the `o` object was created via `let o = {a: 1, b: 2}`)
-3. A function named `tmp` is created, and its `prototype` property is set to 0, which essentially means create `tmp` _without_ a prototype
+3. A function named `tmp` is created, and its `prototype` property is set to `0`, which essentially means create `tmp` _without_ a prototype
 4. `o.a` is set to the value provided by the caller through the `value` parameter. Since we are executing the function as `opt(o, {}, {})`, the `o.a` property will also be `0`
 
 The above code is executed 2000 times. What this does is let the JavaScript engine know that `opt()` has become what is known as a "hot" function. A "hot" function is one that is recognized by JavaScript as being executed constantly (in this case, 2000 times). This instructs ChakraCore to have this function go through a process called Just-In-Time compilation (JIT), where the above JavaScript is converted from interpreted code (essentially byte code) to actually compiled as machine code, such as a C `.exe` binary. This is done to increase performance, as this function doesn't have to go through the interpretation process (which is beyond the scope of this blog post) every time it is executed. We will come back to this in a few moments.

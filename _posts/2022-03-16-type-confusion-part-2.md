@@ -610,7 +610,7 @@ dataview2 = new DataView(new ArrayBuffer(0x100));
 
 // Function to convert to hex for memory addresses
 function hex(x) {
-	return `0x${x.toString(16)}`
+	return ${x.toString(16)};
 }
 
 // Arbitrary read function

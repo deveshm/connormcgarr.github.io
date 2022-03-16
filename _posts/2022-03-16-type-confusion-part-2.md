@@ -672,7 +672,7 @@ main();
 
 We can see we added a few things above. The first is our `hex()` function, which really is just for "pretty printing" purposes. It allows us to convert a value to hex, which is obviously how user-mode addresses are represented in Windows.
 
-Secondly, we can see our `read64()` function. This is identical to what we displayed with the arbitrary write primitive. We use `dataview1` to corrupt the `buffer` of `dataview2` with the address we want to read from. However, instead of using `dataview2.setUint32()` to overwrite our target address, we use the `getUint32()` method to retrieve `0x8` bytes from our target address.
+Secondly, we can see our `read64()` function. This is practically dentical to what we displayed with the arbitrary write primitive. We use `dataview1` to corrupt the `buffer` of `dataview2` with the address we want to read from. However, instead of using `dataview2.setUint32()` to overwrite our target address, we use the `getUint32()` method to retrieve `0x8` bytes from our target address.
 
 Lastly, `write64()` is _identical_ to what we displayed in the code before the code above, where we walked through the process of performing an arbitrary write. We have simply "templatized" the read/write process to make our exploitation much more efficient.
 

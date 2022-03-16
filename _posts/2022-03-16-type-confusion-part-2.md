@@ -1211,7 +1211,7 @@ Let's now run our updated `exploit.js` in a `cmd.exe` session without any debugg
 
 As we can see, we received an access denied. This actually has nothing to do with our exploit, except that we attempted to read memory that is invalid as a result of our loop. This is because we set an arbitrary value of `0x10000` bytes to read - but all of this memory may not be resident at the time of execution. This is no worry, because if we open up our `results.txt` file, where our output went, we can see we have _plenty_ to work with here.
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/2typeconfusion84png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/2typeconfusion84.png" alt="">
 
 Scrolling down a bit in our results, we can see we have finally reached the location on the stack with return addresses and other data.
 

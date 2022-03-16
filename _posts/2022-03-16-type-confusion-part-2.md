@@ -423,7 +423,7 @@ We can clearly see that the `o->auxSlots` pointer is updated with the address of
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/2typeconfusion39.png" alt="">
 
-This is exactly how we would expect our vulnerability to behave. After toe `opt(o, o, obj)` function is called, the next step in our script is the following:
+This is exactly how we would expect our vulnerability to behave. After the `opt(o, o, obj)` function is called, the next step in our script is the following:
 
 ```javascript
 // Corrupt obj->auxSlots with the address of the first DataView object

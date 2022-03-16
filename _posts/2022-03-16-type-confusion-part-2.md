@@ -800,7 +800,7 @@ From here, we can compute the base address of `chakracore.dll` by determining th
 The updated code to leak the base address of `chakracore.dll` can be found below:
 
 ```javascript
-	(...)truncated(...)
+    (...)truncated(...)
 
     opt(o, o, obj);     // Instead of supplying 0x1234, we are supplying our obj
 

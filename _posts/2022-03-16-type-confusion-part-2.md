@@ -325,7 +325,7 @@ dataview2.setUint32(0x0, 0x42424242, true);
 dataview2.setUint32(0x4, 0x42424242, true);
 ```
 
-If we invoke `setUint32()` on `dataview2`, we do so at an offset of `0`. This is because we are not attempting to corrupt any other objects, we are intending to use `dataview2.setUint32()` in a legitimate fashion. When `dataview2->setUint32()` is invoked, it will fetch the address of the `buffer` from `dataview2` by locating `dataview+0x38`, derefencing the address, and attempting to write the value `0x4242424242424242` (as seen above) into the address.
+If we invoke `setUint32()` on `dataview2`, we do so at an offset of `0`. This is because we are not attempting to corrupt any other objects, we are intending to use `dataview2.setUint32()` in a legitimate fashion. When `dataview2->setUint32()` is invoked, it will fetch the address of the `buffer` from `dataview2` by locating `dataview2+0x38`, derefencing the address, and attempting to write the value `0x4242424242424242` (as seen above) into the address.
 
 The issue is, however, is that we used a type confusion vulnerability to update `dataview2->buffer` to a _different_ address (in this case an invalid address of `0x4141414141414141`). This is the address `dataview2` will now attempt to write to, which obviously will cause an access violation.
 

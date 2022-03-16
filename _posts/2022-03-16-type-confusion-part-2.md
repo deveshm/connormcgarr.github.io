@@ -235,7 +235,7 @@ Using the exact same methodology as before, we can return to our `mov dword ptr 
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/2typeconfusion22.png" alt="">
 
-The only thing we are "limited" to is the fact we cannot set a 64-bit value in "one go", and we must divide our writes/reads into two tries, since we can only read/write 32-bits at a time as a result of the methods provided to use by `DataView`. However, there is currently no way for us to abuse this functionality, as we can only perform these actions inside a buffer of a `DataView` object, which is not a security vulnerability. Let's see how we can use our type confusion vulnerability to achieve this.
+The only thing we are "limited" to is the fact we cannot set a 64-bit value in "one go", and we must divide our writes/reads into two tries, since we can only read/write 32-bits at a time as a result of the methods provided to use by `DataView`. However, there is currently no way for us to abuse this functionality, as we can only perform these actions inside a buffer of a `DataView` object, which is not a security vulnerability. We will eventually see how we can use our type confusion vulnerability to achieve this, later in this blog post.
 
 Lastly, we know how we can act on the `DataView` object, but how do we actually view the object in memory? Where does the `buffer` property of `DataView` come from, as we saw from our debugging? We can set a breakpoint on our original function, `chakracore!Js::DataView::EntrySetUint32`. When we hit this breakpoint, we then can set a breakpoint on the `SetValue()` function, at the end of the `EntrySetUint32` function, which passes the pointer to the in-scope `DataView` object via RCX.
 

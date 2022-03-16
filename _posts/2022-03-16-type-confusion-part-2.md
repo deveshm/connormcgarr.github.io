@@ -1584,7 +1584,7 @@ pop rdx ; ret
 pop rax ; ret
 <WinExec address> (placed into RAX)
 
-jmp rax ; ret (call kernel32!WinExec)
+jmp rax (call kernel32!WinExec)
 ```
 
 The above gadgets will fill RDX with our last parameter, and then place `WinExec` into RAX. Here is how we update our final script.

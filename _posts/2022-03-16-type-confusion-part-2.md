@@ -1227,7 +1227,7 @@ After seeing this address, we need to find out if this is an actual `ret` instru
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/2typeconfusion87.png" alt="">
 
-<img src="{{ site.url }}{{ site.baseurl }}/images/2typeconfusion88.png" alt="">
+<img src="{{ site.url }}{{ site.baseurl }}/images/2typeconfusion88a.png" alt="">
 
 After `chakracore.dll` is loaded, we can disassemble our memory address and as we can see - this is a valid `ret` address.
 

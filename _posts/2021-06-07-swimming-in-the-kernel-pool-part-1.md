@@ -2,7 +2,7 @@
 title: "Exploit Development: Swimming In The (Kernel) Pool - Leveraging Pool Vulnerabilities From Low-Integrity Exploits, Part 1"
 date: 2021-06-07
 tags: [posts]
-excerpt: "Leveraging the HackSysExtreme Vulnerable Driver to understand the Windows Kernel Pool, the impacts of kLFH, and bypassing kASLR from low integrity via out-of-bounds read vulnerabilities."
+excerpt: "Leveraging the HackSysExtreme Vulnerable Driver to understand the Windows kernel pool, the impacts of kLFH, and bypassing kASLR from low integrity via out-of-bounds read vulnerabilities."
 ---
 Introduction
 ---

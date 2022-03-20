@@ -2,7 +2,7 @@
 title: "Exploit Development: Swimming In The (Kernel) Pool - Leveraging Pool Vulnerabilities From Low-Integrity Exploits, Part 2"
 date: 2021-07-18
 tags: [posts]
-excerpt: "Combining Part 1's information leak vulnerability with a pool overflow vulnerability to obtain code execution via grooming the kLFH"
+excerpt: "Combining part 1's information leak vulnerability with a pool overflow vulnerability to obtain code execution via grooming the kLFH"
 ---
 Introduction
 ---

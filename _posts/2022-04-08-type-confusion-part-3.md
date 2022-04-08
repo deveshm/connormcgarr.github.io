@@ -9850,9 +9850,15 @@ The last thing for us is to ensure execution reaches our shellcode. After execut
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3typeconfusion203.png" alt="">
 
-That's it! We have achieved our task and we now can execute our shellcode! A GIF shall suit us nicely here!
+That's it! We have achieved our task and we now can execute our shellcode!
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3typeconfusion204.png" alt="">
+
+An exploit GIF shall suit us nicely here!
+
+<img src="{{ site.url }}{{ site.baseurl }}/images/final_acg_exploit.gif" alt="">
+
+
 
 Meterpreter is also loaded as a reflective, in memory DLL - meaning we have also taken care of CIG as well! That makes for DEP, ASLR, CFG, ACG, CIG, and no-child process mitigation bypasses! No wonder this post was so long!
 

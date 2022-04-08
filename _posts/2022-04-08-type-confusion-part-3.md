@@ -889,7 +889,7 @@ This value can be seen in the stack leaking contents.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3typeconfusion44.png" alt="">
 
-Why did I choose this return address? Again, it was an arduous process taking every stack address and overwriting it until one consistently worked. Additionally, a little less anecdotally, the symbol for this return address is with a function quite literally called `CallFunction`, which means its likely responsible for executing a function call of interpreted JavaScript. Because of this, we know a function will execute its code and then hand execution back to the caller via the return address, it is likely that this piece of code will be executed (the return address). However, there are many other options that you could choose from.  
+Why did I choose this return address? Again, it was an arduous process taking every stack address and overwriting it until one consistently worked. Additionally, a little less anecdotally, the symbol for this return address is with a function quite literally called `CallFunction`, which means its likely responsible for executing a function call of interpreted JavaScript. Because of this, we know a function will execute its code and then hand execution back to the caller via the return address. It is likely that this piece of code will be executed (the return address) since it is responsible for calling a function. However, there are many other options that you could choose from.  
 
 ```html
 <button onclick="main()">Click me to exploit CVE-2019-0567!</button>

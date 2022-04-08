@@ -881,7 +881,7 @@ As we start to scroll down through the output, we can clearly see some return ad
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3typeconfusion42.png" alt="">
 
-Since I already mentioned the "trial and error" approach in part two, which consists of overwriting a return address (after confirming it is one) and seeing if you end up controlling the instruction pointer by corrupting it. This is just a matter of trial and error and it was the approach I took. The return address that I found worked best for me was `chakra!Js::JavascriptFunction::CallFunction<1>+0x83` (again there is no "special" way to find it. Again, just start corrupting return address with `0x4141414141414141` and see if you cause an access violation with RIP being pointer to by this value, or RSP being pointed to by this value at the time of the instruction).
+Since I already mentioned the "trial and error" approach in part two, which consists of overwriting a return address (after confirming it is one) and seeing if you end up controlling the instruction pointer by corrupting it, I won't show this process here again. Just know, as mentioned, that this is just a matter of trial and error (in terms of my approach). The return address that I found worked best for me was `chakra!Js::JavascriptFunction::CallFunction<1>+0x83` (again there is no "special" way to find it. Again, just start corrupting return address with `0x4141414141414141` and see if you cause an access violation with RIP being pointer to by this value, or RSP being pointed to by this value at the time of the instruction).
 
 This value can be seen in the stack leaking contents.
 

@@ -1136,7 +1136,7 @@ So, to summarize, in Edge we cannot:
 4. We cannot allocate RW memory with `VirtualAlloc` and then mark it as RX
 5. We cannot allocate RX memory with `VirtualAlloc` and then mark it as RW
 
-With the advent of all three of these mitigations, previous exploitation strategies are all thrown out the window. Let's talk about how this changes our exploit strategy, now knowing we cannot just execute shellcode directly within the content process.
+With the advent of all three of these mitigations, previous exploitation strategies are all thrown out of the window. Let's talk about how this changes our exploit strategy, now knowing we cannot just execute shellcode directly within the content process.
 
 CVE-2017-8637 - Combining Vulnerabilities
 ---

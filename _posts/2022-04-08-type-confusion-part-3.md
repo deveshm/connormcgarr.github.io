@@ -1335,12 +1335,11 @@ Instead of directly allocating RWX memory within the JIT process (from the conte
 2. Allocate memory within the JIT process via `VirtualAllocEx` and the above handle
 3. Write our final shellcode (a reflective DLL from Meterpreter) into the allocation (our shellcode is now in the JIT process as RW)
 4. Create a thread within the JIT process via `CreateRemoteThread`, but create this thread as _suspended_ so it doesn't execute
-5. Dump the `CONTEXT` structure of the thread we just created (and now control) in the JIT process via `GetThreadContext` to retrieve its instruction pointer (RIP) and stack pointer (RSP)
+5. Dump the `CONTEXT` structure of the thread we just created (and now control) in the JIT process via `GetThreadContext` to retrieve its stack pointer (RSP)
 6. Use `WriteProcessMemory` to write the "final" ROP chain into the JIT process by leveraging the leaked stack pointer (RSP) of the thread we control in the JIT process from our call to `GetThreadContext`. Since we know where the stack is for our thread we created, from `GetThreadContext`, we can directly write a ROP chain to it with `WriteProcessMemory` and our handle to the JIT server. This ROP chain will mark our shellcode, which we already injected into the JIT process, as RWX (this ROP chain will work just like any traditional ROP chain that calls `VirtualProtect`)
-7. Update the instruction pointer of the thread we control to return into our ROP chain
-8. Use `SetThreadContext` to update our thread's RIP and RSP members
-9. Call `ResumeThread`. This call will kick off execution of our thread, which has RIP pointed to a return routine to start executing off of the stack, where our ROP chain is
-10. Our ROP chain will mark our shellcode as RWX and will jump to it and execute it
+7. Update the instruction pointer of the thread we control to return into our ROP chains
+8. Call `ResumeThread`. This call will kick off execution of our thread, which has RIP pointed to a return routine to start executing off of the stack, where our ROP chain is
+9. Our ROP chain will mark our shellcode as RWX and will jump to it and execute it
 
 Lastly, I want to quickly point out the old [Advanced Windows Exploitation syllabus](https://web.archive.org/web/20190909204906/https://www.offensive-security.com/documentation/advanced-windows-exploitation.pdf) from Offensive Security. After reading the steps outlined in this syllabus, I was able to formulate my aforementioned exploitation path off of the ground work laid here. As this blog post continues on, I will explain some of the things I thought would work at first and how the above exploitation path actually came to be. Although the syllabus I read was succinct and concise, but after developing my exploit I learned some additional things Control Flow Guard checks and it led to many more ROP chains than I would have liked. As this blog post goes on, I will explain my thought process as to what I _thought_ would work and what _actually_ worked. 
 

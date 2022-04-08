@@ -1212,7 +1212,7 @@ Let's now turn out attention to this [this](https://bugs.chromium.org/p/project-
 
 We know that the JIT server (a different process) needs to map JIT'd code into the content process. As the issue explains:
 
-> In order to be able to map executable memory in the calling process, JIT process needs to have a handle of the calling process. So how does it get that handle? It is sent by the calling process as part of the ThreadContext structure. In order to send its handle to the JIT process, the calling process first needs to call DuplicateHandle on its (pseudo) handle.
+> In order to be able to map executable memory in the calling process, JIT process needs to have a handle of the calling process. So how does it get that handle? It is sent by the calling process as part of the `ThreadContext` structure. In order to send its handle to the JIT process, the calling process first needs to call `DuplicateHandle` on its (pseudo) handle.
 
 The above is self explanatory. If you want to do process injection (e.g. map code into _another_ process) you need a handle to that process. So, in the case of the JIT server - the JIT server knows it is going to need to inject some code into the content process. In order to do this, the JIT server needs a handle to the content process with permissions such as `PROCESS_VM_OPERATION`. So, in order for the JIT process to have a handle to the content process, the content process (as mentioned above) shares it with the JIT process. However, this is where things get interesting. 
 

@@ -2420,12 +2420,12 @@ As previously mentioned, it is possible to obtain a `PROCESS_ALL_ACCESS` handle 
 
 ```c
 DuplicateHandle(
-	jitHandle,				// Leaked from s_jitManager+0x8 with PROCESS_DUP_HANDLE permissions
+	jitHandle,		// Leaked from s_jitManager+0x8 with PROCESS_DUP_HANDLE permissions
 	GetCurrentProcess(),	// Pseudo handle to the current process
 	GetCurrentProcess(),	// Pseudo handle to the current process
-	&fulljitHandle,			// Variable we supply that will receive the PROCESS_ALL_ACCESS handle to the JIT server
-	0,						// NULL since we will set dwOptions to DUPLICATE_SAME_ACCESS
-	0,						// FALSE (new handle isn't inherited)
+	&fulljitHandle,		// Variable we supply that will receive the PROCESS_ALL_ACCESS handle to the JIT server
+	0,			// NULL since we will set dwOptions to DUPLICATE_SAME_ACCESS
+	0,			// FALSE (new handle isn't inherited)
 	DUPLICATE_SAME_ACCESS	// Duplicate handle has same access as source handle (source handle is an all access handle, e.g. a pseudo handle), meaning the duplicated handle will be PROCESS_ALL_ACCESS
 );
 ```

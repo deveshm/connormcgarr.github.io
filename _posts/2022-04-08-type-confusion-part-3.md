@@ -2361,7 +2361,7 @@ write64(chakraLo+0x74b000+countMe, chakraHigh, 0x00000000, 0x00000000);         
 inc();
 ```
 
-According to the `__fastcall` calling convention, the `lpAddress` parameter needs to be stored in the RCX register. However, we can see our ROP chain, as it currently stands, will only pop the value of `0` into RCX. We know, however, that we need the address of our shellcode to be placed here. Let me explain how we will reconcile this (we will step through all of this code when the time comes, but for now I just want to make this clear to the reader as to why our final ROP chain is only _partially_ completed at the current moment).
+According to the `__fastcall` calling convention, the `lpAddress` parameter needs to be stored in the RCX register. However, we can see our ROP chain, as it currently stands, will only `pop` the value of `0` into RCX. We know, however, that we need the address of our shellcode to be placed here. Let me explain how we will reconcile this (we will step through all of this code when the time comes, but for now I just want to make this clear to the reader as to why our final ROP chain is only _partially_ completed at the current moment).
 
 1. We will use `VirtualAllocEx` and `WriteProcessMemory` to allocate and write our shellcode into the JIT process with our first few ROP chains of our exploit.
 2. `VirtualAllocEx` will return the address of our shellcode within the JIT process

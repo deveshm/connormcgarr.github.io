@@ -2649,7 +2649,7 @@ As we can see, RAX now has a valid pointer in it. Moving our, our next ROP gadge
 
 Our `.data` address of `chakra.dll` is loaded into RCX. This memory address is where our `PROCESS_ALL_ACCESS` handle to the JIT server will be located after our call to `DuplicateHandle`.
 
-Now that we have prepared RAX with a valid pointer and prepared RCX with the address we want `DuplicateHandle` to write our `PROCESS_ALL_ACCESS` handle to, we hit the ` mov r9, rcx ; cmp r8d,  [rax] ; je 0x00000001800F6280 ; mov al, r10L ; add rsp, 0x28 ; ret` ROP gadget.
+Now that we have prepared RAX with a valid pointer and prepared RCX with the address we want `DuplicateHandle` to write our `PROCESS_ALL_ACCESS` handle to, we hit the `mov r9, rcx ; cmp r8d,  [rax] ; je 0x00000001800F6280 ; mov al, r10L ; add rsp, 0x28 ; ret` ROP gadget.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3typeconfusion79.png" alt="">
 

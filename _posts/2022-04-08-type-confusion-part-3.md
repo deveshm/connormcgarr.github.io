@@ -8405,14 +8405,14 @@ All that is left now is to set the thread's `CONTEXT` and resume the thread. Her
 
 ```c
 SetThreadContext(
-	threadHandle,									// A handle to the thread we want to set (our thread we created via CreateRemoteThread)
-	addressof(VirtualAlloc_buffer)					// The updated CONTEXT structure
+	threadHandle,				// A handle to the thread we want to set (our thread we created via CreateRemoteThread)
+	addressof(VirtualAlloc_buffer)		// The updated CONTEXT structure
 );
 ```
 
 ```c
 ResumeThread(
-	threadHandle,									// A handle to the thread we want to resume (our thread we created via CreateRemoteThread)
+	threadHandle,				// A handle to the thread we want to resume (our thread we created via CreateRemoteThread)
 );
 ```
 
@@ -9717,7 +9717,7 @@ This brings our calls to the following states:
 
 ```c
 SetThreadContext(
-	threadHandle,									// A handle to the thread we want to set (our thread we created via CreateRemoteThread)
+	threadHandle,				// A handle to the thread we want to set (our thread we created via CreateRemoteThread)
 	-
 );
 ```
@@ -9736,8 +9736,8 @@ We then can get `SetThreadContext` into RAX and call it. The call should be in t
 
 ```c
 SetThreadContext(
-	threadHandle,									// A handle to the thread we want to set (our thread we created via CreateRemoteThread)
-	addressof(VirtualAlloc_buffer)					// The updated CONTEXT structure
+	threadHandle,				// A handle to the thread we want to set (our thread we created via CreateRemoteThread)
+	addressof(VirtualAlloc_buffer)		// The updated CONTEXT structure
 );
 ```
 
@@ -9751,7 +9751,7 @@ We then can execute our `SetThreadContext` call and hit our first `ResumeThread`
 
 ```c
 ResumeThread(
-	threadHandle,									// A handle to the thread we want to set (our thread we created via CreateRemoteThread)
+	threadHandle,				// A handle to the thread we want to set (our thread we created via CreateRemoteThread)
 );
 ```
 
@@ -9774,7 +9774,7 @@ Our last step will be to walk through our `VirtualProtect` ROP chain, which shou
 ```c
 VirtualProtect(
 	addressof(shellcode),				// The address of our already injected shellcode (we want this to be marked as RWX)
-	sizeof(shellcode),					// The size of the memory we want to mark as RWX
+	sizeof(shellcode),				// The size of the memory we want to mark as RWX
 	PAGE_EXECUTE_READWRITE,				// We want our shellcode to be RWX
 	addressof(data_address) 			// Any writable address
 );
@@ -9819,7 +9819,7 @@ We are now here:
 ```c
 VirtualProtect(
 	addressof(shellcode),				// The address of our already injected shellcode (we want this to be marked as RWX)
-	sizeof(shellcode),					// The size of the memory we want to mark as RWX
+	sizeof(shellcode),				// The size of the memory we want to mark as RWX
 	-
 	addressof(data_address) 			// Any writable address
 );
@@ -9834,7 +9834,7 @@ We are now all setup!
 ```c
 VirtualProtect(
 	addressof(shellcode),				// The address of our already injected shellcode (we want this to be marked as RWX)
-	sizeof(shellcode),					// The size of the memory we want to mark as RWX
+	sizeof(shellcode),				// The size of the memory we want to mark as RWX
 	PAGE_EXECUTE_READWRITE,				// We want our shellcode to be RWX
 	addressof(data_address) 			// Any writable address
 );
@@ -9858,6 +9858,6 @@ Meterpreter is also loaded as a reflective, in memory DLL - meaning we have also
 
 Conclusion
 ---
-This was an extremely challenging and rewarding task. Browser exploitation has been a thorn in my side for a long time, and I am very glad I now understand the basics. I do not yet know what is in my future, but if it is close to this level of complexity (I, at least, thought it was complex) I should be in for a treat! It is 4 a.m., so I am signing off now.
+This was an extremely challenging and rewarding task. Browser exploitation has been a thorn in my side for a long time, and I am very glad I now understand the basics. I do not yet know what is in my future, but if it is close to this level of complexity (I, at least, thought it was complex) I should be in for a treat! It is 4 a.m., so I am signing off now. Here is the final [exploit on my GitHub](https://github.com/connormcgarr/Exploit-Development/blob/master/Browser/CVE-2019-0567.html).
 
 Peace, love, and positivity :-)

@@ -597,7 +597,7 @@ Using the Project Zero issue as a guide, and leveraging the process outlined in 
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3typeconfusion24.png" alt="">
 
-The Google Project Zero explains, that we essentially can just walk the `type` pointer to extract a `ScriptContext` structure which, in turn, contains `ThreadContext`. The `ThreadContext` structure is responsible, as we have see, for storing various stack addresses. Here are the offsets:
+The Google Project Zero [issue](https://bugs.chromium.org/p/project-zero/issues/detail?id=1360) explains that we essentially can just walk the `type` pointer to extract a `ScriptContext` structure which, in turn, contains `ThreadContext`. The `ThreadContext` structure is responsible, as we have see, for storing various stack addresses. Here are the offsets:
 
 1. `type + 0x8` = `JavaScriptLibrary`
 2. `JavaScriptLibrary + 0x430` = `ScriptContext`

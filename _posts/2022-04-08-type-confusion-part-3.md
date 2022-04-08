@@ -1267,12 +1267,12 @@ So, we could setup a call to `DuplicateHandle` as such:
 
 ```c
 DuplicateHandle(
-	jitHandle,				// Leaked from s_jitManager+0x8 with PROCESS_DUP_HANDLE permissions
+	jitHandle,		// Leaked from s_jitManager+0x8 with PROCESS_DUP_HANDLE permissions
 	GetCurrentProcess(),	// Pseudo handle to the current process
 	GetCurrentProcess(),	// Pseudo handle to the current process
-	&fulljitHandle,			// Variable we supply that will receive the PROCESS_ALL_ACCESS handle to the JIT server
-	0,						// Ignored since we later specify DUPLICATE_SAME_ACCESS
-	0,						// FALSE (handle can't be inherited)
+	&fulljitHandle,		// Variable we supply that will receive the PROCESS_ALL_ACCESS handle to the JIT server
+	0,			// Ignored since we later specify DUPLICATE_SAME_ACCESS
+	0,			// FALSE (handle can't be inherited)
 	DUPLICATE_SAME_ACCESS	// Create handle with same permissions as source handle (source handle = GetCurrentProcessHandle() so PROCESS_ALL_ACCESS permissions)
 );
 ```

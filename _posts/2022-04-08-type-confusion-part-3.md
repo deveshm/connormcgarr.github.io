@@ -615,7 +615,7 @@ If we try to examine the memory contents of this address, we can see they are no
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3typeconfusion27.png" alt="">
 
-As we can recall from part two, this was also the case. However, in ChakraCore, we could consistently compute the offset from the leaked `stackLimitForCurrentThread` _consistently_ between exploit attempts. Let's compute the distance from our leaked `stackLimitForCurrentThread` with the actual stack limit from the TEB.
+As we can recall from part two, this was also the case. However, in ChakraCore, we could compute the offset from the leaked `stackLimitForCurrentThread` _consistently_ between exploit attempts. Let's compute the distance from our leaked `stackLimitForCurrentThread` with the actual stack limit from the TEB.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3typeconfusion28.png" alt="">
 

@@ -1900,7 +1900,7 @@ As we can clearly, see, we use our write primitive to write 1 QWORD at a time ou
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3typeconfusion66.png" alt="">
 
-After our exploit has ran, we can then examine where our shellcode _should_ have been written to : `chakra_base + 0x74b000`.
+After our exploit has ran, we can then examine where our shellcode _should_ have been written to: `chakra_base + 0x74b000`.
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3typeconfusion67.png" alt="">
 

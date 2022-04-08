@@ -1208,7 +1208,7 @@ Turning our attention back to the aforementioned analysis, we know we have a han
 
 This "kills" our idea in its tracks - the handle we have only has the permission `PROCESS_DUP_HANDLE`. We don't have the access rights to allocate memory in a remote process where perhaps ACG is disabled (like the JIT server). However, due to a vulnerability (CVE-2017-8637), there is actually a way we can abuse the handle stored within `s_jitManager+0x8` (which is a handle to the JIT server). To understand this, let's just take a few moments to understand _why_ we even need a handle to the JIT server, from the content process, in the first place.
 
-To understand this, let's take a look at [this](https://bugs.chromium.org/p/project-zero/issues/detail?id=1299) Google Project Zero issue regarding the CVE.
+Let's now turn out attention to this [this](https://bugs.chromium.org/p/project-zero/issues/detail?id=1299) Google Project Zero issue regarding the CVE.
 
 We know that the JIT server (a different process) needs to map JIT'd code into the content process. As the issue explains:
 

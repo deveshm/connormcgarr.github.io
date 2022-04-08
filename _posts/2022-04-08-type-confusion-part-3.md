@@ -6776,7 +6776,7 @@ Instead, it is a call to `RtlUserThreadStart`. This makes total sense, as our th
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3typeconfusion169.png" alt="">
 
-Remember earlier when I talked about the nuances of setting the entry point directly of `CreateRemoteThread`? This is Control Flow Guard kicking in and exposing this nuance. When we set the routine for `CreateRemoteThread` to execute, we actually did so with a `ret` ROP gadget. As we know, most functions _end_ with a `ret` statement - so this means we told our program we wanted to call into the _end_ of a function. Control Flow Guard, when performing a `call` will check to see if the `call` target is a valid function. The way this manifests is through a bitmap of all known "valid call targets". CFG will check to see if you are calling into know targets at `0x10` byte boundaries - as functions should be aligned in this manner. Since we called into a function towards the end, we obviously didn't call in a `0x10` byte alignment and, thus, CFG will kill the process as it has deemed to have detected an invalid function (and rightly so, we were maliciously trying to call into the middle of a function). The way we can get around this, is to use a call to `SetThreadContext` to manually update RIP to _directly_ execute our ROP gadget after resuming, instead of asking `CreateRemoteThread` to perform a `call` instruction to it (which CFG will check). This will require a few extra steps, but we are nearing the end now.
+Remember earlier when I talked about the nuances of setting the entry point directly with our call to `CreateRemoteThread`? This is Control Flow Guard kicking in and exposing this nuance. When we set the routine for `CreateRemoteThread` to execute, we actually did so with a `ret` ROP gadget. As we know, most functions _end_ with a `ret` statement - so this means we told our program we wanted to call into the _end_ of a function. Control Flow Guard, when performing a `call` will check to see if the `call` target is a valid function. The way this manifests is through a bitmap of all known "valid call targets". CFG will check to see if you are calling into know targets at `0x10` byte boundaries - as functions should be aligned in this manner. Since we called into a function towards the end, we obviously didn't call in a `0x10` byte alignment and, thus, CFG will kill the process as it has deemed to have detected an invalid function (and rightly so, we were maliciously trying to call into the middle of a function). The way we can get around this, is to use a call to `SetThreadContext` to manually update RIP to _directly_ execute our ROP gadget after resuming, instead of asking `CreateRemoteThread` to perform a `call` instruction to it (which CFG will check). This will require a few extra steps, but we are nearing the end now.
 
 Manipulating RIP and Preserving RSP
 ---
@@ -7500,7 +7500,7 @@ Now that we have RSP preserved, it is finally time to use one last call to `Writ
 `WriteProcessMemory` ROP Chain (Round 4)
 ---
 
-Our last step is to write our ROP chain into the remote process. You may be thinking - "Connor, we just hijacked RIP. Why can't we just hijack RSP instead of writing our payload to the existing stack?" Great question! We know that if we call `SetThreadContext`, CFG doesn't perform any validation on the instruction pointer to ensure we aren't calling into the middle or end of a function. There is now way for CFG to know this! However, CFG _does_ perform some slight validation on `SetThreadContext` calls - via a function called `RtlGuardIsValidStackPointer`.
+Our last step is to write our ROP chain into the remote process. You may be thinking - "Connor, we just hijacked RIP. Why can't we just hijack RSP instead of writing our payload to the existing stack?" Great question! We know that if we call `SetThreadContext`, CFG doesn't perform any validation on the instruction pointer to ensure we aren't calling into the middle or end of a function. There is now way for CFG to know this! However, CFG _does_ perform some slight validation of the stack pointer on `SetThreadContext` calls - via a function called `RtlGuardIsValidStackPointer`.
 
 When the `SetThreadContext` function is called, this performs a `syscall` to the kernel (via `NtSetContextThread`). In the kernel, this eventually leads to the kernel version of `NtSetContextThread`, which calls `PspSetContextThreadInternal`.
 
@@ -7520,11 +7520,11 @@ With that said, let's see our last `WriteProcessMemory` call. Here is how the ca
 
 ```c
 WriteProcessMemory(
-	fulljitHandle, 								// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
-	addressof(CONTEXT.Rsp),						// Address of our remote thread's stack
+	fulljitHandle, 					// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
+	addressof(CONTEXT.Rsp),				// Address of our remote thread's stack
 	addressof(data_chakra_shellcode_location),	// Address of our VirtualProtect ROP chain in the content process (.data of chakra) (what we want to write (our ROP chain))
-	sizeof(rop_chain)							// Size of our ROP chain
-	NULL 										// Optional
+	sizeof(rop_chain)				// Size of our ROP chain
+	NULL 						// Optional
 );
 ```
 
@@ -8324,7 +8324,7 @@ WriteProcessMemory(
 	-
 	-
 	-
-	sizeof(rop_chain)							// Size of our ROP chain
+	sizeof(rop_chain)			// Size of our ROP chain
 	-
 );
 ```
@@ -8340,9 +8340,9 @@ Our call is in the following state:
 ```c
 WriteProcessMemory(
 	-
-	addressof(CONTEXT.Rsp),						// Address of our remote thread's stack
+	addressof(CONTEXT.Rsp),			// Address of our remote thread's stack
 	-
-	sizeof(rop_chain)							// Size of our ROP chain
+	sizeof(rop_chain)			// Size of our ROP chain
 	-
 );
 ```
@@ -8356,9 +8356,9 @@ Our call is now in the below state:
 ```c
 WriteProcessMemory(
 	-
-	addressof(CONTEXT.Rsp),						// Address of our remote thread's stack
+	addressof(CONTEXT.Rsp),				// Address of our remote thread's stack
 	addressof(data_chakra_shellcode_location),	// Address of our VirtualProtect ROP chain in the content process (.data of chakra) (what we want to write (our ROP chain))
-	sizeof(rop_chain)							// Size of our ROP chain
+	sizeof(rop_chain)				// Size of our ROP chain
 	-
 );
 ```
@@ -8371,10 +8371,10 @@ We now have our call almost completed:
 
 ```c
 WriteProcessMemory(
-	fulljitHandle, 								// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
-	addressof(CONTEXT.Rsp),						// Address of our remote thread's stack
+	fulljitHandle, 					// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
+	addressof(CONTEXT.Rsp),				// Address of our remote thread's stack
 	addressof(data_chakra_shellcode_location),	// Address of our VirtualProtect ROP chain in the content process (.data of chakra) (what we want to write (our ROP chain))
-	sizeof(rop_chain)							// Size of our ROP chain
+	sizeof(rop_chain)				// Size of our ROP chain
 	-
 );
 ```
@@ -8383,11 +8383,11 @@ Lastly, all we need to do is set a `NULL` value of RSP + `0x28` and set RAX to `
 
 ```c
 WriteProcessMemory(
-	fulljitHandle, 								// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
-	addressof(CONTEXT.Rsp),						// Address of our remote thread's stack
+	fulljitHandle, 					// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
+	addressof(CONTEXT.Rsp),				// Address of our remote thread's stack
 	addressof(data_chakra_shellcode_location),	// Address of our VirtualProtect ROP chain in the content process (.data of chakra) (what we want to write (our ROP chain))
-	sizeof(rop_chain)							// Size of our ROP chain
-	NULL 										// Optional
+	sizeof(rop_chain)				// Size of our ROP chain
+	NULL 						// Optional
 );
 ```
 <img src="{{ site.url }}{{ site.baseurl }}/images/3typeconfusion186.png" alt="">

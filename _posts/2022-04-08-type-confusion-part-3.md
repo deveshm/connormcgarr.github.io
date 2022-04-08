@@ -437,7 +437,7 @@ Recall that this information derives from [this Google Project Zero issue](https
 
 However, even though the `type->scriptContext->threadContext` offsets will be the ones mentioned in the Project Zero issue, the stack address offset is _slightly_ different. We will go ahead and debug this with `alert()` statements.
 
-We know we have to leak `type` pointer (which we already have stored in `exploit.html` the same way as part two of this blogs series) in order to leak a stack address. Let's update our `exploit.html` with a few items to aid in our debugging for leaking a stack address.
+We know we have to leak a `type` pointer (which we already have stored in `exploit.html` the same way as part two of this blog series) in order to leak a stack address. Let's update our `exploit.html` with a few items to aid in our debugging for leaking a stack address.
 
 ```html
 <button onclick="main()">Click me to exploit CVE-2019-0567!</button>

